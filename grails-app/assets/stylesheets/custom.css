@@ -1,0 +1,339 @@
+/*.dropdown-menu>li:hover {*/
+    /*background-color: #7f7f7f;*/
+    /*color: white;*/
+/*}*/
+
+.dropdown-menu>li>a {
+    padding: 3px 20px;
+    white-space: nowrap;
+}
+
+.dropdown-menu>li>a:link {
+    color: #149dcc !important;
+}
+
+.dropdown-menu>li>a:visited {
+    color: #149dcc !important;
+}
+
+.dropdown-menu>li>span.oi {
+    color: #149dcc;
+    padding-left: 1rem;
+    padding-right: 0;
+    white-space: nowrap;
+}
+
+/*Allow for text next to icon appear without space in-between*/
+li.menu-with-icon>a {
+    padding-left: 0;
+    white-space: nowrap;
+}
+
+a.dropdown-toggle {
+    outline: none
+}
+
+.cid-qHAUKIofDN .navbar {
+    -webkit-box-shadow: -1px 12px 38px -19px rgba(0,0,0,0.37);
+    -moz-box-shadow: -1px 12px 38px -19px rgba(0,0,0,0.37);
+    box-shadow: -1px 4px 25px -5px rgba(0,0,0,0.37);
+    background: #ffffff;
+}
+
+.li-spacer {
+    padding-left: 1em;
+}
+
+.cid-qHAUKIofDN .dropdown .dropdown-menu  {
+    background: #ffffff;
+}
+
+
+.dropdown-menu > li:hover {
+    background-color: rgba(154, 167, 180, 0.40);
+}
+
+.dropdown-menu>li>*:hover {
+    color: white;
+}
+
+.navbar-dropdown.bg-color.transparent {
+    box-shadow: none;
+}
+
+
+.activity-feed {
+    margin-top: 3em;
+    margin-left: inherit;
+}
+
+.activity-post {
+    margin-left: 0;
+}
+
+.activity-post-comment {
+    text-align: right;
+    background-color: #ffffff;
+    margin-top: 0.5em;
+}
+
+.activity-profile-pic {
+    max-width: 48px;
+    max-height: 48px;
+}
+
+.card.activity-post {
+    margin-left: 0;
+    border: 1px solid #cacaca;
+    border-left-width: .35em;
+    border-left-color: #21a0c9;
+    background-color: white;
+    border-radius: 4px;
+    max-width: 100%;
+    margin-bottom: 0.25em;
+}
+
+.activity-post .card-header {
+    margin-left: -1em;
+    margin-right: -1em;
+}
+
+.card-footer {
+    margin-left: 0;
+    margin-right: 0;
+    border-top: none;
+    background-color: white;
+}
+
+.card-header .date-time {
+    font-size: 0.75em;
+    color: #757575;
+    float: right;
+}
+
+.activity-post-comment .activity-comment-profile-pic {
+    max-width: 24px;
+    max-height: 24px;
+    float: left;
+}
+
+.activity-post-comment .date-time-comment {
+    font-size: small;
+    font-style: italic;
+    font-weight: 700;
+    margin-right: 1em;
+    border-right: 4px solid #21a0c9;
+    padding-right: 0.5em;
+}
+
+.activity-post-comment .comment-text {
+    padding-right: 0.5em;
+    padding-top: 1em;
+    text-align: left;
+}
+
+.activity-post .card-footer.with-comments {
+    border-bottom: 2px dashed grey;
+    margin-bottom: 0.75em;
+}
+
+.card-title.activity-post-title {
+    font-weight: 700;
+}
+
+.connections {
+    white-space: nowrap;
+}
+
+.connections .badge-primary {
+    background-color: #7f7f7f;
+}
+
+.sidebar-parent {
+    background-color: white;
+    border: 3px solid #e4e4e4;
+    border-bottom: 1px solid #e4e4e4;
+    border-left: none;
+    border-right: none;
+    margin-bottom: -3em;
+    margin-top: -2em;
+    transition: all .25s ease;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    margin-top: 2em;
+}
+
+.collapse-icon {
+    margin-left: -2%;
+    color: lightslategrey;
+    float: right;
+    padding-top: 1em;
+    padding-right: 3px;
+    position: fixed;
+    font-size: 24px;
+}
+
+.collapse-icon-div {
+    background-color: white;
+    border-right: 3px solid #e4e4e4;
+    margin-bottom: -3em;
+    margin-top: -2em;
+}
+
+.collapse-icon-div-collapsed {
+    width: 2em;
+}
+
+.collapse-icon-collapsed {
+    margin-left: 8px;
+}
+
+.nav-tabs .nav-link-rectangle {
+    border-radius: 1px !important;
+}
+
+.tab-data-scrollable {
+    max-height: 185px;
+    overflow: auto;
+    border: 1px solid #e4e4e4;
+    border-top: none;
+}
+
+.even-list-item {
+    background-color: #f7f7f7;
+}
+
+ul.list-group.list-group-flush {
+    line-height: 0.5em;
+}
+
+.comments-show-more {
+    padding-left: 20%;
+}
+
+.sidebar-announcements {
+    padding-left: 2em;
+    margin-left: -0.2em;
+    padding: 0px;
+    background-color: white;
+    border: 3px solid #e4e4e4;
+    border-top: none;
+    margin-top: -2em;
+    border-right: none;
+    margin-bottom: -3em;
+    border-bottom: 1px solid #e4e4e4;
+    position: absolute;
+    right: 0;
+    height: 120%;
+}
+
+.sidebar-right {
+    margin-top: 1.5em;
+    position: fixed;
+    margin-bottom: -3em;
+    max-width: 29%;
+}
+
+.spacer-collapsed {
+    margin-right: 6.7em;
+}
+
+#connections-nav-tabContent, #teams-nav-tabContent {
+    max-height: 12em;
+    min-height: 7em;
+}
+
+.cid-qIfhXo2QYg {
+    border-top: 1px solid #e4e4e4;
+    background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
+}
+
+.dropdown-menu {
+    border: 2px solid #149dcc;
+}
+
+.cid-qHAUKIofDN .dropdown.open > .dropdown-menu {
+    position: static;
+}
+
+/*From bootstrap and navbar settings for hiding menu items. Adjust when needed*/
+@media (min-width: 768px) {
+    .arrow_box {
+        position: relative;
+        background: #ffffff;
+        border: 3px solid #149dcc;
+    }
+
+    .arrow_box:after, .arrow_box:before {
+        bottom: 100%;
+        left: 56%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+    }
+
+    .arrow_box:after {
+        border-color: rgba(255, 255, 255, 0);
+        border-bottom-color: #ffffff;
+        border-width: 13px;
+        margin-left: -13px;
+        top: -25px;
+    }
+
+    .arrow_box:before {
+        border-color: rgba(20, 157, 204, 0);
+        border-bottom-color: #149dcc;
+        border-width: 17px;
+        margin-left: -17px;
+    }
+
+    .cid-qHAUKIofDN .dropdown.open > .dropdown-menu {
+        position: absolute;
+    }
+}
+.comment-add-box {
+    margin: -0.5em;
+    margin-top: 1em;
+    background-color: #f7f7f7;
+    margin-bottom: 1em;
+    padding: 0.5em;
+    display: none;
+    border: 2px solid#80808021;
+    border-radius: 5px;
+}
+
+.comment-add-box-visible {
+    display: block;
+}
+
+.add-comment-button {
+    float: right;
+    margin: 0.5em;
+    margin-right: 0;
+    border-radius: 5px;
+    border: 2px solid #1492bd;
+}
+
+.cancel-comment-button {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #ed9aa2;
+}
+
+.cancel-comment-button:hover {
+    background-color: #9d2832;
+}
+
+.i-button {
+    outline: none;
+}
+
+.liked-post {
+    color: mediumseagreen;
+}

@@ -1,0 +1,110 @@
+{
+    "institutions": [
+        {
+            "fullName":"Sage Bionetworks",
+            "shortName":"Sage",
+
+        },
+        {
+            "fullName": "HHS (ASPE)",
+            "shortName": "HHS",
+        },
+        {
+            "fullName":"Oracle",
+            "shortName":"Oracle"
+        },
+        {
+            "fullName":"University of California, San Diego",
+            "shortName":"UCSD"
+        },
+        {
+            "fullName":"University of Colorado Denver",
+            "shortName":"UCD"
+        },
+        {
+            "fullName":"University of Cincinnati College of Medicine",
+            "shortName":"UCCM"
+        },
+        {
+            "fullName":"RAND",
+            "shortName":"RAND"
+        },
+        {
+            "fullName":"Department of Veteran's Affairs",
+            "shortName":"VA"
+        },
+        {
+            "fullName":"AHRQ",
+            "shortName":"AHRQ"
+        },
+        {
+            "fullName":"Janssen Research and Development",
+            "shortName":"JRD"
+        },
+        {
+            "fullName":"University of Vermont",
+            "shortName":"Vermont"
+        },
+        {
+            "fullName":"Validic",
+            "shortName":"Validic"
+        },
+        {
+            "fullName":"Columbia University",
+            "shortName":"Columbia"
+        },
+        {
+            "fullName":"Intermountain Healthcare",
+            "shortName":"Intermountain"
+        },
+        {
+            "fullName":"DocGraph Journal",
+            "shortName":"DJ"
+        },
+        {
+            "fullName":"University of Colorado School of Medicine",
+            "shortName":"UCSM"
+        },
+        {
+            "fullName":"Kaiser Family Foundation",
+            "shortName":"KFF"
+        },
+        {
+            "fullName":"Manatt, Phelps & Phillips, LLP",
+            "shortName":"MPP"
+        },
+        {
+            "fullName":"PatientsLikeMe",
+            "shortName":"PLM"
+        },
+        {
+            "fullName":"ProPublica",
+            "shortName":"PP"
+        },
+        {
+            "fullName":"Stanford University School of Medicine",
+            "shortName":"SUSM"
+        },
+
+        {
+            "fullName":"University of Washington",
+            "shortName":"UW"
+        },
+        {
+            "fullName":"PRIME",
+            "shortName":"PRIME"
+        },
+        {
+            "fullName":"PCORI",
+            "shortName":"PCORI"
+        },
+        {
+            "fullName":"NLM",
+            "shortName":"NLM"
+        },
+        {
+            "fullName":"The Ohio State University",
+            "shortName":"OSU"
+        }
+    ]
+}
