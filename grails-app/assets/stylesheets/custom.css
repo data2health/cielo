@@ -337,3 +337,12 @@ ul.list-group.list-group-flush {
 .liked-post {
     color: mediumseagreen;
 }
+
+.preProdText {
+    margin-left: -1.2em;
+    color: red;
+    font-style: italic;
+    font-family: Rubik;
+    font-weight: 500;
+    font-size: x-large;
+}
