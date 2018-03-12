@@ -1,5 +1,6 @@
 package edu.wustl.cielo
 
+import edu.wustl.cielo.enums.ActivityTypeEnum
 import grails.testing.mixin.integration.Integration
 import grails.transaction.*
 import spock.lang.Specification
@@ -27,7 +28,8 @@ class ActivityIntegrationSpec extends Specification {
 
         when: "adding activity with the proper params"
             UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
-            Activity activity = new Activity(description: "Some description", user: user, linkToActivityItem: new URL("https://cd2h.cielo.wustl.edu:8443/login/auth"))
+            Activity activity = new Activity(eventType: ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_COMMENTS,
+                    eventTitle: "title", eventText: "text", activityInitiatorUserName: user.username).save()
 
         then: "save is successful"
             activity.save()

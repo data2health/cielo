@@ -259,7 +259,7 @@ class UserAccountServiceIntegrationSpec extends Specification {
             UserAccount.count() == 4
             UserAccount.list().eachWithIndex { user, index ->
                 assert user.profile.annotations.size() == 3
-                assert user.connections == []
+                assert user.connections.size() == 0
             }
 
         when: "adding followers to the users"

@@ -103,7 +103,7 @@ class ProjectServiceIntegrationSpec extends Specification {
             Code.list() == []
 
         when: "calling with valid project"
-            user = new UserAccount(username: "someuser", password: "somePassword").save(flush: true)
+            user = new UserAccount(username: "admin", password: "somePassword").save(flush: true)
             softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                     url: "http://www.rerlicense.com").save(flush: true)
             project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
@@ -131,7 +131,7 @@ class ProjectServiceIntegrationSpec extends Specification {
             Annotation.list() == []
 
         when: "calling with valid project"
-            user = new UserAccount(username: "someuser", password: "somePassword").save(flush: true)
+            user = new UserAccount(username: "admin", password: "somePassword").save(flush: true)
             softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                     url: "http://www.rerlicense.com").save(flush: true)
             project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
@@ -297,9 +297,9 @@ class ProjectServiceIntegrationSpec extends Specification {
             Project.list()
 
         when: "getting the 2 most popular projects"
-            List<Project> mostPopular = projectService.getMostViewedProjects(2, true)
+            List<Project> mostPopular = projectService.getMostViewedProjects(2, false)
 
         then: "the top two returned should match the top two projects in list"
-            mostPopular == Project.executeQuery("select distinct p from Project p where shared=:shared order by views desc, dateCreated desc", [shared: true],[max: 2])
+            mostPopular.collect { it.projectId } == Project.executeQuery("select distinct p from Project p order by views desc, dateCreated desc",[max: 2]).collect { it.id }
     }
 }

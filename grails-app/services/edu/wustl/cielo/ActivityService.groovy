@@ -10,6 +10,7 @@ import org.springframework.validation.ObjectError
 import grails.events.annotation.*
 import org.grails.datastore.mapping.engine.event.*
 import org.grails.datastore.mapping.engine.event.AbstractPersistenceEvent
+import grails.util.Environment
 
 @Transactional
 @Slf4j
@@ -30,18 +31,20 @@ class ActivityService {
     @Subscriber
     void preUpdateHandler(PreUpdateEvent event) {
 
-        String domainClass = event.getEntityObject().class.simpleName
-        ActivityTypeEnum activityTypeEnum
-        def domainObject = event.getEntityAccess().getEntity()
+        if (Environment.current != Environment.TEST) {
+            String domainClass = event.getEntityObject().class.simpleName
+            ActivityTypeEnum activityTypeEnum
+            def domainObject = event.getEntityAccess().getEntity()
 
-        domainObject.properties.each {
-            if (domainObject.hasChanged(it.key.toString())
-                    && (it.key.toString() != "version" || it.key.toString() != "lastUpdated")) {
-                //need to see if we need to log the activity
-                activityTypeEnum = getUpdateActivityType(domainObject, it.key.toString())
+            domainObject.properties.each {
+                if (domainObject.hasChanged(it.key.toString())
+                        && (it.key.toString() != "version" || it.key.toString() != "lastUpdated")) {
+                    //need to see if we need to log the activity
+                    activityTypeEnum = getUpdateActivityType(domainObject, it.key.toString())
 
-                if (activityTypeEnum) {
-                    saveActivity(event, domainClass, activityTypeEnum)
+                    if (activityTypeEnum) {
+                        saveActivity(event, domainClass, activityTypeEnum)
+                    }
                 }
             }
         }
@@ -55,12 +58,14 @@ class ActivityService {
     @Listener
     void logActivityForInsert(PostInsertEvent event) {
 
-        String domainClass = event.getEntityAccess().entity.class.simpleName
-        ActivityTypeEnum activityTypeEnum = getNewActivityTypeEnum(domainClass)
+        if (Environment.current != Environment.TEST) {
+            String domainClass = event.getEntityAccess().entity.class.simpleName
+            ActivityTypeEnum activityTypeEnum = getNewActivityTypeEnum(domainClass)
 
-        //if it's not null then we care about this activity
-        if (activityTypeEnum) {
-            saveActivity(event, domainClass, activityTypeEnum)
+            //if it's not null then we care about this activity
+            if (activityTypeEnum) {
+                saveActivity(event, domainClass, activityTypeEnum)
+            }
         }
     }
 
@@ -72,7 +77,9 @@ class ActivityService {
     @Subscriber
     void logActivityForDelete(PostDeleteEvent event) {
         //TODO: Figure out if we need this, if we do add code to handle this.
-        log.info("Subscriber to delete event")
+        if (Environment.current != Environment.TEST) {
+            log.info("Subscriber to delete event")
+        }
     }
 
     /**
@@ -277,31 +284,33 @@ class ActivityService {
      */
     void saveActivityForEvent(ActivityTypeEnum activityTypeEnum, String eventText) {
 
-        def principal = springSecurityService?.principal
-        UserAccount user = principal ? UserAccount.get(principal?.id) : UserAccount.findByUsername("admin")
-        Activity activity
+        if (Environment.current != Environment.TEST) {
+            def principal = springSecurityService?.principal
+            UserAccount user = principal ? UserAccount.get(principal?.id) : UserAccount.findByUsername("admin")
+            Activity activity
 
-        if (user) {
-            if (!Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText, activityTypeEnum)) {
-                Activity.withNewTransaction {
-                    activity = new Activity()
-                    activity.activityInitiatorUserName = user.username
-                    activity.eventType = activityTypeEnum
-                    activity.eventTitle = messageSource.getMessage(activityTypeEnum.toString(), null, Locale.getDefault())
-                    activity.eventText = eventText
+            if (user) {
+                if (!Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText, activityTypeEnum)) {
+                    Activity.withNewTransaction {
+                        activity = new Activity()
+                        activity.activityInitiatorUserName = user.username
+                        activity.eventType = activityTypeEnum
+                        activity.eventTitle = messageSource.getMessage(activityTypeEnum.toString(), null, Locale.getDefault())
+                        activity.eventText = eventText
 
-                    if (!activity.save()) {
-                        activity.errors.allErrors.each { ObjectError err ->
-                            log.error(err.toString())
+                        if (!activity.save()) {
+                            activity.errors.allErrors.each { ObjectError err ->
+                                log.error(err.toString())
+                            }
+                            log.error("Unable to save activity")
                         }
-                        log.error("Unable to save activity")
+                        log.info("Saved activity")
                     }
-                    log.info("Saved activity")
                 }
-            }
 
-        } else {
-            log.error("Activity could not be logged because there was an error finding the user")
+            } else {
+                log.error("Activity could not be logged because there was an error finding the user")
+            }
         }
     }
 
