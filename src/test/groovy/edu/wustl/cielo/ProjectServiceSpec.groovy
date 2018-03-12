@@ -2,22 +2,79 @@ package edu.wustl.cielo
 
 import edu.wustl.cielo.enums.ProjectStatusEnum
 import grails.testing.services.ServiceUnitTest
+import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import grails.testing.gorm.DomainUnitTest
+import grails.plugin.springsecurity.SpringSecurityService
 
 class ProjectServiceSpec extends Specification implements ServiceUnitTest<ProjectService>, DomainUnitTest<Project> {
 
     def webRoot
+    LinkGenerator grailsLinkGenerator
+    ActivityService activityService
+    SpringSecurityService springSecurityService
 
     def setup() {
         mockDomains(UserRole, Institution, Profile, Annotation, SoftwareLicense, RegistrationCode, UserAccountUserRole)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+        grailsLinkGenerator = Mock()
+        activityService = Mock()
+        springSecurityService = Mock()
+
+        service.grailsLinkGenerator = grailsLinkGenerator
+        service.activityService = activityService
+
+        messageSource.addMessage('ACTIVITY_NEW_USER', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_PROJECT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_UPLOAD_DATA', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_UPLOAD_CODE', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_TEAM', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_NAME', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_DESCRIPTION', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_LICENSE', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_STATUS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_SHARED', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_TEAMS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_CODES', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_DATAS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_PUBLICATIONS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_ANNOTATIONS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_COMMENTS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_METADATAS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_INSTITUTION', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_PICTURE', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_INTERESTS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_EMAIL_ADDRESS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_CONNECTIONS', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_USER_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_PROJECT_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_UPLOAD_DATA_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_UPLOAD_CODE_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_NEW_TEAM_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_NAME_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_DESCRIPTION_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_LICENSE_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_STATUS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_SHARED_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_TEAMS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_CODES_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_DATAS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_PUBLICATIONS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_ANNOTATIONS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_COMMENTS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_PROJECT_METADATAS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_INSTITUTION_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_PICTURE_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_INTERESTS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_EMAIL_ADDRESS_BODY_TEXT', Locale.getDefault(), "hello")
+        messageSource.addMessage('ACTIVITY_UPDATE_USER_CONNECTIONS_BODY_TEXT', Locale.getDefault(), "hello")
     }
 
     def cleanup() {
     }
 
     void "test bootstrapProjects"() {
+
         expect:"no projects"
             Project.list() == []
 
@@ -93,7 +150,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
             Annotation.list() == []
 
         when: "calling with valid project"
-            user = new UserAccount(username: "someuser", password: "somePassword").save()
+            user = new UserAccount(username: "admin", password: "somePassword").save()
             annotation = new Annotation(label: "ID").save()
             softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                     url: "http://www.rerlicense.com").save()
@@ -147,7 +204,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
             Publication.list() == []
 
         when: "Calling with the correct information"
-            user = new UserAccount(username: "someuser", password: "somePassword").save()
+            user = new UserAccount(username: "admin", password: "somePassword").save()
             softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                     url: "http://www.rerlicense.com").save()
             project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
@@ -174,7 +231,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
             Comment.list() == []
 
         when: "Calling with the correct information"
-            user = new UserAccount(username: "someuser", password: "somePassword").save()
+            user = new UserAccount(username: "admin", password: "somePassword").save()
             softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                     url: "http://www.rerlicense.com").save()
             project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,

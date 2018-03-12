@@ -307,14 +307,13 @@ class ProjectService {
     List<Object> getMostViewedProjects(int maxNumberOfProjects, boolean sharedOnly = false) {
         return Project.withCriteria() {
             maxResults(maxNumberOfProjects)
-            eq("shared", sharedOnly)
+            sharedOnly ? eq("shared", sharedOnly) : null
             order("views", "desc")
             order("dateCreated", "desc")
         }.collect { Project project ->
             [
                     projectId: project.id,
                     projectOwner: project.projectOwner.fullName,
-                    projectOwnerInstitution: project.projectOwner.profile.institution.fullName,
                     profilePic: project.projectOwner.profile.picture?.fileContents,
                     projectName: project.name,
                     description: project.description,

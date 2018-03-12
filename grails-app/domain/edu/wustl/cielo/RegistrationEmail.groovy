@@ -17,6 +17,9 @@ class RegistrationEmail {
         subject(nullable: false)
         plainMessage(nullable: false)
         htmlMessage(nullable: false)
-        toAddresses(nulllable: false)
+        toAddresses(validator: {
+            if (!it)    return false
+            else        return true
+        })
     }
 }

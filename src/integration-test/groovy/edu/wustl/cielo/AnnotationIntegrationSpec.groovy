@@ -8,6 +8,10 @@ import spock.lang.Specification
 @Rollback
 class AnnotationIntegrationSpec extends Specification {
 
+    void setup() {
+        new UserAccount(username: "admin", password: "somepass").save(flush: true)
+    }
+
     void cleanup() {
         Project.list().each {
             it.delete()

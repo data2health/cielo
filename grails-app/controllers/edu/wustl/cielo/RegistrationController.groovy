@@ -17,7 +17,7 @@ class RegistrationController {
     /**
      * Handles making necessary data model available to register page
      *
-     * @return
+     * @return map with the necessary data for view
      */
     def register() {
         return [institutes: institutionService.getAvailableInstitutions(),
@@ -30,6 +30,7 @@ class RegistrationController {
      * @return
      */
     def saveNewUser() {
+        Institution institution = params.institution
         UserAccount user = new UserAccount()
         Profile profile = new Profile(user: user)
         boolean failed = false
@@ -38,7 +39,7 @@ class RegistrationController {
         bindData(profile, params)
 
         //the user selected Other, we need to create a new institution based on the input from user
-        if (Integer.valueOf(params.institution?.id) == -1) {
+        if (!institution) {
             Institution newInstitute = new Institution(fullName: params.institutionFName, shortName: params.institutionSName)
              if (!newInstitute.save())  {
                  newInstitute.errors.allErrors.each { ObjectError err ->
@@ -49,7 +50,7 @@ class RegistrationController {
                  failed = true
              }
             profile.institution = newInstitute
-        }
+        } else profile.institution = institution
 
         if (!user.save(flush: true)) {
             user.errors.allErrors.each { ObjectError err ->
@@ -60,7 +61,7 @@ class RegistrationController {
             failed = true
         }
 
-        if (!profile.save(flush: true)){
+        if (!profile.save(flush: true)) {
             profile.errors.allErrors.each { ObjectError err ->
                 log.error(err.toString())
             }
@@ -80,7 +81,7 @@ class RegistrationController {
     /**
      * Generate view that has text for user to check email
      *
-     * @return
+     * @return map with the users email
      */
     def registered() {
         registrationService.scheduleRegistrationEmail(params.userEmail)

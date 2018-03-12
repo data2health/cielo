@@ -6,6 +6,6 @@ class UserController {
 
     @Secured('isAuthenticated()')
     def view() {
-        return [user: UserAccount.findById(Long.valueOf(params.id))]
+        return [user: (params.id ? UserAccount.findById(Long.valueOf(params.id)) : null)]
     }
 }

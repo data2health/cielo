@@ -294,7 +294,7 @@ class UserAccountService {
             if (!user.connections) {
                 numFollowers.times {
                     def anotherUser = users?.get(new Random().nextInt(users?.size()))
-                    while(anotherUser?.id == user?.id) {
+                    while(anotherUser?.id == user?.id || user.connections.contains(anotherUser)) {
                         anotherUser = users?.get(new Random().nextInt(users?.size()))
                     }
                     user.connections?.add(anotherUser)

@@ -33,7 +33,7 @@
                                 ${bundle.projectOwner}
                             </div>
                             <small class="mbr-author-desc mbr-italic mbr-light mbr-fonts-style display-7">
-                                ${bundle.projectOwnerInstitution}
+                                ${bundle.ownerInstitution}
                             </small>
                             </div>
                         </div> 

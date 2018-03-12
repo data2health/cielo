@@ -56,7 +56,7 @@ class ProfilePicIntegrationSpec extends Specification {
             !profilePic.save()
 
         when: "get contents of a real image"
-            contents = new File(webRoot + "CIELOhometilev5.jpg").bytes
+            contents = new File(webRoot + "mbr-9-1620x1080.jpg").bytes
             profilePic = new ProfilePic(fileContents: contents)
 
         then: "fails due to missing props"
@@ -97,7 +97,7 @@ class ProfilePicIntegrationSpec extends Specification {
         byte[] contents
 
         given:
-            contents = new File(webRoot + "CIELOhometilev5.jpg").bytes
+            contents = new File(webRoot + "mbr-9-1620x1080.jpg").bytes
             user = new UserAccount(username: "someuser", password: "somePassword")
             institution = new Institution(fullName: "Washington University of St. Louis", shortName: "WUSTL")
             profile = new Profile(firstName: "Ricky", lastName: "Rodriguez", emailAddress: "rrodriguez@wustl.edu",
