@@ -198,7 +198,6 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
             UserAccount.count() == 4
             UserAccount.list().eachWithIndex { user, index ->
                 assert user.profile.annotations.size() == 3
-                assert user.connections == []
             }
 
         when: "adding followers to the users"

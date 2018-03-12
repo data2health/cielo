@@ -314,7 +314,6 @@ class ProjectService {
             [
                     projectId: project.id,
                     projectOwner: project.projectOwner.fullName,
-                    projectOwnerInstitution: project.projectOwner.profile.institution.fullName,
                     profilePic: project.projectOwner.profile.picture?.fileContents,
                     projectName: project.name,
                     description: project.description,

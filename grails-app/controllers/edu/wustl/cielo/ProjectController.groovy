@@ -17,7 +17,7 @@ class ProjectController {
     def getMostPopularBundles() {
         List<Object> popularBundles
 
-        if (params.max || params.publicOnly) {
+        if (params.max && params.publicOnly) {
 
             popularBundles = projectService.getMostViewedProjects(Integer.valueOf(params.max),
                     Boolean.valueOf(params.publicOnly))
