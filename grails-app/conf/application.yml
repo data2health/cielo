@@ -139,7 +139,7 @@ dataSource:
 environments:
     development:
         dataSource:
-            dbCreate: update
+            dbCreate: none #remove update to ensure proper db migration
             #url: jdbc:mysql://localhost:3306/cielo
     test:
         hibernate:
@@ -154,7 +154,7 @@ environments:
             url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     production:
         dataSource:
-            dbCreate: update
+            dbCreate: none #update
             username: cd2h_cielo_app
             password: rQc1xTBrCddR
             url: jdbc:postgresql://10.142.0.7:5432/cielo
