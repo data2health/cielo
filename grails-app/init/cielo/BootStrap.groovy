@@ -48,8 +48,6 @@ class BootStrap {
         //init email job - send on a regular interval... emails do not need to be synchronous
         EmailSenderJob.schedule(new Date())
     }
-    def destroy = {
-    }
 
     /**
      * Setup other stuff needed to test things

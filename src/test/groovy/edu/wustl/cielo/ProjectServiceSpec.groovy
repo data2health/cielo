@@ -70,9 +70,6 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         messageSource.addMessage('ACTIVITY_UPDATE_USER_CONNECTIONS_BODY_TEXT', Locale.getDefault(), "hello")
     }
 
-    def cleanup() {
-    }
-
     void "test bootstrapProjects"() {
 
         expect:"no projects"

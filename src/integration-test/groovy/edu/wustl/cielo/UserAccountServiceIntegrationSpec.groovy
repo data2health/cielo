@@ -197,7 +197,7 @@ class UserAccountServiceIntegrationSpec extends Specification {
             userAccountService.setupMockAppUsers(2, 0)
 
         then:
-            UserAccount.count() == 3 //2 + 1 admin
+            UserAccount.count() == 3
             UserAccount.list().each { user -> user.profile.annotations == [] }
 
         when: "remove all the users"

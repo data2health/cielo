@@ -64,4 +64,7 @@ mailjet.secretKey="e7e5a40f55babdfd6540d2ab2e438e5b"
 mailjet.from = "CIELO"
 mailjet.fromAddress = "cd2h.cielo@wustl.edu"
 
-
+//migration settings
+grails.plugin.databasemigration.updateOnStart 			= true
+grails.plugin.databasemigration.updateOnStartFileName 	= 'changelog.groovy'
+grails.plugin.databasemigration.autoMigrateScripts 		= ['RunApp', 'DebugApp']

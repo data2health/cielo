@@ -5,21 +5,9 @@ import spock.lang.Specification
 
 class RegistrationEmailSpec extends Specification implements DomainUnitTest<RegistrationEmail> {
 
-    def setup() {
-    }
-
-    def cleanup() {
-    }
-
     void "test save"() {
         RegistrationEmail registrationEmail
-        /*
-        attempts(min: 0, max: 2)
-        subject(nullable: false)
-        plainMessage(nullable: false)
-        htmlMessage(nullable: false)
-        toAddresses(nulllable: false)
-         */
+
         when:"we attempt to save with no constraints fulfilled"
            registrationEmail = new RegistrationEmail()
 

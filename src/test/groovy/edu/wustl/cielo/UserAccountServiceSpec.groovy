@@ -15,9 +15,6 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
     }
 
-    def cleanup() {
-    }
-
     void "test handleOnAuthSuccess"() {
         given: "No users"
             UserAccount.list() == []
@@ -158,7 +155,7 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
             service.setupMockAppUsers(2, 0)
 
         then:
-            UserAccount.count() == 3 //2 + 1 admin
+            UserAccount.count() == 3
             UserAccount.list().each { user -> user.profile.annotations == [] }
 
         when: "adding a few more with annotations"

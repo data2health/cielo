@@ -20,9 +20,6 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
         cieloTagLib = mockTagLib(CieloTagLib)
     }
 
-    def cleanup() {
-    }
-
     void "test getActivities"() {
         Activity activity
 

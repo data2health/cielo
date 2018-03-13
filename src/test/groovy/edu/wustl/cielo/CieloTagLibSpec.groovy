@@ -6,12 +6,6 @@ import spock.lang.Specification
 
 class CieloTagLibSpec extends Specification implements TagLibUnitTest<CieloTagLib>, DomainUnitTest<UserAccount> {
 
-    def setup() {
-    }
-
-    def cleanup() {
-    }
-
     void "test rawOutput"() {
         when:"passing in an html string"
             def result = tagLib.rawOutput([text: "<div><span>some span</span></div>"], null)
