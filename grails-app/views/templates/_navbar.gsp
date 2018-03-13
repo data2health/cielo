@@ -18,7 +18,10 @@
                 <span class="navbar-logo">
                     <asset:image src="cielo-blue-new-240x150.png" alt="CIELO" title="" style="height: 2.5rem;"/>
                 </span>
-                <span class="navbar-caption-wrap"><a class="navbar-caption text-secondary display-5" href="/">CIELO</a></span>
+                <span class="navbar-caption-wrap">
+                    <a class="navbar-caption text-secondary display-5" href="/">CIELO</a>
+                    <div class="preProdText">Beta!</div>
+                </span>
             </div>
         </div>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">

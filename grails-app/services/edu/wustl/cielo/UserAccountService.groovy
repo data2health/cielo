@@ -292,21 +292,23 @@ class UserAccountService {
         List<UserAccount> users = UserAccount.list() - superAdmin
         users?.each { UserAccount user ->
             if (!user.connections) {
+                List<UserAccount> usersCopy = (users - user)
                 numFollowers.times {
-                    def anotherUser = users?.get(new Random().nextInt(users?.size()))
-                    while(anotherUser?.id == user?.id || user.connections.contains(anotherUser)) {
-                        anotherUser = users?.get(new Random().nextInt(users?.size()))
-                    }
-                    user.connections?.add(anotherUser)
+                    def anotherUser = usersCopy.size() > 0 ? usersCopy?.head() : null
 
-                    if (!user.save()) {
-                        user.getErrors().allErrors.each { ObjectError err ->
-                            log.error(err.toString())
+                    if (anotherUser) {
+                        user.connections?.add(anotherUser)
+
+                        if (!user.save()) {
+                            user.getErrors().allErrors.each { ObjectError err ->
+                                log.error(err.toString())
+                            }
+                            log.error("There was an error saving the user connections for user ${user.username}")
+                            System.exit(-1)
                         }
-                        log.error("There was an error saving the user connections for user ${user.username}")
-                        System.exit(-1)
+                        usersCopy = (usersCopy - anotherUser)
+                        log.info("\tSaved user: ${user.toString()}")
                     }
-                    log.info("\tSaved user: ${user.toString()}")
                 }
                 log.info("\n")
             }
