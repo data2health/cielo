@@ -284,33 +284,31 @@ class ActivityService {
      */
     void saveActivityForEvent(ActivityTypeEnum activityTypeEnum, String eventText) {
 
-        if (Environment.current != Environment.TEST) {
-            def principal = springSecurityService?.principal
-            UserAccount user = principal ? UserAccount.get(principal?.id) : UserAccount.findByUsername("admin")
-            Activity activity
+        def principal = springSecurityService?.principal
+        UserAccount user = principal ? UserAccount.get(principal?.id) : UserAccount.findByUsername("admin")
+        Activity activity
 
-            if (user) {
-                if (!Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText, activityTypeEnum)) {
-                    Activity.withNewTransaction {
-                        activity = new Activity()
-                        activity.activityInitiatorUserName = user.username
-                        activity.eventType = activityTypeEnum
-                        activity.eventTitle = messageSource.getMessage(activityTypeEnum.toString(), null, Locale.getDefault())
-                        activity.eventText = eventText
+        if (user) {
+            if (!Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText, activityTypeEnum)) {
+                Activity.withNewTransaction {
+                    activity = new Activity()
+                    activity.activityInitiatorUserName = user.username
+                    activity.eventType = activityTypeEnum
+                    activity.eventTitle = messageSource.getMessage(activityTypeEnum.toString(), null, Locale.getDefault())
+                    activity.eventText = eventText
 
-                        if (!activity.save()) {
-                            activity.errors.allErrors.each { ObjectError err ->
-                                log.error(err.toString())
-                            }
-                            log.error("Unable to save activity")
+                    if (!activity.save()) {
+                        activity.errors.allErrors.each { ObjectError err ->
+                            log.error(err.toString())
                         }
-                        log.info("Saved activity")
+                        log.error("Unable to save activity")
                     }
+                    log.info("Saved activity")
                 }
-
-            } else {
-                log.error("Activity could not be logged because there was an error finding the user")
             }
+
+        } else {
+            log.error("Activity could not be logged because there was an error finding the user")
         }
     }
 
