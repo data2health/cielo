@@ -150,7 +150,7 @@ environments:
             dialect: org.hibernate.dialect.H2Dialect
             username: sa
             password: ''
-            dbCreate: update
+            dbCreate: none #update
             url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     production:
         dataSource:
