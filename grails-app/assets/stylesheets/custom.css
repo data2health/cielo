@@ -227,14 +227,14 @@ ul.list-group.list-group-flush {
     border-bottom: 1px solid #e4e4e4;
     position: absolute;
     right: 0;
-    height: 120%;
+    height: calc(100% + 83px);
 }
 
 .sidebar-right {
     margin-top: 1.5em;
-    position: fixed;
+    position: unset;
     margin-bottom: -3em;
-    max-width: 29%;
+    max-width: 100%;
 }
 
 .spacer-collapsed {

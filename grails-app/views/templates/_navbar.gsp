@@ -115,6 +115,7 @@
                             </ul>
                         </li>
                         <li class="li-spacer">&nbsp;</li>
+                </ul>
         </sec:ifLoggedIn>
         <sec:ifNotLoggedIn>
             <div class="navbar-buttons mbr-section-btn"><a class="btn btn-sm btn-primary display-4" href="/register">Join</a> <a class="btn btn-sm btn-primary display-4" href="${createLink(controller: 'login', action: 'auth')}">Login<br></a></div>

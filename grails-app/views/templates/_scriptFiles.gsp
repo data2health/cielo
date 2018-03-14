@@ -13,3 +13,4 @@
 <asset:javascript src="formoid/formoid.min.js"/>
 <asset:javascript src="bootbox/bootbox.min.js"/>
 <asset:javascript src="iziToast/iziToast.min.js"/>
+<asset:javascript src="isInViewPort/isInViewport.js"/>

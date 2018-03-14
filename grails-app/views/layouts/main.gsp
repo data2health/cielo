@@ -9,7 +9,6 @@
     <link rel="shortcut icon" href="${resource(dir: 'images', file: 'favicon.ico')}"/>
 </head>
 
-<body>
 <div id="main" class="container">
     <g:render template="/templates/headerIncludes"/>
     <div id="wrapper">
@@ -18,6 +17,5 @@
 </div>
 <!-- All Javascript at the bottom of the page for faster page loading -->
 
-</body>
 <g:render template="/templates/footerlncludes"/>
 
