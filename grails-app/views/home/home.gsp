@@ -1,7 +1,5 @@
 <%@ page import="edu.wustl.cielo.UserAccount" %>
 <g:render template="/templates/headerIncludes"/>
-
-<body>
 <g:render template="/templates/navbar"/>
 
 <section class="mbr-fullscreen">
@@ -28,11 +26,15 @@
 <div id="scrollToTop" class="scrollToTop mbr-arrow-up" style=""><a style="text-align: center;"><i></i></a></div>
 <g:render template="/templates/contactUsSection"/>
 <g:render template="/templates/footerlncludes"/>
-</body>
-
 
 <script type="text/javascript">
     $( function() {
+
+        //add listener to load more activity data
+        window.addEventListener('scroll', function (event) {
+            handleInfiniteScroll(event);
+        }, false);
+
         $(".dropdown-toggle").dropdown();
         $('[data-toggle="tooltip"]').tooltip();
 
@@ -86,6 +88,26 @@
         });
     });
 
+    function handleInfiniteScroll(event) {
+        if (isInViewport(document.querySelector('#contact-us-form')) && document.querySelector('#no-more-activity') === null) {
+            $("#loading-activity-indicator").show();
+
+            setTimeout(function(){
+                //if still visible
+                if (isInViewport(document.querySelector('#contact-us-form')) && document.querySelector('#no-more-activity') === null) {
+                    var offset  = Number($('#offset').html());
+                    var max     = Number($('#max').html());
+
+                    if (!(isNaN(offset) && isNaN(max))) {
+                        getOlderActivity(offset, max);
+                    }
+                } else {
+                    $("#loading-activity-indicator").hide();
+                }
+                }, 1500);
+        }
+    }
+
     function showCommentBox(activityId, id) {
         var tooltipId = $("#comment-tooltip-" + activityId).attr("aria-describedby");
 
@@ -137,6 +159,8 @@
         $("<div></div>").load("/activity/getActivities?offset="+offset+"&max="+max, function () {
             $(this).insertBefore($("#olderContent"));
         });
+
+        $("#loading-activity-indicator").hide();
     }
 
     function likePost(activityId, id) {

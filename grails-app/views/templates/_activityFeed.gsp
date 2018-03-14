@@ -2,16 +2,16 @@
 <g:each in="${activities}" var="activity">
     <div id="activity_post_${activity.id}" class="card activity-post col-md-4">
     <h6 class="card-header">
-    <g:if test="${activity.user?.profile?.picture}">
-        <asset:image class="activity-profile-pic" src="data:image/png;base64,${activity.user?.profile?.picture?.fileContents}"/>
-    </g:if>
-    <g:else>
-        <asset:image class="activity-profile-pic" src="default_profile.png"/>
-    </g:else>
+        <g:if test="${activity.user?.profile?.picture}">
+            <asset:image class="activity-profile-pic" src="data:image/png;base64,${activity.user?.profile?.picture?.fileContents}"/>
+        </g:if>
+        <g:else>
+            <asset:image class="activity-profile-pic" src="default_profile.png"/>
+        </g:else>
         &nbsp;${activity.activityInitiatorUserName}
-    <span class="date-time">
-        <g:formatDateWithTimezone date="${activity.dateCreated}"/>
-    </span>
+        <span class="date-time">
+            <g:formatDateWithTimezone date="${activity.dateCreated}"/>
+        </span>
     </h6>
     <div class="card-body">
         <h6 class="card-title activity-post-title">${activity.eventTitle}</h6>
@@ -47,18 +47,18 @@
     </div>
     <div id="comments_activity_${activity.id}">
         <g:if test="${activity?.comments}">
-                <g:render template="/templates/comments" model="[comments: activity?.comments, activityId: activity.id,
-                                                                 numberOfComments: 2]"/>
+            <g:render template="/templates/comments" model="[comments: activity?.comments, activityId: activity.id,
+                                                             numberOfComments: 2]"/>
         </g:if>
     </div>
     </div>
 </g:each>
 
 <div id="nextPage" style="display: flex;justify-content: center;">
-    <g:if test="${showMoreActivitiesButton}">
-        <button id="retrieveOlderActivityButton" type="button" class="btn btn-link" onclick="getOlderActivity(${activityOffset}, ${activityMax})">Load older activity</button>
+    <div id="offset" style="display: none;">${activityOffset}</div>
+    <div id="max" style="display: none;">${activityMax}</div>
+    <div id="loading-activity-indicator" style="display: none;"><i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+    <g:if test="${!showMoreActivitiesButton}">
+        <div id="no-more-activity"><p class="text-secondary">Hurray! You have read all activity posts. Now get back to work!</p></div>
     </g:if>
-    <g:else>
-        <p class="text-secondary">Hurray! You have read all activity posts. Now get back to work!</p>
-    </g:else>
 </div>

@@ -10,3 +10,4 @@
     <title>CIELO</title>
     <g:render template="/templates/cssFiles"/>
 </head>
+<body>

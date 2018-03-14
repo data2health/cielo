@@ -77,6 +77,6 @@
         </div>
     </div>
 </section>
-
 <g:render template="/templates/scriptFiles"/>
+</body>
 </html>

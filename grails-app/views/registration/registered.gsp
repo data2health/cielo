@@ -1,6 +1,4 @@
 <g:render template="/templates/headerIncludes"/>
-
-<body>
 <g:render template="/templates/navbar"/>
 
 <section class="engine"></section><section class="cid-qIklYeJO9W mbr-fullscreen mbr-parallax-background" id="header15-w">
@@ -24,13 +22,10 @@
     </div>
 
 </section>
-
-<g:render template="/templates/contactUsSection"/>
-
 <div id="scrollToTop" class="scrollToTop mbr-arrow-up"><a style="text-align: center;"><i></i></a></div>
 <input name="animation" type="hidden">
-</body>
 
+<g:render template="/templates/contactUsSection"/>
 <g:render template="/templates/footerlncludes"/>
 
 
