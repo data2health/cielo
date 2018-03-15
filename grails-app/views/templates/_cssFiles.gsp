@@ -1,4 +1,4 @@
-<asset:stylesheet src="font-awesome/css/font-awesome.css"/>
+<asset:stylesheet src="fontawesome/fontawesome-all.min.css"/>
 <asset:stylesheet src="mobirise-icons/mobirise-icons.css"/>
 <asset:stylesheet src="tether/tether.min.css"/>
 <asset:stylesheet src="bootstrap-all.css"/>

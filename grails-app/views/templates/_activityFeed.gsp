@@ -24,15 +24,15 @@
         <div id="feed_footer_activity_${activity.id}" class="card-footer button-block">
     </g:else>
     <span id="comment-tooltip-${activity.id}" class="d-inline-block i-button" tabindex="0" data-toggle="tooltip" title="Leave a comment">
-        <i id="${activity.id}" class="fa fa-edit" onclick="showCommentBox(${activity.id}, this.id);"></i>
+        <i id="${activity.id}" class="far fa-comments fa-1x" onclick="showCommentBox(${activity.id}, this.id);"></i>
     </span>
     &nbsp;
     <span id="share-tooltip-${activity.id}" class="d-inline-block i-button" tabindex="0" data-toggle="tooltip" title="Share">
-        <i id="share_${activity.id}" class="fa fa-external-link" onclick="sharePost(${activity.id}, this.id);"></i>
+        <i id="share_${activity.id}" class="far fa-share-square" onclick="sharePost(${activity.id}, this.id);"></i>
     </span>
     &nbsp;
     <span id="like-tooltip-${activity.id}" class="d-inline-block i-button" tabindex="0" data-toggle="tooltip" title="Like">
-        <i id="like_${activity.id}" class="fa fa-meh-o" onclick="likePost(${activity.id}, this.id)"></i>
+        <i id="like_${activity.id}" class="far fa-check-circle" onclick="likePost(${activity.id}, this.id)"></i>
     </span>
     </div>
     <div class="comment-add-box" id="comment_box_${activity.id}">
@@ -57,7 +57,7 @@
 <div id="nextPage" style="display: flex;justify-content: center;">
     <div id="offset" style="display: none;">${activityOffset}</div>
     <div id="max" style="display: none;">${activityMax}</div>
-    <div id="loading-activity-indicator" style="display: none;"><i class="fa fa-spinner fa-spin fa-2x"></i> </div>
+    <div id="loading-activity-indicator" style="display: none;"><i class="fas fa-spinner fa-spin fa-2x"></i> </div>
     <g:if test="${!showMoreActivitiesButton}">
         <div id="no-more-activity"><p class="text-secondary">Hurray! You have read all activity posts. Now get back to work!</p></div>
     </g:if>

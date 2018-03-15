@@ -29,7 +29,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     <li>
                         <a href="${createLink(controller: "home", action: "home")}">
-                            <i class="fa fa-bullhorn"></i>
+                            <i class="fas fa-bullhorn"></i>
                             Activity
                         </a>
                     </li>

@@ -11,3 +11,5 @@ out/
 .settings
 .classpath
 hs_err_pid?*.log
+/gradle/**
+/gradlew.bat

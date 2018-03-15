@@ -566,17 +566,7 @@ a:hover {
 #scrollToTop a {
   border-radius: 100px;
 }
-#scrollToTop a i:before {
-  content: '';
-  position: absolute;
-  height: 40%;
-  top: 25%;
-  background: #fff;
-  width: 2px;
-  left: calc(50% - 1px);
-}
 #scrollToTop a i:after {
-  content: '';
   position: absolute;
   display: block;
   border-top: 2px solid #fff;
@@ -585,7 +575,6 @@ a:hover {
   height: 40%;
   left: 30%;
   bottom: 30%;
-  transform: rotate(135deg);
 }
 /* Others*/
 .note-check a[data-value=Rubik] {

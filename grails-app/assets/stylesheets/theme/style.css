@@ -141,7 +141,7 @@ section {
   -webkit-align-content: center;
   -ms-flex-line-pack: center;
   align-content: center;
-  -webkit-align-items: start;
+  -webkit-align-items: flex-start;
   -ms-flex-align: start;
   align-items: start; }
   .media-container-row .media-size-item {
@@ -287,8 +287,7 @@ nav .mbr-section-btn {
   z-index: 5000;
   color: #ffffff;
   font-size: 32px;
-  transform: rotate(180deg);
-  -webkit-transform: rotate(180deg); }
+}
 
 .mbr-arrow-up a {
   background: rgba(0, 0, 0, 0.2);

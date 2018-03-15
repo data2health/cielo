@@ -10,8 +10,8 @@ buildscript {
                 useLess        : true,
                 //invalidVersionFails : false
                 fontAwesome    : [
-                        install: true,
-                        //version             : "4.3.0"
+//                        install: true,
+                        version: "5.0.8",
                         useLess: true,
                         //invalidVersionFails : false
                 ]
