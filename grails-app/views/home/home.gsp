@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div id="spacer" class="col-md-2">&nbsp;</div>
-            <g:render template="sidebar-right" model="[bundles: mostPopularBundles]"/>
+            <g:render template="sidebar-right" model="[projects: mostPopularProjects]"/>
         </div>
     </div>
 </section>
@@ -28,8 +28,10 @@
 <g:render template="/templates/footerlncludes"/>
 
 <script type="application/javascript">
-    //add listener to load more activity data
-    window.addEventListener('scroll', function (event) {
-        handleInfiniteScroll(event);
-    }, false);
+    $(function () {
+        //add listener to load more activity data
+        window.addEventListener('scroll', function (event) {
+            handleInfiniteScroll(event);
+        }, false);
+    });
 </script>

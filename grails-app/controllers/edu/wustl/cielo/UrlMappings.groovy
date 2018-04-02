@@ -31,7 +31,14 @@ class UrlMappings {
         "/user/$id"(controller: "user", action: "view")
 
         //project
-        "/bundle/$id"(controller: "project", action: "view")
+        "/project/$id"(controller: "project", action: "view")
+        "/project/saveComment"(controller: "project", action: "saveProjectComment")
+        "/project/getProjectComments/$id"(controller: "project", action: "getProjectComments")
+        "/project/saveReply"(controller: "project", action: "saveCommentReply")
+        "/project/saveChanges"(controller: "project", action: "saveProjectBasicChanges")
+
+        //license
+        "/license/$id"(controller: "license", action: "getLicenseBody")
 
         //Activity
         "/activity/getActivities"(controller: "activity", action: "getActivities")

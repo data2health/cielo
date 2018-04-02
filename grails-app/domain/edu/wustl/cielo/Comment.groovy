@@ -28,10 +28,10 @@ class Comment implements Comparable {
     }
 
     void addToResponses(Comment comment) {
-        responses.plus(comment)
+        responses.add(comment)
     }
 
     void removeFromResponses(Comment comment) {
-        responses.minus(comment)
+        responses.remove(comment)
     }
 }

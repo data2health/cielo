@@ -14,6 +14,7 @@ import com.thedeanda.lorem.LoremIpsum
 class UserAccountService {
 
     def springSecurityService
+    def assetResourceLocator
     static Lorem lorem = LoremIpsum.getInstance()
 
     /**
@@ -109,8 +110,8 @@ class UserAccountService {
             superAdmin = new UserAccount(username: "admin",
                     password: "wustlCielo@2017",
                     status: AccountStatusEnum.ACCOUNT_VERIFIED,
-                    timezoneId: TimeZone.default.getID(),
-                    accountLocked: false,
+                    timezoneId: "EST",
+                    accountLocked: false
             )
             if (!superAdmin.save()) {
                 superAdmin.errors.getAllErrors().each { ObjectError err ->
@@ -121,6 +122,19 @@ class UserAccountService {
             }
             log.info("\tSaved admin user: ${superAdmin.toString()}")
 
+            //save profile pic
+            byte[] imageContents = assetResourceLocator.findAssetForURI("admin.png").byteArray
+            ProfilePic profilePic = new ProfilePic([fileContents: imageContents, fileExtension: "png"])
+
+            if (!profilePic.save()) {
+                profilePic.errors.getAllErrors().each { ObjectError err ->
+                    log.error(err.toString())
+                }
+                log.error("Unable to save default admin profilePic. Exiting.")
+                System.exit(-1)
+            }
+            log.info("\tSaved admin profilePic ${profilePic.toString()}")
+
             //save profile stuff
             Institution institution = new Institution(fullName: "Washington University in St Louis",
                     shortName: "WUSTL").save()
@@ -129,7 +143,8 @@ class UserAccountService {
                     firstName: "Administrator",
                     lastName: "Cielo",
                     institution: institution,
-                    user: superAdmin
+                    user: superAdmin,
+                    picture: profilePic
             )
 
             if (!adminProfile.save()) {
@@ -214,7 +229,7 @@ class UserAccountService {
             def annotations = Annotation.list()
             def institutions = Institution.list()
 
-            numberOfUsers.times {
+            numberOfUsers.times { index ->
                 String username  = RandomStringUtils.random(3, true, true)
                 UserAccount user = new UserAccount(
                         username: username,
@@ -232,12 +247,29 @@ class UserAccountService {
                 }
                 log.info("\tSaved user: ${user.toString()}")
 
+                //save profile pic
+                byte[] imageContents = assetResourceLocator.findAssetForURI("user_${index}.jpg").byteArray
+                ProfilePic profilePic = new ProfilePic([
+                        fileExtension: "jpg",
+                        fileContents: imageContents
+                ])
+
+                if (!profilePic.save()) {
+                    profilePic.errors.getAllErrors().each { ObjectError err ->
+                        log.error(err.toString())
+                    }
+                    log.error("Unable to save default admin profilePic. Exiting.")
+                    System.exit(-1)
+                }
+                log.info("\tSaved admin profilePic ${profilePic.toString()}")
+
                 Profile profile = new Profile(
                         emailAddress: username + '@' + RandomStringUtils.random(5, true, false) + '.' + "edu",
                         firstName: lorem.getFirstName(),
                         lastName:  lorem.getLastName(),
                         institution: institutions?.get(new Random().nextInt(institutions?.size())),
-                        user: user
+                        user: user,
+                        picture: profilePic
                 )
 
                 numAnnotations.times {
@@ -338,6 +370,7 @@ class UserAccountService {
 
         if (userAccount && registrationCode) {
             userAccount.status = AccountStatusEnum.ACCOUNT_VERIFIED
+            userAccount.accountLocked = false
 
             if (!userAccount.save()) {
                 userAccount.errors.getAllErrors().each { ObjectError err ->
@@ -361,5 +394,72 @@ class UserAccountService {
             log.info("Removed old registration token for ${userAccount.username}")
             return true
         } else return false
+    }
+
+    /**
+     * Register new user
+     *
+     * @param user the unsaved user object bound in controller
+     * @param profile the unsaved profile bound in controller
+     * @param institutionFName the full name of the institution (optional; if user selects other)
+     * @param institutionSName the short name of the institution (optional; if user selects other)
+     *
+     * @return true if the user was saved successfully
+     */
+    boolean registerUser(UserAccount user, Profile profile, String institutionFName, String institutionSName) {
+        boolean successful
+
+        //the user selected Other, we need to create a new institution based on the input from user
+        if (!profile.institution && institutionFName && institutionSName) {
+            Institution newInstitute = new Institution(fullName: institutionFName, shortName: institutionSName)
+            if (!newInstitute.save())  {
+                newInstitute.errors.allErrors.each { ObjectError err ->
+                    log.error(err.toString())
+                }
+            }
+            profile.institution = newInstitute
+        }
+
+        if (!user.save()) {
+            user.errors.allErrors.each { ObjectError err ->
+                log.error(err.toString())
+            }
+        } else {
+
+            //we also need to add user role
+            UserAccountUserRole userRole    = new UserAccountUserRole()
+            userRole.userRole               = UserRole.findByAuthority(UserRolesEnum.ROLE_USER.toString())
+            userRole.userAccount            = user
+
+            if (!userRole.save()) {
+                userRole.errors.allErrors.each { ObjectError err ->
+                    log.error(err.toString())
+                }
+            }
+
+            if (!profile.save()) {
+                profile.errors.allErrors.each { ObjectError err ->
+                    log.error(err.toString())
+                }
+            }
+            successful = true
+
+            //get a registration code for the newly created user
+            new RegistrationCode(userAccount: user).save()
+        }
+
+        return successful
+    }
+
+    /**
+     * Save an image, in the form of byte[] and extension name to the DB
+     *
+     * @param imageContent the byte[] of the image file
+     * @param extension the extension of the image
+     *
+     * @return returns the instance of the profile pic or null if save fails
+     */
+    ProfilePic saveProfilePic(byte[] imageContent, String extension) {
+        return new ProfilePic(fileExtension: extension, fileContents: imageContent).save()
     }
 }

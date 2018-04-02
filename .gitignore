@@ -13,3 +13,4 @@ out/
 hs_err_pid?*.log
 /gradle/**
 /gradlew.bat
+/gradlew

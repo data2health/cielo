@@ -1,4 +1,4 @@
-<section class="accordion1 cid-qHBWWNO8Ok mbr-parallax-background" id="accordion1-c">
+<section class="cid-qHBWWNO8Ok jarallax-scroll" id="accordion1-c">
     <div class="mbr-overlay" style="opacity: 0.8; background-color: rgb(70, 80, 82);">
     </div>
     <div class="container">

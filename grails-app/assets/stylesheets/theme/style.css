@@ -372,8 +372,8 @@ nav .mbr-section-btn {
   .mbr-arrow-up {
     left: 50%;
     right: auto;
-    transform: translateX(-50%) rotate(180deg);
-    -webkit-transform: translateX(-50%) rotate(180deg); } }
+    transform: translateX(-50%) rotate(0deg);
+    -webkit-transform: translateX(-50%) rotate(0deg); } }
 /*Gradients animation*/
 @keyframes gradient-animation {
   from {

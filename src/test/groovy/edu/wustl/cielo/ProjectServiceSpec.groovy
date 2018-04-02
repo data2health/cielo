@@ -3,6 +3,7 @@ package edu.wustl.cielo
 import edu.wustl.cielo.enums.ProjectStatusEnum
 import grails.testing.services.ServiceUnitTest
 import grails.web.mapping.LinkGenerator
+import org.springframework.core.io.ByteArrayResource
 import spock.lang.Specification
 import grails.testing.gorm.DomainUnitTest
 import grails.plugin.springsecurity.SpringSecurityService
@@ -10,19 +11,29 @@ import grails.plugin.springsecurity.SpringSecurityService
 class ProjectServiceSpec extends Specification implements ServiceUnitTest<ProjectService>, DomainUnitTest<Project> {
 
     def webRoot
+    def assetsRoot
+    def assetResourceLocator
     LinkGenerator grailsLinkGenerator
     ActivityService activityService
     SpringSecurityService springSecurityService
+    UserAccountService userAccountService
 
     def setup() {
         mockDomains(UserRole, Institution, Profile, Annotation, SoftwareLicense, RegistrationCode, UserAccountUserRole)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+        assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
         grailsLinkGenerator = Mock()
         activityService = Mock()
         springSecurityService = Mock()
 
         service.grailsLinkGenerator = grailsLinkGenerator
         service.activityService = activityService
+
+        userAccountService = new UserAccountService()
+        userAccountService.assetResourceLocator = assetResourceLocator
+        userAccountService.assetResourceLocator = [findAssetForURI: { String URI ->
+            new ByteArrayResource(new File(assetsRoot + "/images/${URI}").bytes)
+        }]
 
         messageSource.addMessage('ACTIVITY_NEW_USER', Locale.getDefault(), "hello")
         messageSource.addMessage('ACTIVITY_NEW_PROJECT', Locale.getDefault(), "hello")
@@ -93,7 +104,6 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
             AnnotationService annotationService = new AnnotationService()
             annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
-            UserAccountService userAccountService = new UserAccountService()
             userAccountService.bootstrapUserRoles()
             userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
             userAccountService.setupMockAppUsers(2, 1)

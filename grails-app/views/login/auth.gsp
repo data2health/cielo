@@ -1,7 +1,7 @@
 <g:render template="/templates/headerIncludes"/>
 <g:render template="/templates/navbar"/>
 
-<section class="engine"></section><section class="cid-qIklYeJO9W mbr-fullscreen mbr-parallax-background" id="header15-w">
+<section class="engine"></section><section class="cid-qIklYeJO9W mbr-fullscreen jarallax-scroll" id="header15-w">
 
     <div class="mbr-overlay" style="opacity: 0.2; background-color: rgb(15, 118, 153);"></div>
 

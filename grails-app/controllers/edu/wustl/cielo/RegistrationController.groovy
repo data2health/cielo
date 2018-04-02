@@ -21,6 +21,7 @@ class RegistrationController {
      */
     def register() {
         return [institutes: institutionService.getAvailableInstitutions(),
+                annotations: Annotation.list(),
                 usernames: userAccountService.getUsernames().join(", ")]
     }
 
@@ -30,50 +31,38 @@ class RegistrationController {
      * @return
      */
     def saveNewUser() {
-        Institution institution = params.institution
+        boolean registered
+        String institutionFName
+        String institutionSName
         UserAccount user = new UserAccount()
         Profile profile = new Profile(user: user)
-        boolean failed = false
+        ProfilePic profilePic
 
         bindData(user, params)
         bindData(profile, params)
 
-        //the user selected Other, we need to create a new institution based on the input from user
-        if (!institution) {
-            Institution newInstitute = new Institution(fullName: params.institutionFName, shortName: params.institutionSName)
-             if (!newInstitute.save())  {
-                 newInstitute.errors.allErrors.each { ObjectError err ->
-                     log.error(err.toString())
-                 }
-                 flash.danger = messageSource.getMessage('user.save.failed', null, 'Unable to save user',
-                         request.locale)
-                 failed = true
-             }
-            profile.institution = newInstitute
-        } else profile.institution = institution
-
-        if (!user.save(flush: true)) {
-            user.errors.allErrors.each { ObjectError err ->
-                log.error(err.toString())
-            }
-            flash.danger = messageSource.getMessage('user.save.failed', null, 'Unable to save user',
-                    request.locale)
-            failed = true
+        if (!profile.institution) {
+            //user selected other
+            institutionFName = params.institutionFName
+            institutionSName = params.institutionSName
         }
 
-        if (!profile.save(flush: true)) {
-            profile.errors.allErrors.each { ObjectError err ->
-                log.error(err.toString())
-            }
-            flash.danger = messageSource.getMessage('user.save.failed', null, 'Unable to save user',
-                    request.locale)
-            failed = true
+        if (params.profilePic.filename) {
+            ArrayList filename = params.profilePic.filename.tokenize('.')
+            String extension    = filename[filename.size()-1]
+            byte[] imageContent = params.profilePic.bytes
+            profilePic = userAccountService.saveProfilePic(imageContent, extension)
+            profile.picture = profilePic
         }
 
-        if (failed) redirect(action: 'register')
+        registered = userAccountService.registerUser(user, profile, institutionFName, institutionSName)
+
+        if (!registered) {
+            flash.danger = messageSource.getMessage('user.save.failed', null, 'Unable to save user',
+                    request.locale)
+            redirect(action: 'register')
+        }
         else {
-            //get a registration code for the newly created user
-            new RegistrationCode(userAccount: user).save(flush: true)
             redirect(action: 'registered', params: [userEmail: profile.emailAddress])
         }
     }
@@ -93,9 +82,13 @@ class RegistrationController {
      */
     def activateUser() {
         if (!params.ukey) render(view: "/error")
-        boolean registration = userAccountService.activateUserAccount(params.ukey)
+        boolean activated = userAccountService.activateUserAccount(params.ukey)
 
-        render(view: "/registration/activated", model: [successful: registration, token: params.ukey,
-                                                        link: "${grailsLinkGenerator.serverBaseURL}/login/auth"])
+        if (activated){
+            render(view: "/registration/activated", model: [successful: activated, token: params.ukey,
+                                                            link: "${grailsLinkGenerator.serverBaseURL}/login/auth"])
+        } else {
+            chain(controller: "home", acion: "index")
+        }
     }
 }

@@ -71,7 +71,7 @@ class ProjectService {
                                 project.addToTeams(team)
                                 saveProjectAndLog(project)
                                 Object[] params = [user.username, (grailsLinkGenerator.serverBaseURL?:"")
-                                        + "/bundle/${project.id}", project.name]
+                                        + "/project/${project.id}", project.name]
                                 activityService.saveActivityForEvent(activityTypeEnum,
                                         messageSource.getMessage(activityTypeEnum.toString() + "_BODY_TEXT",
                                         params, Locale.getDefault())
@@ -122,7 +122,7 @@ class ProjectService {
                 project.addToCodes(code)
                 ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_CODES
                 Object[] params = [username, (grailsLinkGenerator.serverBaseURL?:"")
-                        + "/bundle/${project.id}", project.name]
+                        + "/project/${project.id}", project.name]
                 activityService.saveActivityForEvent(activityTypeEnum,
                         messageSource.getMessage(activityTypeEnum.toString() + "_BODY_TEXT",
                                 params, Locale.getDefault()))
@@ -149,7 +149,7 @@ class ProjectService {
                 project.addToAnnotations(annotation)
                 ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_ANNOTATIONS
                 Object[] params = [user.username, (grailsLinkGenerator.serverBaseURL?:"")
-                        + "/bundle/${project.id}", project.name]
+                        + "/project/${project.id}", project.name]
                 activityService.saveActivityForEvent(activityTypeEnum,
                         messageSource.getMessage(activityTypeEnum.toString() + "_BODY_TEXT",
                                 params, Locale.getDefault()))
@@ -188,7 +188,7 @@ class ProjectService {
                 project.addToDatas(data)
                 ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_DATAS
                 Object[] params = [username, (grailsLinkGenerator.serverBaseURL?:"")
-                        + "/bundle/${project.id}", project.name]
+                        + "/project/${project.id}", project.name]
                 activityService.saveActivityForEvent(activityTypeEnum,
                         messageSource.getMessage(activityTypeEnum.toString() + "_BODY_TEXT",
                                 params, Locale.getDefault()))
@@ -232,7 +232,7 @@ class ProjectService {
 
                 ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_PUBLICATIONS
                 Object[] params = [username, (grailsLinkGenerator.serverBaseURL?:"")
-                        + "/bundle/${project.id}", project.name]
+                        + "/project/${project.id}", project.name]
                 activityService.saveActivityForEvent(activityTypeEnum,
                         messageSource.getMessage(activityTypeEnum.toString() + "_BODY_TEXT",
                                 params, Locale.getDefault()))
@@ -272,7 +272,7 @@ class ProjectService {
 
                 ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_COMMENTS
                 Object[] params = [user.username, (grailsLinkGenerator.serverBaseURL?:"")
-                        + "/bundle/${project.id}", project.name]
+                        + "/project/${project.id}", project.name]
                 activityService.saveActivityForEvent(activityTypeEnum,
                         messageSource.getMessage(activityTypeEnum.toString() + "_BODY_TEXT",
                                 params, Locale.getDefault()))
@@ -313,6 +313,7 @@ class ProjectService {
         }.collect { Project project ->
             [
                     projectId: project.id,
+                    projectOwnerUserObject: project.projectOwner,
                     projectOwner: project.projectOwner.fullName,
                     profilePic: project.projectOwner.profile.picture?.fileContents,
                     projectName: project.name,
@@ -320,5 +321,193 @@ class ProjectService {
                     ownerInstitution: project.projectOwner.profile.institution.fullName
             ]
         } as List<Object>
+    }
+
+    /**
+     * Save a comment to a project
+     *
+     * @param user the user that is commenting
+     * @param projectId the id of the project to save the comment to
+     * @param commentStr the comment to save
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean saveProjectComment(UserAccount user, Long projectId, String commentStr) {
+        boolean saved
+
+        if (user) {
+            Project project = Project.findById(projectId)
+            Comment comment
+
+            if (project) {
+                comment             = new Comment()
+                comment.text        = commentStr
+                comment.commenter   = user
+
+                if (!comment.save()) {
+                    comment.errors.getAllErrors().each { ObjectError error ->
+                        log.error(error.toString())
+                    }
+                    log.error("Unable to save comment.")
+                } else {
+                    //now add the comment to the project
+                    project.addToComments(comment)
+
+                    if (!project.save()) {
+                        project.errors.allErrors.each { ObjectError error ->
+                            log.error(error.toString())
+                        }
+                        log.error("There was an error attempting to save project ${project.name}.")
+                    } else saved = true
+                }
+
+            } else {
+                log.error("Project with id ${projectId} was not found")
+            }
+        }
+        return saved
+    }
+
+    /**
+     * Add a reply to a comment
+     *
+     * @param user
+     * @param commentId
+     * @param commentStr
+     * @return
+     */
+    boolean saveProjectCommentReply(UserAccount user, Long commentId, String commentStr) {
+        boolean saved
+
+        if (user) {
+            Comment comment = Comment.findById(commentId)
+
+            if (comment) {
+                Comment reply = new Comment(commenter: user, text: commentStr)
+
+                if (!reply.save()) {
+                    reply.errors.allErrors.each { ObjectError error ->
+                        log.error(error.toString())
+                    }
+                    log.error("Unable to save reply.")
+                } else {
+                    //now add to the parent comment
+                    comment.addToResponses(reply)
+
+                    if (!comment.save()) {
+                        comment.errors.allErrors.each { ObjectError error ->
+                            log.error(error.toString())
+                        }
+                        log.error("Unable to save comment.")
+                    } else saved = true
+                }
+
+            } else log.error("Comment with id ${commentId} was not found")
+        }
+        return saved
+    }
+
+    /**
+     * Get list of all comments for a given project
+     *
+     * @param project to get comments from
+     *
+     * @return a list of Project comments or null list if none
+     */
+    List<Comment> getComments(Project project) {
+        return project.comments
+    }
+
+    boolean saveProjectBasicChanges(Long projectId, String newProjectName, String description, List<Long> tags) {
+        boolean succeeded
+        Project project = Project.findById(projectId)
+
+        if (project) {
+            if (project.name != newProjectName || project.annotations.collect { it.id } != tags ||
+                project.description.toLowerCase() != description.toLowerCase()) {
+                if (project.name != newProjectName) {
+                    //there are changes
+                    project.name = newProjectName
+                }
+
+                if (project.annotations.collect { it.id }.sort() != tags.sort()) {
+                    List<Long> oldTagIds = project.annotations.collect { it.id }
+                    //remove old tags
+                    oldTagIds.each {
+                        project.annotations.remove(Annotation.findById(it))
+                    }
+
+                    //add new tags
+                    tags.each {
+                        project.annotations.add(Annotation.findById(it))
+                    }
+                }
+
+                if (project.description.toLowerCase() != description.toLowerCase()) {
+                    project.description = description
+                }
+
+                //now save the project
+                if (!project.save()) {
+                    project.errors.allErrors.each { ObjectError error ->
+                        log.error(error.toString())
+                    }
+                    log.error("Unable to save project with new name and/or tags")
+                    succeeded = false //previous step could have succeeded
+                } else {
+                    succeeded = true
+                }
+            }
+            else succeeded == true //no changes were necessary but no failure so set to true
+        }
+
+        return succeeded
+    }
+
+    /**
+     * Increment the project views counter only when necessary
+     *
+     * @param project the project we are going to check
+     */
+    void incrementViewsCounter(Project project) {
+
+        if (project) {
+            if (!isViewerOwnerOrContributorToProject(project)) {
+
+                project.views = project.views + 1
+
+                if (!project.save()) {
+                    project.errors.allErrors.each { ObjectError error ->
+                        log.error(error.toString())
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Is the logged in user the owner or contributor to a project
+     *
+     * @param project the project to check
+     *
+     * @return true if the user is the owner or a contributor to a project
+     */
+    private boolean isViewerOwnerOrContributorToProject(Project project) {
+
+        boolean isOwnerOrContributor
+        def principal                   = springSecurityService?.principal
+        UserAccount user                = UserAccount.get(principal?.id)
+        List<UserAccount> contributors  = new ArrayList<UserAccount>()
+
+        project.teams?.each { Team team ->
+            contributors.addAll(team.members) //.each { UserAccount}
+        }
+
+        //only should increment if the viewing user is not a contributor or owner of project
+        if (user && project.projectOwner == user || contributors.contains(user)) {
+            isOwnerOrContributor = true
+        }
+
+        return isOwnerOrContributor
     }
 }

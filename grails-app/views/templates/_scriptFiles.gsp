@@ -14,4 +14,5 @@
 <asset:javascript src="bootbox/bootbox.min.js"/>
 <asset:javascript src="iziToast/iziToast.min.js"/>
 <asset:javascript src="isInViewPort/isInViewport.js"/>
+<asset:javascript src="select2/select2.min.js"/>
 <asset:javascript src="cielo.js"/>

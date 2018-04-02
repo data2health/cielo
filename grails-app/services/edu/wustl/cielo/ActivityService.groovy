@@ -19,6 +19,7 @@ class ActivityService {
     static int DEFAULT_OFFSET   = 0
     static int DEFAULT_MAX      = 5
 
+    static def grailsCacheManager
     def springSecurityService
     def messageSource
     LinkGenerator grailsLinkGenerator
@@ -44,6 +45,12 @@ class ActivityService {
 
                     if (activityTypeEnum) {
                         saveActivity(event, domainClass, activityTypeEnum)
+
+                        //force invalidation of project cache for most viewed projects ... name or description could
+                        //have changed
+                        if (domainObject.class.simpleName == "Project") {
+                            grailsCacheManager.getCache("most_viewed_projects").clear()
+                        }
                     }
                 }
             }
@@ -188,19 +195,19 @@ class ActivityService {
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_COMMENTS:
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_METADATAS:
                 entityIdentifier = entityAccess.getPropertyValue("name")
-                params = [user?.username, (grailsLinkGenerator.serverBaseURL?:"") + "/bundle/${entityId}", entityIdentifier]
+                params = [user?.username, (grailsLinkGenerator.serverBaseURL?:"") + "/project /${entityId}", entityIdentifier]
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_SHARED:
                 params = [entityAccess.getPropertyValue("shared")?"shared" : "private"]
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_NAME:
-                params = [entityAccess.getPropertyValue("name"), ((Project)entityAccess).getOriginalValue("name")]
+                params = [entityAccess.getPropertyValue("name"), ((Project)entityAccess.getEntity()).getOriginalValue("name")]
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_DESCRIPTION:
-                params = [entityAccess.getPropertyValue("description"), ((Project)entityAccess).getOriginalValue("description")]
+                params = [entityAccess.getPropertyValue("description"), ((Project)entityAccess.getEntity()).getOriginalValue("description")]
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_STATUS:
-                params = [entityAccess.getPropertyValue("status"), ((Project)entityAccess).getOriginalValue("status")]
+                params = [entityAccess.getPropertyValue("status"), ((Project)entityAccess.getEntity()).getOriginalValue("status")]
                 break
         }
 
@@ -247,11 +254,16 @@ class ActivityService {
     private void saveActivity(AbstractPersistenceEvent event, String domainClass, ActivityTypeEnum activityTypeEnum) {
 
         Long entityId = event.getEntityAccess().getPropertyValue('id')
-        def principal = springSecurityService?.principal
-        UserAccount user = principal ? UserAccount.get(principal?.id) : UserAccount.findByUsername("admin")
-        Activity activity
+        UserAccount user
+
+        if (springSecurityService.isLoggedIn()) {
+            user = UserAccount.get(springSecurityService?.principal?.id)
+        } else {
+            user = UserAccount.findByUsername("admin")
+        }
 
         if (user) {
+            Activity activity
             String eventText = generateEventBody(event.getEntityAccess(), user, domainClass, activityTypeEnum, entityId)
             if (!Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText, activityTypeEnum)) {
                 Activity.withNewTransaction {

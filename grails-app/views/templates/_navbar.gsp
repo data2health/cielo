@@ -43,24 +43,24 @@
                     <li class="li-spacer">&nbsp;</li>
                     <li class="dropdown pull-right">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="false" aria-expanded="false">
-                            <i class="fa fa-cubes"></i>
-                            Bundles
+                            <i class="fa fa-cube"></i>
+                            Projects
                         </a>
                         <ul class="dropdown-menu arrow_box">
                             <li>
                                 <a role="link" href="#">
-                                    My Bundles
+                                    My Projects
                                 </a>
                             </li>
                             <li>
                                 <a role="link" href="#">
-                                    Public Bundles
+                                    Public Projects
                                 </a>
                             </li>
                             <li>
                                 <a role="link" href="#">
                                     <i class="fa fa-plus"></i>
-                                    Create Bundle
+                                    Create Project
                                 </a>
                             </li>
                         </ul>
@@ -86,35 +86,35 @@
                         </ul>
                     </li>
                     <li class="li-spacer">&nbsp;</li>
-                        <li class="dropdown pull-right">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                <g:if test="${profile.picture}">
-                                    <img src="data:image/png;base64,${profile.picture.fileContents}"
-                                         style="" class="media-object img-profile img-circle img-responsive"/>
-                                </g:if>
-                                <g:else>
-                                    <img src="assets/default_profile.png" class="img-circle img-responsive"
-                                         style="max-width: 24px; max-height: 24px"/>
-                                </g:else>
-                                <sec:username/>
-                                <span class="caret"></span></a>
-                            <ul class="dropdown-menu arrow_box" style="margin-left: 1em;">
-                                <li class="menu-with-icon">
-                                    <a role="link" href="#">
-                                        &nbsp;&nbsp;&nbsp;<span class="oi oi-cog"></span>
-                                        Account
-                                    </a>
-                                </li>
-                                <li><hr style="width: 100%;"></li>
-                                <li class="menu-with-icon">
-                                    <a role="link" href="/logout">
-                                        &nbsp;&nbsp;&nbsp;<span class="oi oi-account-logout"></span>
-                                        Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="li-spacer">&nbsp;</li>
+
+                    <li>
+                        <a href="#contact-us-form">
+                            <i class="fa fa-envelope"></i>
+                            Contact Us
+                        </a>
+                    </li>
+                    <li class="li-spacer d-block d-md-none">&nbsp;</li>
+                    <li class="dropdown pull-right" style="margin-left: 1em;">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <g:getUserProfilePic imageSize="small"/>
+                            <sec:username/>
+                            <span class="caret"></span></a>
+                        <ul class="dropdown-menu arrow_box" style="margin-left: 1em;">
+                            <li class="menu-with-icon">
+                                <a role="link" href="#">
+                                    &nbsp;&nbsp;&nbsp;<span class="oi oi-cog"></span>
+                                    Account
+                                </a>
+                            </li>
+                            <li><hr style="width: 100%;"></li>
+                            <li class="menu-with-icon">
+                                <a role="link" href="/logout">
+                                    &nbsp;&nbsp;&nbsp;<span class="oi oi-account-logout"></span>
+                                    Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
         </sec:ifLoggedIn>
         <sec:ifNotLoggedIn>

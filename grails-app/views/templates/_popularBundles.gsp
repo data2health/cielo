@@ -16,13 +16,8 @@
                 <div id="${bundle.projectId}" class="mbr-testimonial p-3 align-center col-12 col-md-6 col-lg-4">
                     <div class="panel-item p-3">
                         <div class="card-block">
-                            <div class="testimonial-photo">
-                                <g:if test="${bundle.profilePic}">
-                                    <img src="data:image/png;base64,${bundle.profilePic}" sizes="120x120"/>
-                                </g:if>
-                                <g:else>
-                                    <img src="assets/default_profile.png" sizes="120x120"/>
-                                </g:else>
+                            <div style="display: inline-block; overflow: hidden">
+                                <g:getUserProfilePic user="${bundle.projectOwnerUserObject}" sticker="${true}" imageSize="xxx-large"/>
                             </div>
                             <p class="mbr-text mbr-fonts-style display-7">
                                 ${bundle.description}
