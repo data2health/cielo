@@ -29,7 +29,7 @@ class EmailSenderJob {
             MailjetResponse response = emailService.sendEmail(regEmail.toAddresses,
                         regEmail.subject, regEmail.plainMessage, regEmail.htmlMessage)
 
-            if (response.getStatus() == 200) registrationService.deleteRegistrationEmail(regEmail)
+            if (response?.getStatus() == 200) registrationService.deleteRegistrationEmail(regEmail)
         }
 
         //contact us emails to send
@@ -37,7 +37,7 @@ class EmailSenderJob {
             MailjetResponse response = emailService.sendEmail(contactUsEmail.toAddresses,
                     contactUsEmail.subject, contactUsEmail.plainMessage, contactUsEmail.htmlMessage)
 
-            if (response.getStatus() == 200) communicationsService.deleteContactUsEmail(contactUsEmail)
+            if (response?.getStatus() == 200) communicationsService.deleteContactUsEmail(contactUsEmail)
         }
     }
 }
