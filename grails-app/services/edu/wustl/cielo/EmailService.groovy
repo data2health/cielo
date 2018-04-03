@@ -1,5 +1,6 @@
 package edu.wustl.cielo
 
+import com.mailjet.client.ClientOptions
 import com.mailjet.client.resource.Contact
 import com.mailjet.client.errors.MailjetSocketTimeoutException
 import com.mailjet.client.errors.MailjetException
@@ -25,7 +26,7 @@ class EmailService {
      */
     void init() {
         client = new MailjetClient(grailsApplication.config.getProperty("mailjet.publicKey"),
-                grailsApplication.config.getProperty("mailjet.secretKey"))
+                grailsApplication.config.getProperty("mailjet.secretKey"), new ClientOptions("v3", "https://api.mailjet.com:443"))
 
         FROM_NAME  = grailsApplication.config.getProperty("mailjet.from")
         FROM_EMAIL = grailsApplication.config.getProperty("mailjet.fromAddress")

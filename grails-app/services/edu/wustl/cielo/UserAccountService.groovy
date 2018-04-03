@@ -123,7 +123,7 @@ class UserAccountService {
             log.info("\tSaved admin user: ${superAdmin.toString()}")
 
             //save profile pic
-            byte[] imageContents = assetResourceLocator.findAssetForURI("admin.png").byteArray
+            byte[] imageContents  = assetResourceLocator.findAssetForURI("admin.png")?.getInputStream()?.bytes
             ProfilePic profilePic = new ProfilePic([fileContents: imageContents, fileExtension: "png"])
 
             if (!profilePic.save()) {
@@ -248,7 +248,7 @@ class UserAccountService {
                 log.info("\tSaved user: ${user.toString()}")
 
                 //save profile pic
-                byte[] imageContents = assetResourceLocator.findAssetForURI("user_${index}.jpg").byteArray
+                byte[] imageContents = assetResourceLocator.findAssetForURI("user_${index}.jpg")?.getInputStream()?.bytes
                 ProfilePic profilePic = new ProfilePic([
                         fileExtension: "jpg",
                         fileContents: imageContents

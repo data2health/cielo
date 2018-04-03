@@ -80,7 +80,7 @@ dependencies {
     compile 'org.liquibase:liquibase-core:3.5.3'
     compile 'org.grails.plugins:spring-security-core:3.2.0'
     compile 'com.thedeanda:lorem:2.1'
-    compile 'com.mailjet:mailjet-client:4.0.5'
+    compile 'com.mailjet:mailjet-client:4.1.1'
     compile 'org.grails.plugins:quartz:2.0.13'
     console "org.grails:grails-console"
     profile "org.grails.profiles:web"
