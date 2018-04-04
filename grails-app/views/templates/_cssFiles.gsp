@@ -10,5 +10,7 @@
 <asset:stylesheet src="dropdown/style.css"/>
 <asset:stylesheet src="mobirise/mbr-additional.css"/>
 <asset:stylesheet src="open-iconic/css/open-iconic-bootstrap.min.css"/>
-<asset:stylesheet src="custom.css"/>
 <asset:stylesheet src="iziToast/iziToast.min.css"/>
+<asset:stylesheet src="select2/select2.min.css"/>
+<asset:stylesheet src="custom.css"/>
+

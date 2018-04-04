@@ -17,6 +17,7 @@ class SoftwareLicenseServiceIntegrationSpec extends Specification {
     SessionFactory sessionFactory
 
     def webRoot
+    def assetResourceLocator
 
     void setup() {
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
@@ -58,6 +59,7 @@ class SoftwareLicenseServiceIntegrationSpec extends Specification {
 
         when: "adding superadmin user"
             UserAccountService userAccountService = new UserAccountService()
+            userAccountService.assetResourceLocator = assetResourceLocator
             userAccountService.bootstrapUserRoles()
             UserAccount user = userAccountService.bootstrapCreateOrGetAdminAccount()
             userAccountService.bootstrapAddSuperUserRoleToUser(user)

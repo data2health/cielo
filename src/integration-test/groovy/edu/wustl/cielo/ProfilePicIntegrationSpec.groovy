@@ -88,26 +88,4 @@ class ProfilePicIntegrationSpec extends Specification {
         then: "validate fails, image too large"
             !profilePicFail.validate()
     }
-
-    void "test toString"() {
-        Profile profile
-        ProfilePic profilePic
-        Institution institution
-        UserAccount user
-        byte[] contents
-
-        given:
-            contents = new File(webRoot + "mbr-9-1620x1080.jpg").bytes
-            user = new UserAccount(username: "someuser", password: "somePassword")
-            institution = new Institution(fullName: "Washington University of St. Louis", shortName: "WUSTL")
-            profile = new Profile(firstName: "Ricky", lastName: "Rodriguez", emailAddress: "rrodriguez@wustl.edu",
-                    institution: institution, user: user).save()
-            profilePic = new ProfilePic(fileContents: contents, fileExtension: "jpg", profile: profile)
-
-        when: "toString is called"
-            def returnVal = profilePic.toString()
-
-        then:
-            assert returnVal   == "image for " + profile.toString() + " with id ${profilePic.id} and size ${contents.size()}"
-    }
 }

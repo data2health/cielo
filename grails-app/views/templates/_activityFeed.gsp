@@ -2,16 +2,10 @@
 <g:each in="${activities}" var="activity">
     <div id="activity_post_${activity.id}" class="card activity-post col-md-4">
     <h6 class="card-header">
-        <g:if test="${activity.user?.profile?.picture}">
-            <asset:image class="activity-profile-pic" src="data:image/png;base64,${activity.user?.profile?.picture?.fileContents}"/>
-        </g:if>
-        <g:else>
-            <asset:image class="activity-profile-pic" src="default_profile.png"/>
-        </g:else>
+        <g:getUserProfilePic user="${activity.user}" sticker="${true}">
         &nbsp;${activity.activityInitiatorUserName}
-        <span class="date-time">
-            <g:formatDateWithTimezone date="${activity.dateCreated}"/>
-        </span>
+        </g:getUserProfilePic>
+        <g:dateDiff date="${activity.dateCreated}"/>
     </h6>
     <div class="card-body">
         <h6 class="card-title activity-post-title">${activity.eventTitle}</h6>
@@ -24,21 +18,21 @@
         <div id="feed_footer_activity_${activity.id}" class="card-footer button-block">
     </g:else>
     <span id="comment-tooltip-${activity.id}" class="d-inline-block i-button" tabindex="0" data-toggle="tooltip" title="Leave a comment">
-        <i id="${activity.id}" class="far fa-comments fa-1x" onclick="showCommentBox(${activity.id}, this.id);"></i>
+        <i id="${activity.id}" class="far fa-comment fa-1x" onclick="showCommentBox(${activity.id}, this.id);"></i>
     </span>
     &nbsp;
-    <span id="share-tooltip-${activity.id}" class="d-inline-block i-button" tabindex="0" data-toggle="tooltip" title="Share">
+    <span id="share-tooltip-${activity.id}" class="d-inline-block i-button" tabindex="1" data-toggle="tooltip" title="Share">
         <i id="share_${activity.id}" class="far fa-share-square" onclick="sharePost(${activity.id}, this.id);"></i>
     </span>
     &nbsp;
-    <span id="like-tooltip-${activity.id}" class="d-inline-block i-button" tabindex="0" data-toggle="tooltip" title="Like">
+    <span id="like-tooltip-${activity.id}" class="d-inline-block i-button" tabindex="2" data-toggle="tooltip" title="Like">
         <i id="like_${activity.id}" class="far fa-check-circle" onclick="likePost(${activity.id}, this.id)"></i>
     </span>
     </div>
     <div class="comment-add-box" id="comment_box_${activity.id}">
         <div class="input-group">
             <div class="input-group-prepend">
-                <span class="input-group-text">${username}@</span>
+                <span class="input-group-text"><g:getUserProfilePic sticker="${false}"/></span>
             </div>
             <textarea class="form-control" id="comment-box-text-${activity.id}"></textarea>
         </div>
@@ -58,6 +52,10 @@
     <div id="offset" style="display: none;">${activityOffset}</div>
     <div id="max" style="display: none;">${activityMax}</div>
     <div id="loading-activity-indicator" style="display: none;"><i class="fas fa-spinner fa-spin fa-2x"></i> </div>
+    <button id="loadOlderActivity" type="button" style="display: none;" class="btn btn-link"
+            onclick="getOlderActivity(${activityOffset}, ${activityMax});">
+        Load More...
+    </button>
     <g:if test="${!showMoreActivitiesButton}">
         <div id="no-more-activity"><p class="text-secondary">Hurray! You have read all activity posts. Now get back to work!</p></div>
     </g:if>

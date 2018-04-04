@@ -1,5 +1,7 @@
 package cielo
 
+import edu.wustl.cielo.Annotation
+import edu.wustl.cielo.SoftwareLicense
 import edu.wustl.cielo.UserAccount
 import edu.wustl.cielo.EmailSenderJob
 import groovy.util.logging.Slf4j
@@ -32,10 +34,10 @@ class BootStrap {
         userAccountService.bootstrapAddSuperUserRoleToUser(admin)
 
         //always add annotations
-        annotationService.initializeAnnotations(new File(webRoot + grailsApplication.config.annotations))
+        if (Annotation.count() == 0) annotationService.initializeAnnotations(new File(webRoot + grailsApplication.config.annotations))
 
         //always bootstrap licenses
-        softwareLicenseService.bootstrapLicenses(new File(webRoot + grailsApplication.config.software.licenses.path))
+        if (SoftwareLicense.count() == 0) softwareLicenseService.bootstrapLicenses(new File(webRoot + grailsApplication.config.software.licenses.path))
 
         environments {
             development {
@@ -54,11 +56,14 @@ class BootStrap {
      *
      */
     void setupMockDataForDev() {
-        log.info("Going to setup environment with mock data\n")
-        institutionService.setupMockInstitutions(new File(webRoot + grailsApplication.config.institutions))
-        userAccountService.setupMockAppUsers(3, 5)
-        teamService.bootstrapTeams(5, 5)
-        userAccountService.bootstrapFollowers(5)
-        projectService.bootstrapProjects(2)
+        //there should only be the admin setup.
+        if (UserAccount.count() == 1) {
+            log.info("Going to setup environment with mock data\n")
+            institutionService.setupMockInstitutions(new File(webRoot + grailsApplication.config.institutions))
+            userAccountService.setupMockAppUsers(3, 5)
+            teamService.bootstrapTeams(5, 5)
+            userAccountService.bootstrapFollowers(5) //admin account = 1
+            projectService.bootstrapProjects(2)
+        }
     }
 }

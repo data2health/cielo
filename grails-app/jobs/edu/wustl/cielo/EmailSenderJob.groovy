@@ -1,6 +1,7 @@
 package edu.wustl.cielo
 
 import groovy.util.logging.Slf4j
+import com.mailjet.client.MailjetResponse
 
 @Slf4j
 class EmailSenderJob {
@@ -25,18 +26,18 @@ class EmailSenderJob {
 
         //Registration emails to send
         RegistrationEmail.findAllByAttemptsLessThan(3).each { regEmail ->
-            emailService.sendEmail(regEmail.toAddresses,
+            MailjetResponse response = emailService.sendEmail(regEmail.toAddresses,
                         regEmail.subject, regEmail.plainMessage, regEmail.htmlMessage)
 
-            registrationService.deleteRegistrationEmail(regEmail)
+            if (response?.getStatus() == 200) registrationService.deleteRegistrationEmail(regEmail)
         }
 
         //contact us emails to send
         ContactUsEmail.findAllByAttemptsLessThan(3).each { contactUsEmail ->
-            emailService.sendEmail(contactUsEmail.toAddresses,
+            MailjetResponse response = emailService.sendEmail(contactUsEmail.toAddresses,
                     contactUsEmail.subject, contactUsEmail.plainMessage, contactUsEmail.htmlMessage)
 
-            communicationsService.deleteContactUsEmail(contactUsEmail)
+            if (response?.getStatus() == 200) communicationsService.deleteContactUsEmail(contactUsEmail)
         }
     }
 }

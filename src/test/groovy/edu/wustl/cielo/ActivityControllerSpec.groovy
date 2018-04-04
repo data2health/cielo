@@ -14,6 +14,7 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
     CieloTagLib cieloTagLib
 
     def setup() {
+        mockDomain(Profile)
         groovyPageRenderer = Mock()
         activityService = new ActivityService()
         springSecurityService = Mock()
@@ -42,11 +43,7 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
             controller.getActivities()
 
         then:
-            response.text.trim() == "<div id=\"nextPage\" style=\"display: flex;justify-content: center;\">\n" +
-                    "    \n" +
-                    "        <p class=\"text-secondary\">Hurray! You have read all activity posts. Now get back to work!</p>\n" +
-                    "    \n" +
-                    "</div>"
+            response.text.contains("Hurray! You have read all activity posts. Now get back to work!")
 
         when: "we create activities"
             new UserAccount(username: "someuser", password: "somePassword")
@@ -76,14 +73,18 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
             response.text.trim() == ""
 
         when: "there is an activity with comments"
-            new UserAccount(username: "someuser", password: "somePassword")
+                UserAccount user = new UserAccount(username: "commenter", password: "somePassword").save()
+                Institution institution = new Institution(fullName: "Washington University of St. Louis", shortName: "WUSTL").save()
+                Profile profile = new Profile(firstName: "Ricky", lastName: "Rodriguez", emailAddress: "rrodriguez@wustl.edu",
+                        institution: institution, user: user)
+                profile.save()
                 activity = new Activity()
                 activity.activityInitiatorUserName = "someuser"
                 activity.eventType  = ActivityTypeEnum.ACTIVITY_NEW_PROJECT
                 activity.eventTitle = "Some event"
                 activity.eventText  = "Some event just occurred. Do something here"
                 activity.save()
-                activity.comments.add(new Comment(commenter: new UserAccount(username: "commenter", password: "somePassword").save(),
+                activity.comments.add(new Comment(commenter: user,
                         text: "some comment").save())
                 activity.save()
             params.id = activity.id

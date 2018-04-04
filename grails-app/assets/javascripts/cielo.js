@@ -1,6 +1,10 @@
 window.doneLoading = true;
-var usernames;
-var passwordMatcher;
+window.usernames = ("${usernames.replaceAll(' ', '')}").split(',');
+window.passwordMatcher = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+
+window.addEventListener('load', function (event) {
+    $('[data-toggle="tooltip"]').tooltip();
+}, false);
 
 $('.panel-collapse ').on('hide.bs.collapse', function(event) {
     var chevronUp = $('#' + event.target.id).prev().find('i');
@@ -23,8 +27,60 @@ $('.panel-collapse').on('show.bs.collapse', function() {
 });
 
 $( function() {
+
+    //autoload count initialization
+    sessionStorage.setItem("autoloadCount", 1);
+
+    $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
+        $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (-25) + 'px');
+    });
+
+    $('[data-toggle="tooltip"]').on('hidden.bs.tooltip', function () {
+        $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (+25) + 'px');
+    });
+
+    //custom data attributes will show on mouseenter and mouseleave
+    $('.date-time').hover(
+        function() {
+            $(this).html($(this).attr('data-date'));
+        },
+        function() {
+            $(this).html($(this).attr('data-diff'));
+        }
+    );
+
+    $('.team-member').hover(
+        function() {
+            var cardTitle   = $(this).find('.card-title');
+            var cardFooter  = $(this).find('.card-footer');
+
+            cardTitle.show();
+            cardFooter.show();
+        },
+        function() {
+            var cardTitle   = $(this).find('.card-title');
+            var cardFooter  = $(this).find('.card-footer');
+
+            cardTitle.hide();
+            cardFooter.hide();
+        }
+    );
+
+    $('.jarallax').jarallax({
+        type: 'scale',
+        speed: -0.5
+    });
+
+    $('.jarallax-scroll').jarallax({
+        speed: -0.2
+    });
+
     $(".dropdown-toggle").dropdown();
-    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle=".tooltip"]').tooltip(
+        {
+            container: 'body'
+        }
+    );
 
     $("#sidebar-toggle-button").on("click", function () {
         if ($('#sidebar-options').attr("class").indexOf('hidden') > -1) {
@@ -69,10 +125,6 @@ $( function() {
             $("#spacer").addClass("spacer-collapsed");
         }
     });
-
-    //set the usernames global variable
-    window.usernames = ("${usernames.replaceAll(' ', '')}").split(',');
-    window.passwordMatcher = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
 
     //remove was-validated so that we're back to square one
     $('#resetButton').on('click', function() {
@@ -145,6 +197,8 @@ $( function() {
             event.stopPropagation();
         }
     });
+
+    $('.multiple-select').select2();
 });
 
 function getAttributes(element) {
@@ -174,6 +228,23 @@ function showTermsOfUse() {
         setTimeout(function(){
             alertWindow.find('.bootbox-body').html('<div>some information here....</div>');
         }, 1500)
+    });
+}
+
+function showSoftwareLicense(licenseId, licenseLabel) {
+    var alertWindow = bootbox.alert({
+        title: licenseLabel,
+        message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+        closeButton: false,
+        size: "large"
+    });
+
+    //make body of dialog scrollable
+    alertWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert");
+
+    //grab the text for the license from db
+    $.get("/license/getLicenseBody/" + licenseId, function (data) {
+        alertWindow.find('.bootbox-body').html('<pre>'+ data.licenseText +'</pre>');
     });
 }
 
@@ -213,13 +284,14 @@ function onInstitutionChange() {
 
 function handleInfiniteScroll(event) {
     if ((isInViewport(document.querySelector('#contact-us-form')) && isInViewport(document.querySelector('#olderContent'))) &&
-        document.querySelector('#no-more-activity') === null) {
+        document.querySelector('#no-more-activity') === null && !$('#loadOlderActivity').is(":visible")) {
         $("#loading-activity-indicator").show();
 
         setTimeout(function(){
             //if still visible; allows for auto-cancel if you scroll back up before timer goes off
+            //if the manual button load
             if ((isInViewport(document.querySelector('#contact-us-form')) && isInViewport(document.querySelector('#olderContent'))) &&
-                document.querySelector('#no-more-activity') === null) {
+                document.querySelector('#no-more-activity') === null && !$('#loadOlderActivity').is(":visible")) {
                 var offset  = Number($('#offset').html());
                 var max     = Number($('#max').html());
 
@@ -240,7 +312,7 @@ function showCommentBox(activityId, id) {
         var tooltipId = $("#comment-tooltip-" + activityId).attr("aria-describedby");
 
         $("#" + tooltipId).removeClass("show");
-        $('#comment_box_' + id).addClass("comment-add-box-visible").hide().show('slow');
+        $('#comment_box_' + id).addClass("comment-add-box-visible").hide().show(200);
     }
 }
 
@@ -255,13 +327,13 @@ function postComment(id) {
 
     //reset state of textbox
     $("#comment-box-text-" + id).val("");
-    $('#comment_box_' + id).removeClass("comment-add-box-visible").hide('slow');
+    $('#comment_box_' + id).removeClass("comment-add-box-visible").hide(200);
 }
 
 function cancelComment(id) {
     //reset state of textbox
     $("#comment-box-text-" + id).val("");
-    $('#comment_box_' + id).removeClass("comment-add-box-visible").hide('slow');
+    $('#comment_box_' + id).removeClass("comment-add-box-visible").hide(200);
 }
 
 function getCommentsForActivity(activityId) {
@@ -279,6 +351,7 @@ function getOlderComments(activityId) {
     $.post("/activity/getComments/" + activityId, {commentCount: newCommentsCount}, function (data) {
         $("#feed_footer_activity_" + activityId).addClass("with-comments");
         $("#comments_activity_"+ activityId ).html(data);
+        $('[data-toggle="tooltip"]').tooltip('update');
     });
 }
 
@@ -288,7 +361,32 @@ function getOlderActivity(offset, max) {
     $("<div></div>").load("/activity/getActivities?offset="+offset+"&max="+max, function () {
         $(this).insertBefore($("#olderContent")).hide().show('fast', function() {
             window.doneLoading = true;
+            $('[data-toggle="tooltip"]').tooltip('update');
+            $('.date-time').hover(
+                function() {
+                    $(this).html($(this).attr('data-date'));
+                },
+                function() {
+                    $(this).html($(this).attr('data-diff'));
+                }
+            );
         });
+
+        //check whether we need to show the load more button or not
+        if (sessionStorage.getItem("autoloadCount")) {
+            var count = Number(sessionStorage.getItem("autoloadCount"));
+
+            if (count === 3) {
+                //show the load button and reset the count... make sure that the infinite scroll  if statement
+                //above for isInViewport also checks if the button is visible if so, then skip this code
+                $('#loadOlderActivity').show();
+            } else {
+                sessionStorage.setItem("autoloadCount", Number(count + 1));
+            }
+        } else {
+            $('#loadOlderActivity').hide();
+            sessionStorage.setItem("autoloadCount", 1);
+        }
     });
 
     $("#loading-activity-indicator").hide();
@@ -312,4 +410,54 @@ function likePost(activityId, id) {
 function sharePost(activityId, id) {
     var tooltipId = $("#share-tooltip-" + activityId).attr("aria-describedby");
     $("#" + tooltipId).removeClass("show");
+}
+
+function validateProfilePic(input) {
+    if (window.File && window.FileReader && window.FileList && window.Blob) {
+        if(input) {
+            var selectedFile = input.files[0];
+            if(selectedFile) {
+                var fileType = selectedFile.type;
+                var control = $("#profilePic");
+
+                // Only process image files.
+                switch (fileType) {
+                    case 'image/png':
+                    case 'image/gif':
+                    case 'image/jpeg':
+                    case 'image/pjpeg':
+                        break;
+                    default:
+                        control.val("");
+                        alert('Error: Unsupported file type detected. Supported types: PNG, GIF, JPEG');
+                        return;
+                }
+
+                //get the file size and file type from file input field
+                var fsize = selectedFile.size;
+                if (fsize > 1048576) //do something if file size more than 1 MB (1048576 bytes)
+                {
+                    control.val("");
+                    alert("File too large. (" + fsize + "). Please limit uploads to files less than one MiB.");
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $("#currentProfilePic").attr("src", e.target.result);
+                };
+
+                reader.readAsDataURL(selectedFile);
+            }
+        }
+        else {
+            alert("Input was unrecognized.");
+        }
+    } else {
+        alert("This function needs a newer browser.");
+    }
+}
+
+function resetImage() {
+    $("#currentProfilePic").attr("src", "/assets/default_profile.png");
 }

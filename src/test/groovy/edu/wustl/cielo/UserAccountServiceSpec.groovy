@@ -4,15 +4,23 @@ import edu.wustl.cielo.enums.AccountStatusEnum
 import edu.wustl.cielo.enums.UserRolesEnum
 import grails.testing.gorm.DomainUnitTest
 import grails.testing.services.ServiceUnitTest
+import org.springframework.core.io.ByteArrayResource
 import spock.lang.Specification
 
 class UserAccountServiceSpec extends Specification implements ServiceUnitTest<UserAccountService>, DomainUnitTest<UserAccount> {
 
     def webRoot
+    def assetsRoot
 
     def setup() {
         mockDomains(Institution, Profile, UserRole, UserAccountUserRole, RegistrationCode)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+        assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+
+        service.assetResourceLocator = [findAssetForURI: { String URI ->
+            new ByteArrayResource(new File(assetsRoot + "/images/${URI}").bytes)
+        }]
+
     }
 
     void "test handleOnAuthSuccess"() {
@@ -178,9 +186,8 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
             AnnotationService annotationService = new AnnotationService()
             annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
-            UserAccountService userAccountService = new UserAccountService()
-            userAccountService.bootstrapUserRoles()
-            userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
+            service.bootstrapUserRoles()
+            service.bootstrapAddSuperUserRoleToUser(service.bootstrapCreateOrGetAdminAccount())
             service.setupMockAppUsers(2, 0)
 
         then:

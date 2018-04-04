@@ -28,7 +28,7 @@ class HomeController {
                 followers: user.followers,
                 following: user.getConnections(),
                 activities: activityService.getActivities(),
-                mostPopularBundles: projectService.getMostViewedProjects(3, true),
+                mostPopularProjects: projectService.getMostViewedProjects(3, true),
                 activityOffset: activityService.DEFAULT_MAX, activityMax: activityService.DEFAULT_MAX,
                 showMoreActivitiesButton: activityService.areThereMoreActivitiesToRetrieve(10, 10)
         ]

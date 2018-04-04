@@ -2,15 +2,26 @@ package edu.wustl.cielo
 
 import grails.testing.gorm.DomainUnitTest
 import grails.testing.services.ServiceUnitTest
+import org.springframework.core.io.ByteArrayResource
 import spock.lang.Specification
 
 class TeamServiceSpec extends Specification implements ServiceUnitTest<TeamService>, DomainUnitTest<UserAccount> {
 
     def webRoot
+    def assetsRoot
+    def assetResourceLocator
+    UserAccountService userAccountService
 
     void setup() {
         mockDomains(Institution, Profile, UserRole, UserAccountUserRole, RegistrationCode)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+        assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+
+        userAccountService = new UserAccountService()
+        userAccountService.assetResourceLocator = assetResourceLocator
+        userAccountService.assetResourceLocator = [findAssetForURI: { String URI ->
+            new ByteArrayResource(new File(assetsRoot + "/images/${URI}").bytes)
+        }]
     }
     void "test bootstrapTeams"() {
         given: "no teams"
@@ -33,7 +44,6 @@ class TeamServiceSpec extends Specification implements ServiceUnitTest<TeamServi
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
             AnnotationService annotationService = new AnnotationService()
             annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
-            UserAccountService userAccountService = new UserAccountService()
             userAccountService.bootstrapUserRoles()
             userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
             userAccountService.setupMockAppUsers(4, 0)

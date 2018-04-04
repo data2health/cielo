@@ -18,6 +18,7 @@ class ProjectServiceIntegrationSpec extends Specification {
     SessionFactory sessionFactory
 
     def webRoot
+    def assetResourceLocator
 
     def setup() {
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
@@ -74,6 +75,7 @@ class ProjectServiceIntegrationSpec extends Specification {
                 annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
             }
             UserAccountService userAccountService = new UserAccountService()
+            userAccountService.assetResourceLocator = assetResourceLocator
             if (UserAccountUserRole.count() == 0) userAccountService.bootstrapUserRoles()
             userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
             userAccountService.setupMockAppUsers(2, 1)
@@ -280,6 +282,7 @@ class ProjectServiceIntegrationSpec extends Specification {
                 annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
             }
             UserAccountService userAccountService = new UserAccountService()
+            userAccountService.assetResourceLocator = assetResourceLocator
             if (UserAccountUserRole.count() == 0) {
                 userAccountService.bootstrapUserRoles()
             }

@@ -2,16 +2,26 @@ package edu.wustl.cielo
 
 import grails.testing.gorm.DomainUnitTest
 import grails.testing.services.ServiceUnitTest
+import org.springframework.core.io.ByteArrayResource
 import spock.lang.Specification
 
 class SoftwareLicenseServiceSpec extends Specification implements ServiceUnitTest<SoftwareLicenseService>,
         DomainUnitTest<SoftwareLicense> {
 
     def webRoot
+    def assetsRoot
+
+    UserAccountService userAccountService
 
     void setup() {
         mockDomains(Institution, Profile, UserRole, RegistrationCode, UserAccountUserRole)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+        assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+
+        userAccountService = new UserAccountService()
+        userAccountService.assetResourceLocator = [findAssetForURI: { String URI ->
+            new ByteArrayResource(new File(assetsRoot + "/images/${URI}").bytes)
+        }]
     }
 
     void "test bootstrapLicenses"() {
@@ -31,7 +41,6 @@ class SoftwareLicenseServiceSpec extends Specification implements ServiceUnitTes
             SoftwareLicense.list() == []
 
         when: "adding superadmin user"
-            UserAccountService userAccountService = new UserAccountService()
             userAccountService.bootstrapUserRoles()
             userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
             service.bootstrapLicenses(new File(webRoot + "WEB-INF/startup/licenses.json"))

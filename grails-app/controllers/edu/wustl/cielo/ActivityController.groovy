@@ -29,7 +29,7 @@ class ActivityController {
 
     @Secured('isAuthenticated()')
     def saveComment() {
-        boolean savedComment = false
+        boolean savedComment
         Object principal = springSecurityService?.principal
         UserAccount user = principal ? UserAccount.get(principal.id) : null
 

@@ -9,6 +9,7 @@ class ProfilePicSpec extends Specification implements DomainUnitTest<ProfilePic>
     def webRoot
 
     def setup() {
+        mockDomain(Profile)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets/images/"
     }
 
@@ -57,27 +58,5 @@ class ProfilePicSpec extends Specification implements DomainUnitTest<ProfilePic>
 
         then: "save fails, image too large"
             !profilePic.save()
-    }
-
-    void "test toString"() {
-        Profile profile
-        ProfilePic profilePic
-        Institution institution
-        UserAccount user
-        byte[] contents
-
-        given:
-            contents = new File(webRoot + "mbr-9-1620x1080.jpg").bytes
-            user = new UserAccount(username: "someuser", password: "somePassword")
-            institution = new Institution(fullName: "Washington University of St. Louis", shortName: "WUSTL")
-            profile = new Profile(firstName: "Ricky", lastName: "Rodriguez", emailAddress: "rrodriguez@wustl.edu",
-                    institution: institution, user: user).save()
-            profilePic = new ProfilePic(fileContents: contents, fileExtension: "jpg", profile: profile)
-
-        when: "toString is called"
-            def returnVal = profilePic.toString()
-
-        then:
-            assert returnVal   == "image for " + profile.toString() + " with id ${profilePic.id} and size ${contents.size()}"
     }
 }

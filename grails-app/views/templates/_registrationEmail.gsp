@@ -132,7 +132,7 @@
                                     align="left">
                                     <div style="cursor:auto;color:#5e6977;font-family:Arial, sans-serif;font-size:13px;line-height:22px;text-align:left;">
                                         <p style="font-size: 15px; margin: 10px 0;">To get started in the CIELO community, please click
-                                            <a href="${baseLink}/activtate_user=${user.registrationCode.token}">here</a> to activate your account.
+                                            <a href="${baseLink}/registration/activate?ukey=${user.registrationCode.token}">here</a> to activate your account.
                                         </p>
                                         <p style="font-size: 15px; margin: 10px 0;">If the above link does not work, try copying the link below into your web browser:
                                         ${baseLink}/registration/activate?ukey=${user.registrationCode.token}</p>

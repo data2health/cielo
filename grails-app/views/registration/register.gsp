@@ -1,7 +1,7 @@
 <g:render template="/templates/headerIncludes"/>
 <g:render template="/templates/navbar"/>
 
-<section class="engine"></section><section class="cid-qIklYeJO9W mbr-fullscreen mbr-parallax-background" id="header15-w">
+<section class="engine"></section><section class="cid-qIklYeJO9W mbr-fullscreen jarallax-scroll" id="header15-w">
 
     <div class="mbr-overlay" style="opacity: 0.2; background-color: rgb(15, 118, 153);"></div>
 
@@ -154,7 +154,13 @@
                                 </label>
 
                                 <div class="col-sm-8 ui-widget">
-                                    <input type="search" id="annotations" name="annotations" class="form-control ui-autocomplete-input" value="" placeholder="Interests" autocomplete="off"><span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
+                                    <span id="annotations" class="">
+                                        <select class="multiple-select form-control" name="annotations-select" multiple="multiple">
+                                            <g:each in="${annotations}" var="annotation">
+                                                <option value="${annotation.id}">${annotation.label}</option>
+                                            </g:each>
+                                        </select>
+                                    </span>
                                 </div>
                             </div>
 
@@ -175,7 +181,7 @@
                                     <button type="submit" class="btn btn-primary" id="register">
                                         join
                                     </button>
-                                    <button id="resetButton" type="reset" value="Reset" class="btn btn-primary">reset
+                                    <button id="resetButton" type="reset" value="Reset" class="btn btn-primary" onclick="resetImage()">reset
                                     </button>
                                 </div>
                             </div>

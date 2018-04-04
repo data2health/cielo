@@ -19,9 +19,11 @@ class UserAccountServiceIntegrationSpec extends Specification {
     SessionFactory sessionFactory
 
     def webRoot
+    def assetResourceLocator
 
     def setup() {
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+        userAccountService.assetResourceLocator = assetResourceLocator
     }
 
     def cleanup() {
