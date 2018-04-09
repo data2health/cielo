@@ -29,6 +29,9 @@ class UrlMappings {
 
         //user
         "/user/$id"(controller: "user", action: "view")
+        "/user/update/"(controller: "user", action: "updateUser")
+        "/user/follow/"(controller: "user", action: "followUser")
+        "/user/unFollow/"(controller: "user", action: "unFollowUser")
 
         //project
         "/project/$id"(controller: "project", action: "view")

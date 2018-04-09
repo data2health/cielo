@@ -19,10 +19,18 @@
                             <g:set var="loopCount" value="${1}"/>
                             <g:each in="${following}" var="userFollowed">
                                 <g:if test="${(loopCount % 2) == 0}">
-                                    <li class="list-group-item even-list-item">${userFollowed.username}</li>
+                                    <li class="list-group-item even-list-item">
+                                       <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${userFollowed}">
+                                            &nbsp; ${userFollowed.username}
+                                       </g:getUserProfilePic>
+                                    </li>
                                 </g:if>
                                 <g:else>
-                                    <li class="list-group-item">${userFollowed.username}</li>
+                                    <li class="list-group-item">
+                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${userFollowed}">
+                                            &nbsp; ${userFollowed.username}
+                                        </g:getUserProfilePic>
+                                    </li>
                                 </g:else>
                                 <g:set var="loopCount" value="${loopCount+1}"/>
                             </g:each>
@@ -38,10 +46,18 @@
                             <g:set var="loopCount" value="${1}"/>
                             <g:each in="${followers}" var="followingUser">
                                 <g:if test="${(loopCount % 2) == 0}">
-                                    <li class="list-group-item even-list-item">${followingUser.username}</li>
+                                    <li class="list-group-item even-list-item">
+                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${followingUser}">
+                                            &nbsp; ${followingUser.username}
+                                        </g:getUserProfilePic>
+                                    </li>
                                 </g:if>
                                 <g:else>
-                                    <li class="list-group-item">${followingUser.username}</li>
+                                    <li class="list-group-item">
+                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${followingUser}">
+                                            &nbsp; ${followingUser.username}
+                                        </g:getUserProfilePic>
+                                    </li>
                                 </g:else>
                                 <g:set var="loopCount" value="${loopCount+1}"/>
                             </g:each>

@@ -101,7 +101,7 @@
                             <span class="caret"></span></a>
                         <ul class="dropdown-menu arrow_box" style="margin-left: 1em;">
                             <li class="menu-with-icon">
-                                <a role="link" href="#">
+                                <a role="link" href="${createLink(controller: 'user', action: 'view', params: [id: user.id])}">
                                     &nbsp;&nbsp;&nbsp;<span class="oi oi-cog"></span>
                                     Account
                                 </a>

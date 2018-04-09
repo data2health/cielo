@@ -31,14 +31,6 @@ $( function() {
     //autoload count initialization
     sessionStorage.setItem("autoloadCount", 1);
 
-    $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
-        $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (-25) + 'px');
-    });
-
-    $('[data-toggle="tooltip"]').on('hidden.bs.tooltip', function () {
-        $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (+25) + 'px');
-    });
-
     //custom data attributes will show on mouseenter and mouseleave
     $('.date-time').hover(
         function() {
@@ -78,7 +70,8 @@ $( function() {
     $(".dropdown-toggle").dropdown();
     $('[data-toggle=".tooltip"]').tooltip(
         {
-            container: 'body'
+            container: 'body',
+            placement: "bottom"
         }
     );
 
@@ -285,23 +278,26 @@ function onInstitutionChange() {
 function handleInfiniteScroll(event) {
     if ((isInViewport(document.querySelector('#contact-us-form')) && isInViewport(document.querySelector('#olderContent'))) &&
         document.querySelector('#no-more-activity') === null && !$('#loadOlderActivity').is(":visible")) {
-        $("#loading-activity-indicator").show();
 
         setTimeout(function(){
-            //if still visible; allows for auto-cancel if you scroll back up before timer goes off
-            //if the manual button load
-            if ((isInViewport(document.querySelector('#contact-us-form')) && isInViewport(document.querySelector('#olderContent'))) &&
-                document.querySelector('#no-more-activity') === null && !$('#loadOlderActivity').is(":visible")) {
-                var offset  = Number($('#offset').html());
-                var max     = Number($('#max').html());
+            $("#loading-activity-indicator").show();
 
-                if (!(isNaN(offset) && isNaN(max)) && window.doneLoading === true) {
-                    window.doneLoading = false;
-                    getOlderActivity(offset, max);
+            setTimeout(function(){
+                //if still visible; allows for auto-cancel if you scroll back up before timer goes off
+                //if the manual button load
+                if ((isInViewport(document.querySelector('#contact-us-form')) && isInViewport(document.querySelector('#olderContent'))) &&
+                    document.querySelector('#no-more-activity') === null && !$('#loadOlderActivity').is(":visible")) {
+                    var offset  = Number($('#offset').html());
+                    var max     = Number($('#max').html());
+
+                    if (!(isNaN(offset) && isNaN(max)) && window.doneLoading === true) {
+                        window.doneLoading = false;
+                        getOlderActivity(offset, max);
+                    }
+                } else {
+                    $("#loading-activity-indicator").hide();
                 }
-            } else {
-                $("#loading-activity-indicator").hide();
-            }
+            }, 500);
         }, 500);
     }
 }
@@ -444,7 +440,7 @@ function validateProfilePic(input) {
 
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    $("#currentProfilePic").attr("src", e.target.result);
+                    $("#currentProfilePic").find("img").attr("src", e.target.result);
                 };
 
                 reader.readAsDataURL(selectedFile);
@@ -458,6 +454,10 @@ function validateProfilePic(input) {
     }
 }
 
-function resetImage() {
-    $("#currentProfilePic").attr("src", "/assets/default_profile.png");
+function resetImage(imageToResetTo) {
+    if (imageToResetTo === undefined) {
+        $("#currentProfilePic").find("img").attr("src", "/assets/default_profile.png");
+    } else {
+        $("#currentProfilePic").find("img").attr("src", imageToResetTo);
+    }
 }

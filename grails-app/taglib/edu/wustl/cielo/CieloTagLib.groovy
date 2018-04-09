@@ -8,7 +8,8 @@ import java.time.temporal.ChronoUnit
 class CieloTagLib {
     static defaultEncodeAs  = [taglib:'html'] //html escapes characters
     static encodeAsForTags  = [rawOutput: [taglib:'raw'], getUserProfilePic: [taglib: 'raw'], dateDiff: [taglib: 'raw'],
-                               userOwnsProject: [taglib: 'raw'], userCanMakeChangesToProject: [taglib: 'raw']] //, otherTagName: [taglib:'none']]
+                               userOwnsProject: [taglib: 'raw'], userCanMakeChangesToProject: [taglib: 'raw'],
+                               loggedInUserCanMakeChangesToUser: [taglib: 'raw']] //, otherTagName: [taglib:'none']]
     static String DEFAULT_IMG_SIZE  = 'medium'
     static int DEFAULT_STICKER_SIZE = 52 // 48 + 2 px
     static Map imageSizes   = ['xs': '-xs', 'small': '-sm', 'medium': '-md', 'large': '-lg', 'x-large': '-x-lg',
@@ -53,6 +54,17 @@ class CieloTagLib {
         StringBuffer imgClass       = new StringBuffer("activity-profile-pic")
         StringBuffer tooltip        = new StringBuffer("")
         int sizeOfStickerContainer  = DEFAULT_STICKER_SIZE
+        String divId
+        String styles
+        String tooltipOffset
+
+        if (attrs.id) {
+            divId = "id=\"${attrs.id}\""
+        }
+
+        if (attrs.style) {
+            styles = attrs.style
+        }
 
         if (attrs.user) {
             user = attrs.user
@@ -60,8 +72,12 @@ class CieloTagLib {
             user = UserAccount.get(principal?.id)
         }
 
+        if (attrs.tooltipOffset) {
+            tooltipOffset = "offset=\"${attrs.tooltipOffset}\""
+        }
+
         if (attrs.tooltipText) {
-            tooltip << "data-toggle=\"tooltip\" title=\"${attrs.tooltipText}\""
+            tooltip << "data-toggle=\"tooltip\" data-html=\"true\" title=\"${attrs.tooltipText}\" data-placement=\"top\" ${tooltipOffset}"
         }
 
         if (attrs.imageSize) {
@@ -73,14 +89,14 @@ class CieloTagLib {
 
         if (user) {
             if (attrs.sticker) {
-                profilePicHtml << """<div class="row" style="align-items: center; padding-right: 1em; padding-left: 1em;"><div id="image-sticker-border" style="border: 3px solid #bbbaba; width: ${sizeOfStickerContainer + 6}px; border-radius: 50%;">"""
+                profilePicHtml << """<div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border" style="border: 3px solid #bbbaba; width: ${sizeOfStickerContainer + 6}px; border-radius: 50%;">"""
                 profilePicHtml << """<div id="image-background" style="border: 2px solid #ffffff; border-radius: 50%; width: ${sizeOfStickerContainer}px; height: ${sizeOfStickerContainer}px; background-color:  white; ">"""
             }
 
             if (user.profile.picture) {
-                profilePicHtml << """<img ${tooltip.toString()} src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
+                profilePicHtml << """<img src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
             } else {
-                profilePicHtml << """<img ${tooltip.toString()} src="/assets/default_profile.png" class="${imgClass}">"""
+                profilePicHtml << """<img src="/assets/default_profile.png" class="${imgClass}">"""
             }
 
         } else {
@@ -195,6 +211,9 @@ class CieloTagLib {
         }
     }
 
+    /**
+     * Can user make changes to a given project
+     */
     def userCanMakeChangesToProject = { attrs, body ->
         if (attrs.project) {
             Project project = (Project)attrs.project
@@ -208,6 +227,17 @@ class CieloTagLib {
                 out << body()
             }
         }
+    }
+
+    /**
+     * Is the user passed in the same as the logged in user
+     */
+    def loggedInUserCanMakeChangesToUser = { attrs, body ->
+        def principal    = springSecurityService?.principal
+        UserAccount user = UserAccount.get(principal?.id)
+
+        if (attrs.user && attrs.user == user) out << body()
+        else out << null
     }
 
     /**
