@@ -26,10 +26,16 @@
                     </g:if>
                     <g:else>
                         <g:if test="${loggedInUser.connections.contains(user)}">
-                            <span id="follow_button" class="" onclick="unFollowUser();"><i class="fas fa-user-times"></i>&nbsp;<span style="font-size: 0.75em;">Un-Follow</span></span>&nbsp;
+                            <span id="follow_button" class="" onclick="unFollowUser();">
+                                <i class="fas fa-user-times"></i>&nbsp;
+                                <span style="font-size: 0.75em; cursor: default;">Un-Follow</span>
+                            </span>&nbsp;
                         </g:if>
                         <g:else>
-                            <span id="follow_button" class="" onclick="followUser();"><i class="fas fa-user-plus"></i>&nbsp;<span style="font-size: 0.75em;">Follow</span></span>&nbsp;
+                            <span id="follow_button" class="" onclick="followUser();">
+                                <i class="fas fa-user-plus"></i>&nbsp;
+                                <span style="font-size: 0.75em;  cursor: default;">Follow</span>
+                            </span>&nbsp;
                         </g:else>
                     </g:else>
                 </div>
