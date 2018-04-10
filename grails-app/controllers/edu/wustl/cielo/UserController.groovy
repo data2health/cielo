@@ -35,7 +35,7 @@ class UserController {
         if (user) {
             bindData(user, params)
             if (user.id) {
-                bindData(user.profile, params)
+                if (user.profile) bindData(user.profile, params)
             }
 
             userUpdated = userAccountService.updateUser(user)
