@@ -45,7 +45,7 @@ a.dropdown-toggle {
 
 
 .dropdown-menu > li:hover {
-    background-color: rgba(154, 167, 180, 0.40);
+    background-color: #f0f0f0;
 }
 
 .dropdown-menu>li>*:hover {
@@ -292,6 +292,11 @@ ul.list-group.list-group-flush {
     max-width:96%;
 }
 
+#activity {
+    padding: 0;
+    margin: 0;
+}
+
 /*From bootstrap and navbar settings for hiding menu items. Adjust when needed*/
 @media (min-width: 768px) {
     .arrow_box {
@@ -326,6 +331,7 @@ ul.list-group.list-group-flush {
 
     .cid-qHAUKIofDN .dropdown.open > .dropdown-menu {
         position: absolute;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     }
 
     .modal-dialog.modal-lg {
@@ -339,6 +345,16 @@ ul.list-group.list-group-flush {
     .team-deck {
         margin-top: 3em;
         display: inline-flex;
+    }
+
+    .select2-container {
+        min-width:1em;
+        max-width:9em;
+    }
+
+    #activity {
+        padding: 15px;
+        margin: 0;
     }
 }
 
@@ -539,10 +555,27 @@ ul.list-group.list-group-flush {
 }
 
 .select2-container {
-    min-width:9em;
+    min-width: 49vw;
 }
 
 .select2-container--default .select2-selection--multiple {
     border: 1px solid #e8e8e8;
     background-color: #fdfdfd;
+}
+
+.fa-disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.select2-container--default.select2-container--disabled .select2-selection--multiple {
+    background-color: #e9ecef;
+}
+
+.user-connection {
+    display: inline-block;
+}
+
+.btn-link:disabled, .btn-link.disabled:hover {
+    text-decoration: none;
 }

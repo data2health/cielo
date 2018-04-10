@@ -13,26 +13,30 @@
         <div class="row justify-content-center">
             <div class="media-container-column col-lg-8">
                 <form class="mbr-form" action="${createLink(controller: "communications", action: "contactUs")}" method="post" data-form-title="Contact Us Form">
-                    <div class="row row-sm-offset">
-                        <div class="col-md-4 multi-horizontal" data-for="name">
-                            <div class="form-group">
-                                <label class="form-control-label mbr-fonts-style display-7" for="name-form1-f">Name</label>
-                                <input type="text" class="form-control" name="name" data-form-field="Name" required="" id="name-form1-f">
+
+                    <sec:ifNotLoggedIn>
+                        <div class="row row-sm-offset">
+                            <div class="col-md-4 multi-horizontal" data-for="name">
+                                <div class="form-group">
+                                    <label class="form-control-label mbr-fonts-style display-7" for="name-form1-f">Name</label>
+                                    <input type="text" class="form-control" name="name" data-form-field="Name" required="" id="name-form1-f">
+                                </div>
+                            </div>
+                            <div class="col-md-4 multi-horizontal" data-for="email">
+                                <div class="form-group">
+                                    <label class="form-control-label mbr-fonts-style display-7" for="email-form1-f">Email</label>
+                                    <input type="email" class="form-control" name="email" data-form-field="Email" required="" id="email-form1-f">
+                                </div>
+                            </div>
+                            <div class="col-md-4 multi-horizontal" data-for="phone">
+                                <div class="form-group">
+                                    <label class="form-control-label mbr-fonts-style display-7" for="phone-form1-f">Phone</label>
+                                    <input type="tel" class="form-control" name="phone" data-form-field="Phone" id="phone-form1-f">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4 multi-horizontal" data-for="email">
-                            <div class="form-group">
-                                <label class="form-control-label mbr-fonts-style display-7" for="email-form1-f">Email</label>
-                                <input type="email" class="form-control" name="email" data-form-field="Email" required="" id="email-form1-f">
-                            </div>
-                        </div>
-                        <div class="col-md-4 multi-horizontal" data-for="phone">
-                            <div class="form-group">
-                                <label class="form-control-label mbr-fonts-style display-7" for="phone-form1-f">Phone</label>
-                                <input type="tel" class="form-control" name="phone" data-form-field="Phone" id="phone-form1-f">
-                            </div>
-                        </div>
-                    </div>
+                    </sec:ifNotLoggedIn>
+
                     <div class="form-group">
                         <label class="form-control-label mbr-fonts-style display-7" for="name-form1-f">Subject</label>
                         <input type="text" class="form-control" name="subject" data-form-field="Subject" required="" id="subject-form1-f">

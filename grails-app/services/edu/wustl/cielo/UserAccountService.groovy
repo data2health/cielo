@@ -462,4 +462,68 @@ class UserAccountService {
     ProfilePic saveProfilePic(byte[] imageContent, String extension) {
         return new ProfilePic(fileExtension: extension, fileContents: imageContent).save()
     }
+
+    /**
+     * Follow a given user
+     *
+     * @param loggedInUser the user that is logged in
+     * @param userId the id of the user to follow
+     *
+     * @return true if the connection was successful, false otherwise
+     */
+    boolean addConnection(UserAccount loggedInUser, Long userId) {
+        UserAccount userToFollow = UserAccount.findById(userId)
+
+        if (userToFollow) {
+            loggedInUser.connections.add(userToFollow)
+
+            if (!loggedInUser.save()) {
+                loggedInUser.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+            return true
+        }
+       return false
+    }
+
+    /**
+     * Remove a connection to a user
+     *
+     * @param loggedInUser the user that is logged in
+     * @param userId the id of the user to remove from connections (to logged in user)
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean removeConnection(UserAccount loggedInUser, Long userId) {
+        UserAccount userToUnFollow = UserAccount.findById(userId)
+
+        if (userToUnFollow) {
+            loggedInUser.connections.remove(userToUnFollow)
+
+            if (!loggedInUser.save()) {
+                loggedInUser.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Update a user
+     *
+     * @param userAccount the user account to update
+     *
+     * @return true if the account saves correctly otherwise false
+     */
+    boolean updateUser(UserAccount userAccount) {
+        if (!userAccount.save()) {
+            return false
+        }
+        return true
+    }
 }

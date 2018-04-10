@@ -12,6 +12,7 @@ class CommunicationsService {
     LinkGenerator grailsLinkGenerator
     PageRenderer groovyPageRenderer
     def grailsApplication
+    def springSecurityService
 
     /**
      * Initialize static variables
@@ -32,6 +33,18 @@ class CommunicationsService {
     boolean scheduleContactUsEmail(Map params) {
         boolean successful = false
         if (!TO_EMAIL) init()
+
+        if (!params.name) {
+            //then the user is already logged in so we need to get the info for that user
+            Object principal = springSecurityService?.principal
+            UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+            if (user) {
+                params.name  = "${user.profile.firstName} ${user.profile.lastName}"
+                params.email = user.profile.emailAddress
+                params.phone = user.username
+            }
+        }
 
         Map model = [name: params.name,
                      email: params.email,

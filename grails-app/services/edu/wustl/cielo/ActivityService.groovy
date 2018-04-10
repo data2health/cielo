@@ -3,6 +3,7 @@ package edu.wustl.cielo
 import grails.events.annotation.gorm.Listener
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
+import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import edu.wustl.cielo.enums.ActivityTypeEnum
 import org.grails.datastore.mapping.engine.EntityAccess
@@ -37,11 +38,11 @@ class ActivityService {
             ActivityTypeEnum activityTypeEnum
             def domainObject = event.getEntityAccess().getEntity()
 
-            domainObject.properties.each {
-                if (domainObject.hasChanged(it.key.toString())
-                        && (it.key.toString() != "version" || it.key.toString() != "lastUpdated")) {
+            domainObject.properties.each { property ->
+                if (domainObject.isDirty(property.key.toString())
+                        && (property.key.toString() != "version" && property.key.toString() != "lastUpdated")) {
                     //need to see if we need to log the activity
-                    activityTypeEnum = getUpdateActivityType(domainObject, it.key.toString())
+                    activityTypeEnum = getUpdateActivityType(domainObject, property.key.toString())
 
                     if (activityTypeEnum) {
                         saveActivity(event, domainClass, activityTypeEnum)
@@ -107,6 +108,7 @@ class ActivityService {
                 break
             case "Profile":
                 params = getUserProfileActivityParams(user, entityAccess, activityTypeEnum)
+                break
             case "Team":
             case "Data":
             case "Code":
@@ -149,16 +151,13 @@ class ActivityService {
         switch (activityTypeEnum) {
             case ActivityTypeEnum.ACTIVITY_UPDATE_USER_EMAIL_ADDRESS:
                 params = [user?.username, entityAccess.getProperty("emailAddress"),
-                          user.getOriginalValue("emailAddress")]
+                          ((Profile)entityAccess.getEntity()).getOriginalValue("emailAddress")]
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_USER_INSTITUTION:
                 params = [user?.username, entityAccess.getProperty("institution"),
-                          user.getOriginalValue("institution")]
+                          ((Institution)((Profile)entityAccess.getEntity()).getOriginalValue("institution")).fullName]
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_USER_INTERESTS:
-                params = [user?.username, entityAccess.getProperty("interests"),
-                          user.getOriginalValue("interests")]
-                break
             case ActivityTypeEnum.ACTIVITY_UPDATE_USER_PICTURE:
                 params = [user?.username]
                 break
@@ -263,9 +262,19 @@ class ActivityService {
         }
 
         if (user) {
-            Activity activity
+            boolean logActivity = true
             String eventText = generateEventBody(event.getEntityAccess(), user, domainClass, activityTypeEnum, entityId)
-            if (!Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText, activityTypeEnum)) {
+            Activity activity = Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText, activityTypeEnum)
+
+            if (activity) {
+                use(TimeCategory) {
+                    if ((new Date() - activity.dateCreated).days < 1) {
+                        logActivity = false
+                    }
+                }
+            }
+
+            if (logActivity) {
                 Activity.withNewTransaction {
                     activity = new Activity()
                     activity.activityInitiatorUserName = user.username

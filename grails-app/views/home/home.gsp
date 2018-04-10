@@ -1,6 +1,6 @@
 <%@ page import="edu.wustl.cielo.UserAccount" %>
 <g:render template="/templates/headerIncludes"/>
-<g:render template="/templates/navbar"/>
+<g:render template="/templates/navbar" model="[user: profile.user]"/>
 
 <section class="mbr-fullscreen">
     <div class="container-fluid activity-feed">

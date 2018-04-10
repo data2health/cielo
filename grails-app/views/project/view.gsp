@@ -1,6 +1,5 @@
 <g:render template="/templates/headerIncludes"/>
-<g:render template="/templates/navbar" model="[profile: userProfile]"/>
-
+<g:render template="/templates/navbar" model="[profile: userProfile, user: userProfile.user]"/>
 
 <div>
     <div style="margin: 1.65em">
@@ -193,7 +192,13 @@
 <script type="application/javascript">
 
     $( function() {
+        $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
+                $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (-25) + 'px');
+            });
 
+            $('[data-toggle="tooltip"]').on('hidden.bs.tooltip', function () {
+                $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (+25) + 'px');
+            });
     });
 
     function showProjectCommentBox(commentId) {
@@ -359,11 +364,8 @@
 
                 //editing is done - re-use cancelEditing for now
                 cancelEditing();
-            } else {
-               //show an error message here
             }
         });
-
     }
 
     function resetMultiSelect() {

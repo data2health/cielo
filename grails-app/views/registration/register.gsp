@@ -137,8 +137,8 @@
                                     Profile Picture
                                 </label>
                                 <div class="col-sm-2">
-                                    <div id="avatar">
-                                        <asset:image id="currentProfilePic" src="default_profile.png" sizes="100x100"
+                                    <div id="currentProfilePic">
+                                        <asset:image src="default_profile.png" sizes="100x100"
                                                      class="img-circle img-responsive img-profile-md img-thumbnail noBorder"
                                                      style="height: 70px; width: 70px;background-color:  transparent;"/>
                                     </div>

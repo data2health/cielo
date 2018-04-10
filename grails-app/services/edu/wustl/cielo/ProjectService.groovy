@@ -58,7 +58,6 @@ class ProjectService {
                     )
 
                     if (project.shared && (user.id.toInteger() % 2 == 0)) {
-                        println "\tAdding ${numberOfTeamsPerProject} teams to shared bundle ${project.name}..."
                         def teams = Team.findAllWhere(administrator: user)
                         if (teams) {
                             ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS
