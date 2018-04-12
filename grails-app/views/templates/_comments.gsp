@@ -1,4 +1,3 @@
-%{--<g:each var="i" in="${ (0..2) }">--}%
 <g:set var="buttonAdded" value="false"/>
 <g:set var="i" value="${1}"/>
 <g:each in="${comments?.sort { a,b -> b.dateCreated <=> a.dateCreated }}" var="comment">

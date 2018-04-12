@@ -7,8 +7,7 @@
     </g:loggedInUserCanMakeChangesToUser>
     <div class="container-fluid">
         <div class="row">
-                <div class="col-md-12" style="background-color: rgba(58, 71, 85, 0.6); border-bottom: 1px solid lightgrey;
-                padding-left: 5em; padding-bottom: 0.5em; padding-top: 2em; margin-top: -1em; color: white; font-size: 1.25em;">
+                <div id="userEditToolbar" class="col-md-12 edit-toolbar sticky">
                     <g:if test="${userCanEdit}">
                         <span id="edit_button" class="" onclick="editUser();">
                             <i class="far fa-edit"></i>
@@ -44,7 +43,7 @@
 </section>
 
 
-<section class="mbr-section" style="margin-top: 4.5em; background-color: white;">
+<section id="userEditSection" class="mbr-section" style="margin-top: 4.5em; background-color: white;">
     <div class="container-fluid">
         <div class="row" style="text-align: center;">
             <div class="col-lg-3">

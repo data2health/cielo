@@ -72,11 +72,13 @@ class ProjectController {
 
     @Secured('isAuthenticated()')
     def getProjectComments() {
+
+        Object principal = springSecurityService.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
         Project project = Project.findById(Long.valueOf(params.id))
 
         render (template: "/project/projectComments",
-                model: [comments: projectService.getComments(project),
-                        project: project])
+                model: [project: project, user: user])
 
     }
 
@@ -93,5 +95,38 @@ class ProjectController {
             succeeded = projectService.saveProjectBasicChanges(projectId, newName, description, tags)
         }
         render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def likeComment() {
+        boolean succeeded
+        Long commentId = Long.valueOf(params.id)
+
+        if (commentId) {
+            succeeded = projectService.likeProjectComment(commentId)
+        }
+        render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def removeCommentLike() {
+        boolean succeeded
+        Long commentId = Long.valueOf(params.id)
+
+        if (commentId) {
+            succeeded = projectService.removeProjectCommentLike(commentId)
+        }
+        render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def getCommentLikeUsers() {
+        TreeSet<UserAccount> users
+        Long commentId = Long.valueOf(params.id)
+
+        if (commentId) {
+           users = projectService.getUsersWhoLikedComment(commentId)
+        }
+        render(template: "/templates/commentLikesUsers", model: [users: users])
     }
 }

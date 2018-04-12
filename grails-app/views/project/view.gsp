@@ -15,13 +15,18 @@
                     <h1 class="mbr-section-title mbr-bold pb-3 mbr-fonts-style display-2">
                         <span>
                             <span id="project-name-label">${project?.name}&nbsp;</span>
-                            <span id="project-name-input" style="display: none; font-size: 0.75em;"><input type="text" value="${project?.name}" name="project-name" style="border-radius: 5px; width: -webkit-fill-available; max-width: 50%;"></span>
+                            <span id="project-name-input" style="display: none; font-size: 0.75em;">
+                                <input type="text" value="${project?.name}" name="project-name" style="border-radius: 5px; width: -webkit-fill-available; max-width: 50%;"></span>
                         </span>
                         <g:userOwnsProject project="${project}">
                             <span style="font-size: 0.75em;">
-                                <span id="edit-button"><i class="fas fa-pencil-alt" onclick="editProject();"></i></span>
-                                <span id="save-cancel" style="display: none;"><i class="fas fa-save" onclick="saveProjectChanges();"></i>&nbsp;<i class="fas fa-times-circle"
-                                                                                                                                                  onclick="cancelEditing();"></i></span>
+                                <span id="edit-button">
+                                    <i class="fas fa-pencil-alt" onclick="editProject();"></i>
+                                </span>
+                                <span id="save-cancel" style="display: none;">
+                                    <i class="fas fa-save" onclick="saveProjectChanges();"></i>&nbsp;
+                                    <i class="fas fa-times-circle" onclick="cancelEditing();"></i>
+                                </span>
                             </span>
                         </g:userOwnsProject><br>
                     </h1>
@@ -147,12 +152,17 @@
 <div>
     <hr>
     <div class="container-fluid projects-comments-header">
-        <div class="projects-comments-header-text">Comments <i class="far fa-comment fa-1x"></i></div>
+        <div class="projects-comments-header-text">Posts&nbsp;<i class="far fa-comment fa-1x"></i></div>
     </div>
 </div>
 
-<div id="comments-toolbar" class="container-fluid" style="background-color: #eeeeee;">
-    <button type="button" class="btn btn-secondary btn-xs" style="padding: 3px;" onclick="addProjectComment(${project.id})"><i class="fa fa-plus"></i></button>
+<div id="comments-toolbar" class="container-fluid" style="background-color: rgb(129, 137, 146); padding-top: 0.2em;">
+    <span onclick="addProjectComment(${project.id})" style="color: white; padding-left: 1em;">
+        <i class="fa fa-plus"></i>
+        <span>New Comment</span>
+    </span>
+%{--<div id="comments-toolbar" class="container-fluid" style="background-color: #eeeeee;">--}%
+    %{--<button type="button" class="btn btn-secondary btn-xs" style="padding: 3px;" onclick="addProjectComment(${project.id})"><i class="fa fa-plus"></i></button>--}%
 </div>
 
 <section class="features1" id="project-comments-section">
@@ -171,7 +181,7 @@
                 </div>
                 <div id="project_comments">
                     <g:if test="${project.comments}">
-                        <g:render template="projectComments" model="[comments: project.comments, project: project]"/>
+                        <g:render template="projectComments" model="[project: project, user: userProfile.user]"/>
                     </g:if>
                     <g:else>
                         <div class="jumbotron-fluid">
@@ -230,6 +240,23 @@
         }
 
         $("#" + tooltipId).tooltip('update').removeClass("show");
+
+        $.post("/project/likePost", {'id': commentId}, function (data) {
+            if (data.success === true) {
+                getProjectComments(${project.id});
+            }
+        });
+    }
+
+    function removelikeProjectComment(commentId, id) {
+        var tooltipId = $("#like_tooltip_" + commentId).attr("aria-describedby");
+        $("#" + tooltipId).removeClass("show");
+
+        $.post("/project/removeLike", {'id': commentId}, function (data) {
+            if (data.success === true) {
+                getProjectComments(${project.id});
+            }
+        });
     }
 
     function postProjectComment(projectId) {

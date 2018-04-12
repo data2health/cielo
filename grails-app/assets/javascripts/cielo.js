@@ -389,18 +389,31 @@ function getOlderActivity(offset, max) {
 }
 
 function likePost(activityId, id) {
-    var tooltipId = $("#like-tooltip-" + activityId).attr("aria-describedby");
+    var tooltipId = $("#like_tooltip_" + activityId).attr("aria-describedby");
     $("#" + tooltipId).removeClass("show");
 
-    if ($("#" + id).attr("class").indexOf('fa-check-circle') > -1 && $("#" + id).attr("class").indexOf('far') > -1) {
-        $("#" + id).removeClass("far");
-        $("#" + id).addClass("fas");
-        $("#" + id).addClass("liked-post");
-    } else {
-        $("#" + id).removeClass("liked-post");
-        $("#" + id).removeClass("fas");
-        $("#" + id).addClass("far");
-    }
+    $.post("/activity/likePost", {'id': activityId}, function (data) {
+        if (data.success === true) {
+            reloadActivity(activityId)
+        }
+    });
+}
+
+function removeActivityLike(activityId, id) {
+    var tooltipId = $("#like_tooltip_" + activityId).attr("aria-describedby");
+    $("#" + tooltipId).removeClass("show");
+
+    $.post("/activity/removelike", {'id': activityId}, function (data) {
+        if (data.success === true) {
+            reloadActivity(activityId);
+        }
+    });
+}
+
+function reloadActivity(activityId) {
+    $.post("/activity/getActivity/",{id: activityId}, function (data) {
+        $("#activity_post_" + activityId).html(data);
+    });
 }
 
 function sharePost(activityId, id) {
@@ -459,5 +472,31 @@ function resetImage(imageToResetTo) {
         $("#currentProfilePic").find("img").attr("src", "/assets/default_profile.png");
     } else {
         $("#currentProfilePic").find("img").attr("src", imageToResetTo);
+    }
+}
+
+function showAllUsersModal(id, type) {
+    var usersWindow = bootbox.alert({
+        title: '',
+        message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+        closeButton: false,
+        size: "small"
+    });
+
+    //make body of dialog scrollable
+    usersWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert");
+
+    if (type.toLowerCase() === "activity") {
+
+        $.get("/activity/getCommentLikeUsers/" + id, function (data) {
+            usersWindow.find('.bootbox-body').html(data);
+        });
+    } else if (type.toLowerCase() === "project") {
+
+        $.get("/project/getCommentLikeUsers/" + id, function (data) {
+            usersWindow.find('.bootbox-body').html(data);
+        });
+    } else {
+        usersWindow.find('.bootbox-body').html("<div class=\"jumbotron-fluid\">type=" + type + " not supported</div>");
     }
 }

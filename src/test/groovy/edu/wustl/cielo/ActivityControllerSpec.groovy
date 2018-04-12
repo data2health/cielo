@@ -40,6 +40,7 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
 
             controller.activityService = activityService
             controller.springSecurityService
+            views['/activity/_singleActivity.gsp'] = "some text here"
             controller.getActivities()
 
         then:
@@ -50,6 +51,7 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
             activity = new Activity()
             activity.activityInitiatorUserName = "someuser"
             activity.eventType  = ActivityTypeEnum.ACTIVITY_NEW_PROJECT
+
             activity.eventTitle = "Some event"
             activity.eventText  = "Some event just occurred. Do something here"
             activity.save()
@@ -57,10 +59,11 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
         and:
             params.max = 3
             params.offset = 0
+            views['/activity/_singleActivity.gsp'] = activity.eventText
             controller.getActivities()
 
         then: "we have results"
-            response.text.contains("Some event just occurred. Do something here")
+            response.text.contains("id=\"activity_post_${activity.id}")
     }
 
     void "test getComments"() {
@@ -130,5 +133,102 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
 
         then: "we were able to save the comment"
             response.json.success
+    }
+
+    void "test getActivity"() {
+        Activity activity
+
+        when: "adding an activity"
+            new UserAccount(username: "someuser", password: "somePassword")
+            activity = new Activity()
+            activity.activityInitiatorUserName = "someuser"
+            activity.eventType  = ActivityTypeEnum.ACTIVITY_NEW_PROJECT
+            activity.eventTitle = "Some event"
+            activity.eventText  = "Some event just occurred. Do something here"
+            activity.save()
+
+            views['/activity/_singleActivity.gsp'] = activity.eventText
+
+            params.text = "Some comment here"
+            params.id = activity.id
+            controller.getActivity()
+
+        then: "we were able to save the comment"
+            response.text.contains(activity.eventText)
+
+    }
+
+    void "test likeActivity"() {
+        Activity activity
+
+        activityService.metaClass.likeActivity = { Long activityId ->
+            true
+        }
+        controller.activityService = activityService
+
+        when: "adding an activity"
+            new UserAccount(username: "someuser", password: "somePassword")
+            activity = new Activity()
+            activity.activityInitiatorUserName = "someuser"
+            activity.eventType  = ActivityTypeEnum.ACTIVITY_NEW_PROJECT
+            activity.eventTitle = "Some event"
+            activity.eventText  = "Some event just occurred. Do something here"
+            activity.save()
+            params.id = activity.id
+            controller.likeActivity()
+
+        then:
+            response.json.success
+
+    }
+
+    void "test removeActivityLike"() {
+        Activity activity
+
+        activityService.metaClass.removeActivityLike = { Long activityId ->
+            true
+        }
+        controller.activityService = activityService
+
+        when: "adding an activity"
+            new UserAccount(username: "someuser", password: "somePassword")
+            activity = new Activity()
+            activity.activityInitiatorUserName = "someuser"
+            activity.eventType  = ActivityTypeEnum.ACTIVITY_NEW_PROJECT
+            activity.eventTitle = "Some event"
+            activity.eventText  = "Some event just occurred. Do something here"
+            activity.save()
+            params.id = activity.id
+            controller.removeActivityLike()
+
+        then:
+            response.json.success
+
+    }
+
+    void "test getCommentLikeUsers"() {
+        Activity activity
+        UserAccount user
+
+        activityService.metaClass.getUsersWhoLikedComment = { Long activityId ->
+            [user]
+        }
+        controller.activityService = activityService
+
+        views["/templates/_commentLikesUsers.gsp"] = "mock data"
+
+        when: "adding an activity"
+            user =  new UserAccount(username: "someuser", password: "somePassword")
+            activity = new Activity()
+            activity.activityInitiatorUserName = "someuser"
+            activity.eventType  = ActivityTypeEnum.ACTIVITY_NEW_PROJECT
+            activity.eventTitle = "Some event"
+            activity.eventText  = "Some event just occurred. Do something here"
+            activity.save()
+            params.id = activity.id
+            controller.getCommentLikeUsers()
+
+        then:
+            response.text == "mock data"
     }
 }

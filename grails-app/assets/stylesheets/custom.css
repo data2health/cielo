@@ -579,3 +579,24 @@ ul.list-group.list-group-flush {
 .btn-link:disabled, .btn-link.disabled:hover {
     text-decoration: none;
 }
+
+.edit-toolbar {
+    background-color: rgb(129, 137, 146);
+    border-bottom: 1px solid lightgrey;
+    padding-left: 5em;
+    padding-bottom: 0.5em;
+    padding-top: 2em;
+    margin-top: -1em;
+    color: white;
+    font-size: 1.25em;
+}
+.sticky {
+    padding-top: 1em;
+    position: fixed;
+    top: 4em;
+    z-index: 9;
+}
+
+.user-edit-section-scroll {
+    padding-top: 3em;
+}

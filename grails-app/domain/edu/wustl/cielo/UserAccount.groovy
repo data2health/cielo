@@ -8,7 +8,7 @@ import grails.compiler.GrailsCompileStatic
 @GrailsCompileStatic
 @EqualsAndHashCode(includes='username')
 @ToString(includes='username', includeNames=true, includePackage=false)
-class UserAccount implements Serializable {
+class UserAccount implements Serializable, Comparable {
 
     private static final long serialVersionUID = 1
 
@@ -34,6 +34,10 @@ class UserAccount implements Serializable {
         password(nullable: false, blank: false, password: true)
         lastLogin(nullable: true)
         timezoneId(nullable: false)
+    }
+
+    int compareTo(Object account) {
+        ((UserAccount)account)?.dateCreated <=> dateCreated
     }
 
     Set<UserAccountUserRole> getAuthorities() {

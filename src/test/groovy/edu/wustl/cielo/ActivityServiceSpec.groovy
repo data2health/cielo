@@ -1,6 +1,7 @@
 package edu.wustl.cielo
 
 import edu.wustl.cielo.enums.ActivityTypeEnum
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.gorm.DomainUnitTest
 import grails.testing.services.ServiceUnitTest
 import grails.web.mapping.LinkGenerator
@@ -9,6 +10,7 @@ import spock.lang.Specification
 class ActivityServiceSpec extends Specification implements ServiceUnitTest<ActivityService>, DomainUnitTest<Activity> {
 
     LinkGenerator grailsLinkGenerator
+    SpringSecurityService springSecurityService
 
     def setup() {
         grailsLinkGenerator = Mock()
@@ -16,6 +18,7 @@ class ActivityServiceSpec extends Specification implements ServiceUnitTest<Activ
         mockDomains(Institution, Profile)
 
         messageSource.addMessage('ACTIVITY_NEW_USER', Locale.getDefault(), "hello")
+        springSecurityService = new SpringSecurityService()
     }
 
     void "test areThereMoreActivitiesToRetrieve"() {
@@ -183,5 +186,44 @@ class ActivityServiceSpec extends Specification implements ServiceUnitTest<Activ
         then:
             Comment.list().size() ==  1
             Activity.list()[0].comments.size() == 1
+    }
+
+    void "test likeActivity" () {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        Activity activity
+
+        springSecurityService.metaClass.principal = [id: user.id]
+        service.springSecurityService = springSecurityService
+
+        when: "add some activities"
+            activity = new Activity(eventType: ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_COMMENTS,
+                eventTitle: "title", eventText: "text", activityInitiatorUserName: user.username).save()
+            service.likeActivity(activity.id)
+
+        then:
+            activity.likedByUsers.size() > 0
+
+    }
+
+    void "test removeActivityLike"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        Activity activity
+
+        springSecurityService.metaClass.principal = [id: user.id]
+        service.springSecurityService = springSecurityService
+
+        when: "add some activities"
+            activity = new Activity(eventType: ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_COMMENTS,
+                eventTitle: "title", eventText: "text", activityInitiatorUserName: user.username).save()
+            service.likeActivity(activity.id)
+
+        then:
+            activity.likedByUsers.size() > 0
+
+        when:
+            service.removeActivityLike(activity.id)
+
+        then:
+            activity.likedByUsers.size() == 0
     }
 }

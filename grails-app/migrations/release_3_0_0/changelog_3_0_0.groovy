@@ -1,5 +1,6 @@
 package release_3_0_0
 
 databaseChangeLog = {
-//    include file: "release_3_0_0/profileChanges.groovy"
+    include file: "release_3_0_0/addLikesToComments.groovy"
+    include file: "release_3_0_0/addLikesToActivityPosts.groovy"
 }

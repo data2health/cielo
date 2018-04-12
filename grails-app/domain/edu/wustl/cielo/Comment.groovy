@@ -8,11 +8,12 @@ import groovy.transform.ToString
 class Comment implements Comparable {
     String text
     UserAccount commenter
-    SortedSet<Comment> responses = new TreeSet<Comment>()
+    SortedSet<UserAccount> likedByUsers = new TreeSet<UserAccount>()
+    SortedSet<Comment> responses        = new TreeSet<Comment>()
     Date dateCreated
     Date lastUpdated
 
-    static hasMany = [responses: Comment]
+    static hasMany = [responses: Comment, likedByUsers: UserAccount]
 
     static constraints = {
         text(nullable: false)
@@ -33,5 +34,17 @@ class Comment implements Comparable {
 
     void removeFromResponses(Comment comment) {
         responses.remove(comment)
+    }
+
+    void addTolikedByUsers(UserAccount user) {
+        likedByUsers.add(user)
+    }
+
+    void removeFromlikedByUsers(UserAccount user) {
+        likedByUsers.remove(user)
+    }
+
+    SortedSet<UserAccount> getMostRecentLikedByUsers(int count) {
+        likedByUsers.take(count)
     }
 }

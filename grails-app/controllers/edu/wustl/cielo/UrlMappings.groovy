@@ -39,14 +39,21 @@ class UrlMappings {
         "/project/getProjectComments/$id"(controller: "project", action: "getProjectComments")
         "/project/saveReply"(controller: "project", action: "saveCommentReply")
         "/project/saveChanges"(controller: "project", action: "saveProjectBasicChanges")
+        "/project/likePost"(controller: "project", action: "likeComment")
+        "/project/removeLike"(controller: "project", action: "removeCommentLike")
+        "/project/getUsers"(controller: "project", action: "getCommentLikeUsers")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")
 
         //Activity
         "/activity/getActivities"(controller: "activity", action: "getActivities")
+        "/activity/activity"(controller: "activity", action: "getActivity")
         "/activity/saveComment"(controller: "activity", action: "saveComment")
         "/activity/getComments/$id"(controller: "activity", action: "getComments")
+        "/activity/likePost"(controller: "activity", action: "likeActivity")
+        "/activity/removelike"(controller: "activity", action: "removeActivityLike")
+        "/activity/getUsers/"(controller: "activity", action: "getCommentLikeUsers")
 
         //Errors
         "500"(view:'/error')
