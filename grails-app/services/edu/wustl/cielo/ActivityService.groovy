@@ -437,4 +437,67 @@ class ActivityService {
         }
         return wasSuccessful
     }
+
+    /**
+     * Like an activity post
+     *
+     * @param activityId the id of the post to like
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean likeActivity(Long activityId) {
+        boolean succeeded
+        def principal       = springSecurityService?.principal
+        UserAccount user    = UserAccount.get(principal?.id)
+        Activity activity   = Activity.findById(activityId)
+
+        if (user && activity) {
+            activity.likedByUsers.add(user)
+
+            if (!activity.save()) {
+                activity.errors.getAllErrors().each { ObjectError error ->
+                    log.error(error.toString())
+                }
+            } else succeeded = true
+        }
+
+        return succeeded
+    }
+
+    /**
+     * Remove a like by user from post
+     *
+     * @param activityId the post to remove the like from
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean removeActivityLike(Long activityId) {
+        boolean succeeded
+        def principal       = springSecurityService?.principal
+        UserAccount user    = UserAccount.get(principal?.id)
+        Activity activity   = Activity.findById(activityId)
+
+        if (user && activity) {
+            activity.likedByUsers.remove(user)
+
+            if (!activity.save()) {
+                activity.errors.getAllErrors().each { ObjectError error ->
+                    log.error(error.toString())
+                }
+            } else succeeded = true
+        }
+
+        return succeeded
+    }
+
+    /**
+     * Get list of users that have liked the post
+     *
+     * @param activityId  the id of the activity post
+     *
+     * @return list of users that have liked the comment
+     */
+    TreeSet<UserAccount> getUsersWhoLikedComment(Long activityId) {
+        return Activity.findById(activityId)?.likedByUsers
+    }
 }

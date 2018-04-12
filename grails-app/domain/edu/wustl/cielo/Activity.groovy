@@ -12,8 +12,11 @@ class Activity implements Comparable {
     String  eventText
     Date    dateCreated
     ActivityTypeEnum  eventType
-    SortedSet<Comment> comments = new TreeSet<Comment>()
+    SortedSet<Comment>      comments        = new TreeSet<Comment>()
+    SortedSet<UserAccount>  likedByUsers    = new TreeSet<UserAccount>()
     String    activityInitiatorUserName
+
+    static hasMany = [likedByUsers: UserAccount]
 
     static constraints = {
         eventType(nullable: false)
@@ -33,5 +36,17 @@ class Activity implements Comparable {
 
     UserAccount getUser() {
         UserAccount.findByUsername(activityInitiatorUserName)
+    }
+
+    void addTolikedByUsers(UserAccount user) {
+        likedByUsers.add(user)
+    }
+
+    void removeFromlikedByUsers(UserAccount user) {
+        likedByUsers.remove(user)
+    }
+
+    SortedSet<UserAccount> getMostRecentLikedByUsers(int count) {
+        likedByUsers.take(count)
     }
 }

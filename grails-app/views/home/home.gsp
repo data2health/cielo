@@ -13,8 +13,8 @@
                 </span>
             </div>
             <div id="activity" class="col-md-4">
-                <g:render template="/templates/activityFeed" model="[activities: activities, activityOffset: activityOffset,
-                                                                     activityMax: activityMax, username: username]"/>
+                <g:render template="/activity/activityFeed" model="[activities: activities, activityOffset: activityOffset,
+                                                                     activityMax: activityMax, user: profile.user, username: username]"/>
                 <div id="olderContent">
                 </div>
             </div>

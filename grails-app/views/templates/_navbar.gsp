@@ -97,7 +97,7 @@
                     <li class="dropdown pull-right" style="margin-left: 1em;">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             <g:getUserProfilePic imageSize="small"/>
-                            <sec:username/>
+                            <span style="color: #149dcc;"><sec:username/></span>
                             <span class="caret"></span></a>
                         <ul class="dropdown-menu arrow_box" style="margin-left: 1em;">
                             <li class="menu-with-icon">

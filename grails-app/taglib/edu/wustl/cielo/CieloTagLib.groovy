@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import grails.web.mapping.LinkGenerator
 
 class CieloTagLib {
     static defaultEncodeAs  = [taglib:'html'] //html escapes characters
@@ -14,6 +15,8 @@ class CieloTagLib {
     static int DEFAULT_STICKER_SIZE = 52 // 48 + 2 px
     static Map imageSizes   = ['xs': '-xs', 'small': '-sm', 'medium': '-md', 'large': '-lg', 'x-large': '-x-lg',
                                'xx-large': '-xx-lg', 'xxx-large': '-xxx-lg']
+
+    LinkGenerator grailsLinkGenerator
     def springSecurityService
 
     /**
@@ -54,9 +57,10 @@ class CieloTagLib {
         StringBuffer imgClass       = new StringBuffer("activity-profile-pic")
         StringBuffer tooltip        = new StringBuffer("")
         int sizeOfStickerContainer  = DEFAULT_STICKER_SIZE
-        String divId
-        String styles
-        String tooltipOffset
+        String divId = ""
+        String styles = ""
+        String tooltipOffset = ""
+        String userLink = ""
 
         if (attrs.id) {
             divId = "id=\"${attrs.id}\""
@@ -68,6 +72,7 @@ class CieloTagLib {
 
         if (attrs.user) {
             user = attrs.user
+            userLink = grailsLinkGenerator.link(controller: "user", action: "view", id: attrs.user.id)
         } else {
             user = UserAccount.get(principal?.id)
         }
@@ -89,14 +94,20 @@ class CieloTagLib {
 
         if (user) {
             if (attrs.sticker) {
-                profilePicHtml << """<div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border" style="border: 3px solid #bbbaba; width: ${sizeOfStickerContainer + 6}px; border-radius: 50%;">"""
+                profilePicHtml << """<a href="${userLink}"><div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border" style="border: 1px solid #a9a7a785; width: ${sizeOfStickerContainer + 2}px; border-radius: 50%;">"""
                 profilePicHtml << """<div id="image-background" style="border: 2px solid #ffffff; border-radius: 50%; width: ${sizeOfStickerContainer}px; height: ${sizeOfStickerContainer}px; background-color:  white; ">"""
-            }
 
-            if (user.profile.picture) {
-                profilePicHtml << """<img src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
+                if (user.profile?.picture) {
+                    profilePicHtml << """<img src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
+                } else {
+                    profilePicHtml << """<img src="/assets/default_profile.png" class="${imgClass}">"""
+                }
             } else {
-                profilePicHtml << """<img src="/assets/default_profile.png" class="${imgClass}">"""
+                if (user.profile?.picture) {
+                    profilePicHtml << """<a href="${userLink}"><img ${divId} ${tooltip.toString()} src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}"></a>"""
+                } else {
+                    profilePicHtml << """<a href="${userLink}"><img ${divId} ${tooltip.toString()} src="/assets/default_profile.png" class="${imgClass}"></a>"""
+                }
             }
 
         } else {
@@ -104,7 +115,7 @@ class CieloTagLib {
         }
 
         if (attrs.sticker) {
-            profilePicHtml << """</div></div>${body()}</div>"""
+            profilePicHtml << """</a></div></div>${body()}</div>"""
         } else { profilePicHtml << body() }
 
         out << profilePicHtml.toString()
@@ -140,7 +151,7 @@ class CieloTagLib {
                 if (months > 1L) {
                     returnVal = "${months} months ago"
                 } else {
-                    returnVal = "${years} month ago"
+                    returnVal = "${months} month ago"
                 }
             } else {
                 long weeks = from.until(today, ChronoUnit.WEEKS)
@@ -236,7 +247,7 @@ class CieloTagLib {
         def principal    = springSecurityService?.principal
         UserAccount user = UserAccount.get(principal?.id)
 
-        if (attrs.user && attrs.user == user) out << body()
+        if (attrs.user && (attrs.user.equals(user))) out << body()
         else out << null
     }
 

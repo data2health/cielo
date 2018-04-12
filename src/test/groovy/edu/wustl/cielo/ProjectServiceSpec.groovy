@@ -274,4 +274,285 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         then: "project saves correctly and the change is reflected"
             project.status == ProjectStatusEnum.COMPLETED
     }
+
+    void "test saveProjectComment" () {
+        Project project
+        UserAccount user
+        SoftwareLicense softwareLicense
+
+        expect: "no projects"
+            Project.list() == []
+
+        when: "create a good project"
+            user = new UserAccount(username: "someuser", password: "somePassword").save()
+            softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+            project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        then: "saves correctly"
+            Project.list()
+
+        when:
+            def result = service.saveProjectComment(user, project.id, "My comment")
+
+        then:
+            result
+
+    }
+
+    void "test saveProjectCommentReply"() {
+        Project project
+        UserAccount user
+        SoftwareLicense softwareLicense
+
+        expect: "no projects"
+        Project.list() == []
+
+        when: "create a good project"
+            user = new UserAccount(username: "someuser", password: "somePassword").save()
+            softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+            project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        then: "saves correctly"
+            Project.list()
+
+        when:
+            def result = service.saveProjectComment(user, project.id, "My comment")
+
+        then:
+            result
+
+        //now get the comment and then add a reply to it
+        when:
+            Comment comment = project.comments[0]
+            assert comment.responses.size() == 0
+            service.saveProjectCommentReply(user, comment.id, "My reply")
+
+        then:
+            comment.responses.size() == 1
+    }
+
+    void "test getComments"() {
+        Project project
+        UserAccount user
+        SoftwareLicense softwareLicense
+
+        expect: "no projects"
+            Project.list() == []
+
+        when: "create a good project"
+            user = new UserAccount(username: "someuser", password: "somePassword").save()
+            softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+            project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        then: "saves correctly"
+            Project.list()
+
+        when:
+            def result = service.saveProjectComment(user, project.id, "My comment")
+
+        then:
+            result
+
+        //now get the comment and then add a reply to it
+        when:
+            Comment comment = project.comments[0]
+            assert comment.responses.size() == 0
+            def results = service.getComments(project.id)
+
+        then:
+            results == [comment]
+    }
+
+    void "test saveProjectBasicChanges"() {
+
+        Project project
+        UserAccount user
+        SoftwareLicense softwareLicense
+
+        expect: "no projects"
+            Project.list() == []
+
+        when: "create a good project"
+            user = new UserAccount(username: "someuser", password: "somePassword").save()
+            softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+            project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        then: "saves correctly"
+            Project.list()
+
+        when:
+             service.saveProjectBasicChanges(project.id, "My Project", "new description", project.annotations.collect { it.id })
+
+        then:
+            project.name == "My Project"
+            project.description == "new description"
+
+    }
+
+    void "test likeProjectComment"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+
+        springSecurityService = new SpringSecurityService()
+        service.springSecurityService = springSecurityService
+        service.springSecurityService.metaClass.principal = [id: user.id]
+
+        expect: "no projects"
+        Project.list() == []
+
+        when: "create a good project"
+            softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+            project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        then: "saves correctly"
+            Project.list()
+
+        when:
+            def result = service.saveProjectComment(user, project.id, "My comment")
+
+        then:
+            result
+
+        when:
+            Comment comment = project.comments[0]
+            result = service.likeProjectComment(comment.id)
+
+        then:
+            result
+            comment.likedByUsers.contains(user)
+    }
+
+    void "test removeProjectCommentLike"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+
+        springSecurityService = new SpringSecurityService()
+        service.springSecurityService = springSecurityService
+        service.springSecurityService.metaClass.principal = [id: user.id]
+
+        expect: "no projects"
+            Project.list() == []
+
+        when: "create a good project"
+            softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+            project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        then: "saves correctly"
+            Project.list()
+
+        when:
+            def result = service.saveProjectComment(user, project.id, "My comment")
+
+        then:
+            result
+
+        when:
+            Comment comment = project.comments[0]
+            result = service.likeProjectComment(comment.id)
+
+        then:
+            result
+            comment.likedByUsers.contains(user)
+
+        //now remove the like
+        when:
+            result = service.removeProjectCommentLike(comment.id)
+
+        then:
+            result
+            comment.likedByUsers.size() == 0
+
+    }
+
+    void "test getUsersWhoLikedComment"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+
+        springSecurityService = new SpringSecurityService()
+        service.springSecurityService = springSecurityService
+        service.springSecurityService.metaClass.principal = [id: user.id]
+
+        expect: "no projects"
+            Project.list() == []
+
+        when: "create a good project"
+            softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                    url: "http://www.rerlicense.com").save()
+            project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                    description: "some description").save()
+
+        then: "saves correctly"
+            Project.list()
+
+        when:
+            def result = service.saveProjectComment(user, project.id, "My comment")
+
+        then:
+            result
+
+        when:
+            Comment comment = project.comments[0]
+            result = service.likeProjectComment(comment.id)
+
+        then:
+            result
+            comment.likedByUsers.contains(user)
+
+        when:
+            def usersResults = service.getUsersWhoLikedComment(comment.id)
+
+        then:
+            usersResults == new TreeSet<UserAccount>([user])
+    }
+
+    void "test incrementViewsCounter"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount viewer = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+
+        springSecurityService = new SpringSecurityService()
+        service.springSecurityService = springSecurityService
+        service.springSecurityService.metaClass.principal = [id: viewer.id]
+
+        expect: "no projects"
+            Project.list() == []
+
+        when: "create a good project"
+            softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+            project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        then: "saves correctly"
+            Project.list()
+
+        when:
+            //owner and contributors cannot increase the popularity of a project
+            service.incrementViewsCounter(project)
+
+        then:
+            project.views == 1
+
+        when:
+            service.incrementViewsCounter(project)
+
+        then:
+            project.views == 2
+    }
 }

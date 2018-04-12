@@ -19,10 +19,10 @@ class ActivityController {
         Object principal = springSecurityService?.principal
         UserAccount user = principal ? UserAccount.get(principal.id) : null
 
-        render(template: "/templates/activityFeed",
+        render(template: "activityFeed",
                 model:[activities: activityService.getActivities(offset, max), activityOffset: newOffset, activityMax: max,
                        showMoreActivitiesButton: activityService.areThereMoreActivitiesToRetrieve(newOffset, max),
-                       username: user?.username
+                       user: user, username: user?.username
                 ]
         )
     }
@@ -45,5 +45,50 @@ class ActivityController {
                 model: [comments: Activity.findById(Long.valueOf(params.id))?.comments, activityId: params.id,
                         numberOfComments: (params.commentCount ? Integer.valueOf(params.commentCount) : DEFAULT_COMMENT_COUNT)])
 
+    }
+
+    @Secured('isAuthenticated()')
+    def likeActivity() {
+        boolean succeeded
+        Long activityId = Long.valueOf(params.id)
+
+        if (activityId) {
+            succeeded = activityService.likeActivity(activityId)
+        }
+        render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def removeActivityLike() {
+        boolean succeeded
+        Long activityId = Long.valueOf(params.id)
+
+        if (activityId) {
+            succeeded = activityService.removeActivityLike(activityId)
+        }
+        render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def getCommentLikeUsers() {
+        TreeSet<UserAccount> users
+        Long activityId = Long.valueOf(params.id)
+
+        if (activityId) {
+            users = activityService.getUsersWhoLikedComment(activityId)
+        }
+        render(template: "/templates/commentLikesUsers", model: [users: users])
+    }
+
+    @Secured('isAuthenticated()')
+    def getActivity() {
+        Long activityId = Long.valueOf(params.id)
+
+        Object principal = springSecurityService?.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+        render(template: "singleActivity",
+                model:[activity: Activity.findById(activityId), user: user]
+        )
     }
 }

@@ -300,6 +300,14 @@ class ProjectService {
         }
     }
 
+    /**
+     * Get the top most viewed projects
+     *
+     * @param maxNumberOfProjects the number of projects to return
+     * @param sharedOnly whether we should filter on sharedOnly
+     *
+     * @return a list of projects
+     */
     @ReadOnly
     @Secured("IS_AUTHENTICATED_ANONYMOUSLY")
     @Cacheable("most_viewed_projects")
@@ -413,10 +421,20 @@ class ProjectService {
      *
      * @return a list of Project comments or null list if none
      */
-    List<Comment> getComments(Project project) {
-        return project.comments
+    List<Comment> getComments(Long projectId) {
+        return Project.findById(projectId)?.comments
     }
 
+    /**
+     * Save changes to a project definition
+     *
+     * @param projectId the id of the project we are working with
+     * @param (optional) newProjectName the projectName to change to. default: current
+     * @param (optional) description the description to use. default: current
+     * @param (optional) tags the annotations to assign. default: current
+     *
+     * @return true if successful, false otherwise
+     */
     boolean saveProjectBasicChanges(Long projectId, String newProjectName, String description, List<Long> tags) {
         boolean succeeded
         Project project = Project.findById(projectId)
@@ -464,6 +482,58 @@ class ProjectService {
     }
 
     /**
+     * Like a project post
+     *
+     * @param commentId the id of the post to like
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean likeProjectComment(Long commentId) {
+        boolean succeeded
+        def principal       = springSecurityService?.principal
+        UserAccount user    = UserAccount.get(principal?.id)
+        Comment comment     = Comment.findById(commentId)
+
+        if (user && comment) {
+            comment.likedByUsers.add(user)
+
+            if (!comment.save()) {
+                comment.errors.getAllErrors().each { ObjectError error ->
+                    log.error(error.toString())
+                }
+            } else succeeded = true
+        }
+
+        return succeeded
+    }
+
+    /**
+     * Remove a like by user to a project comment
+     *
+     * @param commentId the comment to remove the like from
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean removeProjectCommentLike(Long commentId) {
+        boolean succeeded
+        def principal       = springSecurityService?.principal
+        UserAccount user    = UserAccount.get(principal?.id)
+        Comment comment     = Comment.findById(commentId)
+
+        if (user && comment) {
+            comment.likedByUsers.remove(user)
+
+            if (!comment.save()) {
+                comment.errors.getAllErrors().each { ObjectError error ->
+                    log.error(error.toString())
+                }
+            } else succeeded = true
+        }
+
+        return succeeded
+    }
+
+    /**
      * Increment the project views counter only when necessary
      *
      * @param project the project we are going to check
@@ -485,6 +555,17 @@ class ProjectService {
     }
 
     /**
+     * Get list of users that have liked the comment
+     *
+     * @param commentId  the id of the comment
+     *
+     * @return list of users that have liked the comment
+     */
+    TreeSet<UserAccount> getUsersWhoLikedComment(Long commentId) {
+        return Comment.findById(commentId)?.likedByUsers
+    }
+
+    /**
      * Is the logged in user the owner or contributor to a project
      *
      * @param project the project to check
@@ -503,7 +584,7 @@ class ProjectService {
         }
 
         //only should increment if the viewing user is not a contributor or owner of project
-        if (user && project.projectOwner == user || contributors.contains(user)) {
+        if (user && project.projectOwner.equals(user) || contributors.contains(user)) {
             isOwnerOrContributor = true
         }
 

@@ -36,5 +36,12 @@ class ActivitySpec extends Specification implements DomainUnitTest<Activity> {
 
         then: "the save is successful"
             activity.save()
+
+        when: "liking an activity"
+            activity.likedByUsers.add(user)
+            activity.save()
+
+        then:
+            activity.likedByUsers.size() == 1
     }
 }
