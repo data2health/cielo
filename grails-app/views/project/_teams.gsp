@@ -16,7 +16,7 @@
                             <div class="card-title" style="display: none; font-weight: 600;margin-bottom: -0.5em;z-index: 1;position: relative;">
                                 <i class="fas fa-chess-queen fa-2x" style="color: goldenrod;"></i>
                             </div>
-                            <div style="display: inline-block;"><g:getUserProfilePic user="${team.administrator}" sticker="${true}" imageSize="x-large"/></div>
+                            <div style="display: inline-block;"><g:getUserProfilePic user="${team.administrator}" showLink="${true}" sticker="${true}" imageSize="x-large"/></div>
                             <div class="card-footer" style="display: none;">
                                 <span style="color: goldenrod;">Team Admin</span><br>
                                 <span style="font-weight: 600;">${team.administrator.fullName}</span><br>
@@ -26,7 +26,7 @@
                         <g:each in="${team.members}" var="member">
                             <div class="team-member" style="text-align: center;">
                                 <div class="card-title" style="display: none;"></div>
-                                <div style="display: inline-block;"><g:getUserProfilePic user="${member}" sticker="${true}" imageSize="x-large"/></div>
+                                <div style="display: inline-block;"><g:getUserProfilePic user="${member}" showLink="${true}" sticker="${true}" imageSize="x-large"/></div>
                                 <div class="card-footer" style="display: none;">
                                     <span style="font-weight: 600;">${member.fullName}</span><br>
                                     <span style="font-weight: 100;font-style: italic;">${member.username}</span>

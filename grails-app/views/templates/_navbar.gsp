@@ -48,12 +48,12 @@
                         </a>
                         <ul class="dropdown-menu arrow_box">
                             <li>
-                                <a role="link" href="#">
+                                <a role="link" href="${createLink(controller: 'project', action: 'myProjects')}">
                                     My Projects
                                 </a>
                             </li>
                             <li>
-                                <a role="link" href="#">
+                                <a role="link" href="${createLink(controller: 'project', action: 'publicProjectsList')}">
                                     Public Projects
                                 </a>
                             </li>
@@ -95,10 +95,14 @@
                     </li>
                     <li class="li-spacer d-block d-md-none">&nbsp;</li>
                     <li class="dropdown pull-right" style="margin-left: 1em;">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            <g:getUserProfilePic imageSize="small"/>
-                            <span style="color: #149dcc;"><sec:username/></span>
-                            <span class="caret"></span></a>
+                            <g:getUserProfilePic imageSize="small" showLink="${false}">
+                            <span class="caret"></span>
+                            <span style="color: #149dcc;">
+                                <sec:username/>
+                            </span>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
+                            </g:getUserProfilePic>
+                            </a>
                         <ul class="dropdown-menu arrow_box" style="margin-left: 1em;">
                             <li class="menu-with-icon">
                                 <a role="link" href="${createLink(controller: 'user', action: 'view', params: [id: user.id])}">

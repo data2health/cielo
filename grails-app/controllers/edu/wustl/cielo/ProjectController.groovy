@@ -88,11 +88,18 @@ class ProjectController {
         Long projectId = Long.valueOf(params.id)
 
         if (projectId) {
-            String newName      = params.name
-            List<Long> tags     = params."tags[]".collect { Long.valueOf(it) }
-            String description  = params.desc
+            String newName          = params.name
+            String description      = params.desc
+            List<Long> tags
+            Long softwareLicenseId
+            boolean shared
 
-            succeeded = projectService.saveProjectBasicChanges(projectId, newName, description, tags)
+            if (params."tags[]")    tags = params."tags[]".collect { Long.valueOf(it) }
+            if (params.licenseId)   softwareLicenseId  = Long.valueOf(params.licenseId)
+            if (params.shared)      shared = Integer.valueOf(params.shared) ?: false
+
+            succeeded = projectService.saveProjectBasicChanges(projectId, newName, description, tags,
+                    softwareLicenseId, shared)
         }
         render([success: succeeded] as JSON)
     }
@@ -128,5 +135,57 @@ class ProjectController {
            users = projectService.getUsersWhoLikedComment(commentId)
         }
         render(template: "/templates/commentLikesUsers", model: [users: users])
+    }
+
+
+    @Secured('isAuthenticated()')
+    def myProjects() {
+        Object principal = springSecurityService.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+        List<Project> myProjects
+        int max     = -1
+        int offset  = -1
+
+        if (user) {
+            if (params.max)     max     = Integer.valueOf(params.max)
+            if (params.offset)  offset  = Integer.valueOf(params.offset) - 1
+
+            myProjects = projectService.getMyProjects(user, max, offset)
+        }
+
+        return [userProfile: user?.profile, projects: myProjects, offset: offset <= 0 ? 1 : offset,
+                numberOfPages: projectService.getNumberOfPagesForMyProjects(user, max)]
+    }
+
+    @Secured('isAuthenticated()')
+    def publicProjectsList() {
+        int max     = -1
+        int offset  = -1
+        List<Project> projects
+        Object principal = springSecurityService.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+        if (params.max)     max     = Integer.valueOf(params.max)
+        if (params.offset)  offset  = Integer.valueOf(params.offset) - 1
+
+        projects = projectService.getPublicProjects(offset, max)
+
+        return [projects: projects, userProfile: user?.profile,
+                offset: offset <= 0 ? 1 : offset,
+                numberOfPages: projectService.getNumberOfPagesForPublicProjects(max),
+                max: max]
+    }
+
+    @Secured('isAuthenticated()')
+    def deleteProject() {
+        boolean succeeded
+        Long projectId = params.id ? Long.valueOf(params.id) : -1L
+        Object principal = springSecurityService.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+        if (user) {
+            succeeded = projectService.deleteProject(user, projectId)
+        }
+        render([success: succeeded] as JSON)
     }
 }

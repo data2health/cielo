@@ -42,6 +42,9 @@ class UrlMappings {
         "/project/likePost"(controller: "project", action: "likeComment")
         "/project/removeLike"(controller: "project", action: "removeCommentLike")
         "/project/getUsers"(controller: "project", action: "getCommentLikeUsers")
+        "/project/myList/"(controller: "project", action: "myProjects")
+        "/project/delete/"(controller: "project", action: "deleteProject")
+        "/project/public/list"(controller: "project", action: "publicProjectsList")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")

@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="row justify-content-md-start">
                 <div class="col-md-1" style="margin-right: -70px; align-self: center;">
-                    <g:getUserProfilePic user="${project?.projectOwner}" sticker="${true}" imageSize="xxx-large"/>
+                    <g:getUserProfilePic user="${project?.projectOwner}" sticker="${true}" showLink="${true}" imageSize="xxx-large"/>
                 </div>
                 <div class="project-header-container mbr-white col-md-10">
                     <h1 class="mbr-section-title mbr-bold pb-3 mbr-fonts-style display-2">
@@ -111,7 +111,8 @@
                     <div class="row" style="align-items: center;">
                         <div class="col-sm-3">License:</div>
                         <div class="col-sm-9">
-                            <button onclick="showSoftwareLicense(${project.license.id}, '${project.license.label}')"
+                            <g:getSoftwareLicenseOptions/>
+                            <button id="softwareLicenseButton"onclick="showSoftwareLicense(${project.license.id}, '${project.license.label}')"
                                     class="btn btn-link" style="padding: 0; margin-left: -2px;">
                                 ${project.license.label}
                             </button>
@@ -120,13 +121,21 @@
                     <div class="row" style="align-items: center;">
                         <div class="col-sm-3">Visibility:</div>
                         <div class="col-sm-9">
-                            <g:if test="${project.shared}">
-                                <i class="fas fa-lock-open"></i>
-                            </g:if>
-                            <g:else>
-                                <i class="fas fa-lock"></i>
-                            </g:else>
-                            <g:projectVisibility value="${project.shared}"/>
+                            <span id="sharedSelectSpan" style="display: none;">
+                                <select id="sharedSelect" class="form-control">
+                                    <option value="0">Private</option>
+                                    <option value="1">Public</option>
+                                </select>
+                            </span>
+                            <span id="sharedSpan">
+                                <g:if test="${project.shared}">
+                                    <i id="sharedIcon" class="fas fa-lock-open"></i>
+                                </g:if>
+                                <g:else>
+                                    <i id="sharedIcon" class="fas fa-lock"></i>
+                                </g:else>
+                                <span id="sharedText"><g:projectVisibility value="${project.shared}"/></span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -319,6 +328,7 @@
     function editProject() {
         var annotations = $('#annotation-labels').text().replace(/^\s+|\s+$/, '').split(",");
         var options = new Array(annotations.length);
+        var projectLicense = $('#softwareLicenseButton').html().trim();
 
         //setup multi-select for the annotations for the project
         for (index in annotations) {
@@ -349,6 +359,27 @@
         $('#project-name-input').val($('#project-name-label').text());
         $('#project-name-input').show();
 
+        //license stuff
+        $('#licenses option').each( function() {
+            if ($(this).text() === projectLicense) {
+                $('#licenses').val($(this).attr('value'));
+            }
+        });
+
+        $('#softwareLicenseButton').hide();
+        $('#licenses').show();
+
+        //project visibility stuff
+        $('#sharedSpan').hide();
+        var sharedVal = $('#sharedText').text().trim();
+
+        if (sharedVal === "Public") {
+            $('#sharedSelect').val(1);
+        } else {
+            $('#sharedSelect').val(0);
+        }
+
+        $('#sharedSelectSpan').show();
     }
 
     function cancelEditing() {
@@ -364,14 +395,23 @@
 
         $('#project-description-input').hide();
         $('#description-label').show();
+
+        $('#licenses').hide();
+        $('#softwareLicenseButton').show();
+
+        $('#sharedSelectSpan').hide();
+        $('#sharedSpan').show();
     }
 
     function saveProjectChanges() {
         var newProjectName      = $('[name=project-name]').val();
         var projectTags         = $('.multiple-select').val();
         var description         = $('.project-description-textarea').val();
+        var licenseID           = $('#licenses').val();
+        var projectShared       = $('#sharedSelect').val();
 
-        $.post("/project/saveChanges", {'name': newProjectName, 'id': "${project.id}", 'tags': projectTags, 'desc': description}, function (data) {
+        $.post("/project/saveChanges", {'name': newProjectName, 'id': "${project.id}", 'tags': projectTags,
+            'desc': description, 'licenseId': licenseID, 'shared': projectShared}, function (data) {
             if (data.success === true) {
                 var tagsLabel = "";
                 //set the new name and new tags
@@ -388,6 +428,23 @@
 
                 $('#annotation-labels').text(tagsLabel);
                 $('#project-description-text').text($('.project-description-textarea').val());
+
+                //license change
+                var selectedText = $('#licenses option[value=' + $('#licenses').val() + ']').text();
+                $('#softwareLicenseButton').html(selectedText);
+
+                //shared
+                var projectSharedText = $('#sharedSelect option[value=' + $('#sharedSelect').val() + ']').text();
+
+                if (projectSharedText === "Public") {
+                    $('#sharedIcon').removeClass('fa-lock');
+                    $('#sharedIcon').addClass('fa-lock-open');
+                } else {
+                    $('#sharedIcon').removeClass('fa-lock-open');
+                    $('#sharedIcon').addClass('fa-lock');
+                }
+
+                $('#sharedText').text(projectSharedText);
 
                 //editing is done - re-use cancelEditing for now
                 cancelEditing();

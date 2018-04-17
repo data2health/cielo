@@ -389,12 +389,11 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
             Project.list()
 
         when:
-             service.saveProjectBasicChanges(project.id, "My Project", "new description", project.annotations.collect { it.id })
+             service.saveProjectBasicChanges(project.id, "My Project", "new description", project.annotations.collect { it.id }, softwareLicense.id, false)
 
         then:
             project.name == "My Project"
             project.description == "new description"
-
     }
 
     void "test likeProjectComment"() {
@@ -554,5 +553,204 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
 
         then:
             project.views == 2
+    }
+
+    void "test getMyProjects"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+        softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
+                description: "some description").save()
+
+        springSecurityService = new SpringSecurityService()
+        springSecurityService.metaClass.principal = [id: user.id]
+        service.springSecurityService = springSecurityService
+
+        when:
+            def results = service.getMyProjects(user, 1, 0)
+
+        then:
+            results.contains(project)
+            !results.contains(project1)
+
+        when:
+            Project project2 = new Project(projectOwner: user, name: "Project2", license: softwareLicense,
+                    description: "some description").save()
+            Project project3 = new Project(projectOwner: user, name: "Project3", license: softwareLicense,
+                    description: "some description").save()
+            results = service.getMyProjects(user, 5, 0)
+
+        then:
+            results.contains(project)
+            results.contains(project2)
+            results.contains(project3)
+            !results.contains(project1)
+
+    }
+
+    void "test getNumberOfPagesForMyProjects"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+        softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
+                description: "some description").save()
+
+        springSecurityService = new SpringSecurityService()
+        springSecurityService.metaClass.principal = [id: user.id]
+        service.springSecurityService = springSecurityService
+
+        when:
+            int results = service.getNumberOfPagesForMyProjects(user, 1)
+
+        then:
+            results == 1
+
+        when:
+            Project project2 = new Project(projectOwner: user, name: "Project2", license: softwareLicense,
+                    description: "some description").save()
+            Project project3 = new Project(projectOwner: user, name: "Project3", license: softwareLicense,
+                    description: "some description").save()
+            results = service.getNumberOfPagesForMyProjects(user, 1)
+
+        then:
+            results == 3
+
+        when:
+            results = service.getNumberOfPagesForMyProjects(user, 3)
+
+        then:
+            results == 1
+    }
+
+    void "test getPublicProjects"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+        softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
+                description: "some description", shared: true).save()
+
+        springSecurityService = new SpringSecurityService()
+        springSecurityService.metaClass.principal = [id: user.id]
+        service.springSecurityService = springSecurityService
+
+        when:
+            List<Project> results = service.getPublicProjects(0, 5)
+
+        then:
+            results.contains(project1)
+            !results.contains(project)
+
+        when:
+            Project project2 = new Project(projectOwner: user, name: "Project2", license: softwareLicense,
+                description: "some description", shared: true).save()
+            Project project3 = new Project(projectOwner: user, name: "Project3", license: softwareLicense,
+                description: "some description", shared: true).save()
+            results = service.getPublicProjects(0, 5)
+
+        then:
+            results.size() == 3
+            results.contains(project1)
+            results.contains(project2)
+            results.contains(project3)
+    }
+
+    void "test getNumberOfPagesForPublicProjects"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+        softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
+                description: "some description", shared: true).save()
+
+        springSecurityService = new SpringSecurityService()
+        springSecurityService.metaClass.principal = [id: user.id]
+        service.springSecurityService = springSecurityService
+
+        when:
+            int results = service.getNumberOfPagesForPublicProjects(5)
+
+        then:
+            results == 1
+
+        when:
+            Project project2 = new Project(projectOwner: user, name: "Project2", license: softwareLicense,
+                description: "some description", shared: true).save()
+            Project project3 = new Project(projectOwner: user, name: "Project3", license: softwareLicense,
+                description: "some description", shared: true).save()
+            results = service.getNumberOfPagesForPublicProjects(5)
+
+        then:
+            results == 1
+
+        when:
+            results = service.getNumberOfPagesForPublicProjects(1)
+
+        then:
+            results == 3
+    }
+
+    void "test deleteProject"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+        softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
+                description: "some description", shared: true).save()
+
+        springSecurityService = new SpringSecurityService()
+        springSecurityService.metaClass.principal = [id: user.id]
+        service.springSecurityService = springSecurityService
+
+        when:
+            int results = service.getNumberOfPagesForPublicProjects(5)
+
+        then:
+            results == 1
+
+        when:
+            Project project2 = new Project(projectOwner: user, name: "Project2", license: softwareLicense,
+                description: "some description", shared: true).save()
+            Project project3 = new Project(projectOwner: user, name: "Project3", license: softwareLicense,
+                description: "some description", shared: true).save()
+            boolean returnVal = service.deleteProject(user, project3.id)
+
+        then:
+            returnVal
+
+        when:
+            returnVal = service.deleteProject(user2, project2.id)
+
+        then:
+            !returnVal
+
+        when:
+            returnVal = service.deleteProject(user2, project1.id)
+
+        then:
+            returnVal
+
     }
 }

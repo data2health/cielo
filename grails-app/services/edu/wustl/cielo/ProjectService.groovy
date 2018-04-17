@@ -25,10 +25,12 @@ class ProjectService {
     static int numberOfCommentsPerProject       = 3
     static Lorem lorem                          = LoremIpsum.getInstance()
     static LinkGenerator grailsLinkGenerator
+    static int DEFAULT_MAX      = 5
+    static int DEFAULT_OFFSET   = 0
+
     def activityService
     def messageSource
     def springSecurityService
-
 
     /**
      * Main call used in bootstrap to generated project data
@@ -435,13 +437,15 @@ class ProjectService {
      *
      * @return true if successful, false otherwise
      */
-    boolean saveProjectBasicChanges(Long projectId, String newProjectName, String description, List<Long> tags) {
+    boolean saveProjectBasicChanges(Long projectId, String newProjectName, String description, List<Long> tags,
+                                    Long softwareLicenseId, boolean shared) {
         boolean succeeded
         Project project = Project.findById(projectId)
 
         if (project) {
             if (project.name != newProjectName || project.annotations.collect { it.id } != tags ||
-                project.description.toLowerCase() != description.toLowerCase()) {
+                project.description.toLowerCase() != description.toLowerCase() || project.shared != shared ||
+                    project.license.id != softwareLicenseId) {
                 if (project.name != newProjectName) {
                     //there are changes
                     project.name = newProjectName
@@ -463,6 +467,12 @@ class ProjectService {
                 if (project.description.toLowerCase() != description.toLowerCase()) {
                     project.description = description
                 }
+
+                if (softwareLicenseId) {
+                    project.license = SoftwareLicense.findById(softwareLicenseId)
+                }
+
+                project.shared = shared
 
                 //now save the project
                 if (!project.save()) {
@@ -563,6 +573,88 @@ class ProjectService {
      */
     TreeSet<UserAccount> getUsersWhoLikedComment(Long commentId) {
         return Comment.findById(commentId)?.likedByUsers
+    }
+
+    /**
+     * Return a list of projects owned by a user
+     *
+     * @param user the user to filter on
+     *
+     * @return list of projects the user owns
+     */
+    List<Project> getMyProjects(UserAccount user, int max, int offset) {
+        if (max == -1)      max     = DEFAULT_MAX
+        if (offset == -1)   offset  = DEFAULT_OFFSET
+
+        return Project.findAllByProjectOwner(user, [offset: offset * max, max: max, sort: 'id', order: 'asc'])
+    }
+
+    /**
+     * Get the number of pages for my projects
+     *
+     * @param user the user that owns the projects
+     * @param max the max number of projects to grab
+     *
+     * @return the number of pages of my projects per max per page
+     */
+    int getNumberOfPagesForMyProjects(UserAccount user, int max) {
+        if (!max || max <= 0) max = DEFAULT_MAX
+
+        int numberOfProjects = Project.findAllByProjectOwner(user).size()
+
+        if (numberOfProjects == 0 || numberOfProjects <= max) return 1
+        else return numberOfProjects / max
+    }
+
+    /**
+     * Delete project
+     *
+     * @param projectId the id of the project to delete
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean deleteProject(UserAccount user, Long projectId) {
+        Project project = Project.findById(projectId)
+
+        if (project.projectOwner.equals(user)) {
+            try {
+                project.delete(failOnError: true)
+                return true
+            } catch (Exception e) {
+                project.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+        } else return false
+    }
+
+    /**
+     * Get list of projects that are public
+     *
+     * @return list of projects that are public
+     */
+    List<Project> getPublicProjects(int offset, int max) {
+        if (!offset || offset <= 0) offset  = DEFAULT_OFFSET
+        if (!max || max <= 0)       max     = DEFAULT_MAX
+
+        return Project.findAllWhere([shared: true], [offset: offset * max, max: max, sort: 'id', order: 'asc'])
+    }
+
+    /**
+     * Get the number of pages for public projects
+     *
+     * @param max the number of items per page
+     *
+     * @return number indicating how many pages are available
+     */
+    int getNumberOfPagesForPublicProjects(int max) {
+        if (!max || max <= 0) max = DEFAULT_MAX
+
+        int numberOfProjects = Project.findAllByShared(true).size()
+
+        if (numberOfProjects == 0 || numberOfProjects <= max) return 1
+        else return numberOfProjects / max
     }
 
     /**

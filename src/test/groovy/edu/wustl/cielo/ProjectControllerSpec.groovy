@@ -223,7 +223,8 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
                 description: "some description").save()
 
-        projectService.metaClass.saveProjectBasicChanges = { Long projectId, String name, String description,  List<Long> tags ->
+        projectService.metaClass.saveProjectBasicChanges = { Long projectId, String name, String description,  List<Long> tags,
+                                                             Long licenseId, boolean shared ->
             true
         }
 
@@ -262,5 +263,92 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         then:
             response.json.success
+    }
+
+    void "test myProjects"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        controller.springSecurityService = springSecurityService
+        controller.springSecurityService.metaClass.principal = [id: user.id]
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Project project2 = new Project(projectOwner: user2, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        projectService.metaClass.getMyProjects = { UserAccount userAccount, int max, int offset ->
+            [project]
+        }
+
+        controller.projectService = projectService
+
+        when:
+            def returnVal = controller.myProjects()
+
+        then:
+            returnVal.projects.contains(project)
+            !returnVal.projects.contains(project2)
+    }
+
+    void "test publicProjectList"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        controller.springSecurityService = springSecurityService
+        controller.springSecurityService.metaClass.principal = [id: user.id]
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description", shared: true).save()
+        Project project2 = new Project(projectOwner: user2, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        projectService.metaClass.getPublicProjects = { int offset, int max ->
+            [project]
+        }
+
+        controller.projectService = projectService
+
+        when:
+        def returnVal = controller.publicProjectsList()
+
+        then:
+        returnVal.projects.contains(project)
+        !returnVal.projects.contains(project2)
+    }
+
+    void "test deleteProject"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description", shared: true).save()
+        Project project2 = new Project(projectOwner: user2, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        projectService.metaClass.deleteProject = { UserAccount userAccount, Long projectId  ->
+            if (userAccount.equals(user) && Project.findById(projectId)?.projectOwner.equals(userAccount)) return true
+            return false
+        }
+
+        controller.projectService = projectService
+
+        when:
+            params.id = project.id
+            controller.deleteProject()
+
+        then:
+            response.json.success
+            response.reset()
+
+        when:
+            params.id = project2.id
+            controller.deleteProject()
+
+        then:
+            !response.json.success
     }
 }

@@ -7,7 +7,7 @@
         </g:if>
         <div id="activity_comment_id_${comment?.id}" class="activity-post-comment">
             <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="${comment.commenter.username}">
-                <g:getUserProfilePic user="${comment.commenter}" imageSize="small" sticker="${false}" tooltipText="${comment.commenter.username}"/>
+                <g:getUserProfilePic user="${comment.commenter}" imageSize="small" showLink="${true}" sticker="${false}" tooltipText="${comment.commenter.username}"/>
             </span>
             <span class="date-time-comment">
                 <g:formatDateWithTimezone date="${comment.dateCreated}"/>

@@ -32,6 +32,11 @@ class Project {
 
     static mapping = {
         dynamicUpdate true
+        codes cascade: 'all-delete-orphan'
+        datas cascade: 'all-delete-orphan'
+        publications cascade: 'all-delete-orphan'
+        comments cascade: 'all-delete-orphan'
+        metadatas cascade: 'all-delete-orphan'
     }
 
     static constraints = {

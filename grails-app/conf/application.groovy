@@ -44,6 +44,9 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/project/saveCommentReply',   access: ['isAuthenticated()']],
 	[pattern: '/project/saveProjectBasicChanges',   access: ['isAuthenticated()']],
 	[pattern: '/project/getCommentLikeUsers',   access: ['isAuthenticated()']],
+	[pattern: '/project/myProjects',   access: ['isAuthenticated()']],
+	[pattern: '/project/delete',   access: ['isAuthenticated()']],
+	[pattern: '/project/publicProjectsList',   access: ['isAuthenticated()']],
 	[pattern: '/templates/**', access: ['permitAll']],
 	[pattern: '/**/favicon.ico', access: ['permitAll']],
 	[pattern: '/**/cielo_icon.png', access: ['permitAll']]
