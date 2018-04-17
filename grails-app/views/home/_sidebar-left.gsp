@@ -20,14 +20,14 @@
                             <g:each in="${following}" var="userFollowed">
                                 <g:if test="${(loopCount % 2) == 0}">
                                     <li class="list-group-item even-list-item">
-                                       <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${userFollowed}">
+                                       <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${userFollowed}" showLink="${true}">
                                             &nbsp; ${userFollowed.username}
                                        </g:getUserProfilePic>
                                     </li>
                                 </g:if>
                                 <g:else>
                                     <li class="list-group-item">
-                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${userFollowed}">
+                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${userFollowed}" showLink="${true}">
                                             &nbsp; ${userFollowed.username}
                                         </g:getUserProfilePic>
                                     </li>
@@ -47,14 +47,14 @@
                             <g:each in="${followers}" var="followingUser">
                                 <g:if test="${(loopCount % 2) == 0}">
                                     <li class="list-group-item even-list-item">
-                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${followingUser}">
+                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${followingUser}" showLink="${true}">
                                             &nbsp; ${followingUser.username}
                                         </g:getUserProfilePic>
                                     </li>
                                 </g:if>
                                 <g:else>
                                     <li class="list-group-item">
-                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${followingUser}">
+                                        <g:getUserProfilePic imageSize="xs" sticker="${false}" user="${followingUser}" showLink="${true}">
                                             &nbsp; ${followingUser.username}
                                         </g:getUserProfilePic>
                                     </li>

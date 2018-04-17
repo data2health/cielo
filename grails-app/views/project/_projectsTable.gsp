@@ -1,0 +1,71 @@
+<div id="myProjectsTableSection">
+    <section class="mbr-fullscreen" style="background-color: #f1f1f1;">
+        <div class="container-fluid">
+            <div class="row justify-content-md-start">
+                <div class="col-lg-auto myprojects-section" style="padding-top: 2em;">
+                    <div class="card table-card">
+                        <div class="card-body" style="padding: 0; background-color: white;">
+                            <h6 class="card-header">
+                                <i class="fas fa-cube"></i>&nbsp;Projects
+                            </h6>
+                            <table class="table table-hover table-responsive" style="min-height: 300px;
+                            background-color: white;">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">License</th>
+                                    <th scope="col">Visibility</th>
+                                    <th scope="col">Date Created</th>
+                                    <th scope="col">Last Updated</th>
+                                    <g:if test="${usersProject}">
+                                        <th scope="col"></th>
+                                    </g:if>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <g:set var="count" value="${1}"/>
+                                <g:each in="${projects}" var="project">
+                                    <tr>
+                                        <th scope="row">${count}</th>
+                                        <td><a class="btn btn-link" style="padding-top:0; margin: 0;" href="${createLink(controller: "project", action: "view", id: project.id)}">${project.name}</a></td>
+                                        <td data-toggle="tooltip" title="${project.description}">${project.description.substring(0,20)}...</td>
+                                        <td>
+                                            <button id="softwareLicenseButton"onclick="showSoftwareLicense(${project.license.id}, '${project.license.label}')"
+                                                    class="btn btn-link" style="padding: 0; margin: 0; margin-left: -2px;">
+                                                ${project.license.label}
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <g:if test="${project.shared}">
+                                                <i id="sharedIcon" class="fas fa-lock-open"></i>
+                                            </g:if>
+                                            <g:else>
+                                                <i id="sharedIcon" class="fas fa-lock"></i>
+                                            </g:else>
+                                            <g:projectVisibility value="${project.shared}"/>
+                                        </td>
+                                        <td>
+                                            <g:dateDiff date="${project.dateCreated}"/>
+                                        </td>
+                                        <td>
+                                            <g:dateDiff date="${project.lastUpdated}"/>
+                                        </td>
+                                        <g:if test="${usersProject}">
+                                            <td style="text-align: right;"><i class="fas fa-trash-alt" onclick="deleteProject(${project.id}, '${project.name}');"></i></td>
+                                        </g:if>
+                                    </tr>
+                                    <g:set var="count" value="${count+1}"/>
+                                </g:each>
+                                </tbody>
+                            </table>
+                            <g:render template="/templates/paginationToolbar" model="[pages: numberOfPages, offset: offset,
+                                                                                      onChangeCallback: onChangeCallback]"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

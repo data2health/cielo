@@ -99,7 +99,7 @@
                                 </label>
 
                                 <div class="col-sm-8">
-                                    <g:timeZoneSelect id="timezoneId" name="timezoneId" class="form-control" value="${tz}"/>
+                                    <g:customTimeZoneSelect id="timezoneId"/>
                                 </div>
                             </div>
 

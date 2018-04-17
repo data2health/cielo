@@ -1,5 +1,5 @@
 <h6 class="card-header">
-    <g:getUserProfilePic user="${activity.user}" sticker="${true}">
+    <g:getUserProfilePic user="${activity.user}" sticker="${true}" showLink="${true}">
         &nbsp;${activity.activityInitiatorUserName}
     </g:getUserProfilePic>
     <g:dateDiff date="${activity.dateCreated}"/>
@@ -37,7 +37,7 @@
 <span>
     %{--Only show the first 4 if there are more then need to show a link to show all--}%
     <g:each in="${activity?.likedByUsers?.take(4)}" var="user">
-        <g:getUserProfilePic user="${user}" imageSize="small" sticker="${false}"  tooltipText="${user?.profile?.firstName} ${user?.profile?.lastName}${'<br><em>'}${user.username}${'</em>'}"/>
+        <g:getUserProfilePic user="${user}" imageSize="small" sticker="${false}" showLink="${true}" tooltipText="${user?.profile?.firstName} ${user?.profile?.lastName}${'<br><em>'}${user.username}${'</em>'}"/>
     </g:each>
 </span>
 
@@ -49,7 +49,7 @@
 <div class="comment-add-box" id="comment_box_${activity.id}">
     <div class="input-group">
         <div class="input-group-prepend">
-            <span class="input-group-text"><g:getUserProfilePic sticker="${false}"/></span>
+            <span class="input-group-text"><g:getUserProfilePic sticker="${false}" showLink="${true}"/></span>
         </div>
         <textarea class="form-control" id="comment-box-text-${activity.id}"></textarea>
     </div>

@@ -17,7 +17,7 @@
                     <div class="panel-item p-3">
                         <div class="card-block">
                             <div style="display: inline-block; overflow: hidden">
-                                <g:getUserProfilePic user="${bundle.projectOwnerUserObject}" sticker="${true}" imageSize="xxx-large"/>
+                                <g:getUserProfilePic user="${bundle.projectOwnerUserObject}" showLink="${true}" sticker="${true}" imageSize="xxx-large"/>
                             </div>
                             <p class="mbr-text mbr-fonts-style display-7">
                                 ${bundle.description}

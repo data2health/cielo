@@ -53,7 +53,7 @@
                     </form>
 
                 </div>
-                <g:getUserProfilePic id="currentProfilePic" style="margin-top: 1.8em;display: inline-block;" user="${user}" sticker="${true}" imageSize="xxx-large"/>
+                <g:getUserProfilePic id="currentProfilePic" style="margin-top: 1.8em;display: inline-block;" showLink="${true}" user="${user}" sticker="${true}" imageSize="xxx-large"/>
             </div>
             <div class="col-lg-9">
                 <div class="form-container">
@@ -135,7 +135,7 @@
                                 </label>
 
                                 <div class="col-sm-8">
-                                    <g:timeZoneSelect id="timezoneId" name="timezoneId" class="form-control" value="${tz}" disabled="disabled"/>
+                                    <g:customTimeZoneSelect id="timezoneId"/>
                                 </div>
                             </div>
 
@@ -198,6 +198,7 @@
 
     $( function () {
         $('#institution').val(${user.profile.institution.id});
+        $('#timezoneId').prop('disabled', 'disabled');
         $('#timezoneId').val('${user.timezoneId}');
 
         var annotations = "${user.profile.annotations.collect { it.label }.join(',')}".replace(/^\s+|\s+$/, '').split(",");

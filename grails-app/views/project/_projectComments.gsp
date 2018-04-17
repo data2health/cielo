@@ -2,7 +2,7 @@
     <g:if test="${comment}">
     <div id="project_comments_${project.id}" class="card activity-post col-md-4">
     <h6 class="card-header">
-        <g:getUserProfilePic user="${comment.commenter}" sticker="${true}">
+        <g:getUserProfilePic user="${comment.commenter}" sticker="${true}" showLink="${true}">
             &nbsp;${comment.commenter.username}
         </g:getUserProfilePic>
         <span class="date-time">
@@ -41,7 +41,7 @@
     <span>
         %{--Only show the first 4 if there are more then need to show a link to show all--}%
         <g:each in="${comment?.likedByUsers?.take(4)}" var="user">
-            <g:getUserProfilePic user="${user}" imageSize="small" sticker="${false}"  tooltipText="${user?.profile?.firstName} ${user?.profile?.lastName}${'<br><em>'}${user.username}${'</em>'}"/>
+            <g:getUserProfilePic user="${user}" imageSize="small" sticker="${false}" showLink="${true}" tooltipText="${user?.profile?.firstName} ${user?.profile?.lastName}${'<br><em>'}${user.username}${'</em>'}"/>
         </g:each>
     </span>
 

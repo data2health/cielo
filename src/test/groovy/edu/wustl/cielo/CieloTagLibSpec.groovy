@@ -196,4 +196,32 @@ class CieloTagLibSpec extends Specification implements TagLibUnitTest<CieloTagLi
         then:
             result.contains("2 years ago")
     }
+
+    void "test getSoftwareLicenseOptions"() {
+        UserAccount user
+
+        given:
+            user = new UserAccount(username: "someuser", password: "somePassword").save()
+            new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                    url: "http://www.rerlicense.com").save()
+        when:
+            def result = tagLib.getSoftwareLicenseOptions()
+
+        then:
+            SoftwareLicense.list().each { license ->
+                result.contains(license.label)
+            }
+    }
+
+    void "test customTimeZoneSelect"() {
+
+        when:
+            def result = tagLib.customTimeZoneSelect()
+
+        then:
+            result.contains("UTC")
+            result.contains("Asia/Dubai")
+            result.contains("US/Eastern")
+
+    }
 }
