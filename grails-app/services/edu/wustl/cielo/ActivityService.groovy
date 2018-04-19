@@ -194,10 +194,10 @@ class ActivityService {
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_COMMENTS:
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_METADATAS:
                 entityIdentifier = entityAccess.getPropertyValue("name")
-                params = [user?.username, (grailsLinkGenerator.serverBaseURL?:"") + "/project /${entityId}", entityIdentifier]
+                params = [user?.username, (grailsLinkGenerator.serverBaseURL?:"") + "/project/${entityId}", entityIdentifier]
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_SHARED:
-                params = [entityAccess.getPropertyValue("shared")?"shared" : "private"]
+                params = [(grailsLinkGenerator.serverBaseURL?:"") + "/project/${entityId}", entityAccess.getPropertyValue("name"), entityAccess.getPropertyValue("shared")?"public" : "private"]
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_NAME:
                 params = [entityAccess.getPropertyValue("name"), ((Project)entityAccess.getEntity()).getOriginalValue("name")]
@@ -460,7 +460,6 @@ class ActivityService {
                 }
             } else succeeded = true
         }
-
         return succeeded
     }
 

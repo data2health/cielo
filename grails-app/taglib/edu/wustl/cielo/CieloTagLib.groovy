@@ -127,7 +127,87 @@ class CieloTagLib {
 
         out << profilePicHtml.toString()
     }
+    /**
+     * Generate the html ESCAPED code for user profile pic in either sticker or non-sticker format. Image is read from the DB,
+     * if there is one, otherwise the default_profile.png asset is used. Same as above but the output is not raw. This is needed
+     * for the multiselect lists support of images - otherwise select2 component strips the html out and uses the text only
+     */
+    def getUserProfilePicNotRaw = { attrs, body ->
+        def principal               = springSecurityService?.principal
+        UserAccount user
+        StringBuffer profilePicHtml = new StringBuffer("")
+        StringBuffer imgClass       = new StringBuffer("activity-profile-pic")
+        StringBuffer tooltip        = new StringBuffer("")
+        int sizeOfStickerContainer  = DEFAULT_STICKER_SIZE
+        String divId = ""
+        String styles = ""
+        String tooltipOffset = ""
+        String userLink = ""
 
+        if (attrs.id) {
+            divId = "id=\"${attrs.id}\""
+        }
+
+        if (attrs.style) {
+            styles = attrs.style
+        }
+
+        if (attrs.user) {
+            user = attrs.user
+            if (attrs.showLink) {
+                userLink = grailsLinkGenerator.link(controller: "user", action: "view", id: attrs.user.id)
+            }
+        } else {
+            user = UserAccount.get(principal?.id)
+        }
+
+        if (attrs.tooltipOffset) {
+            tooltipOffset = "offset=\"${attrs.tooltipOffset}\""
+        }
+
+        if (attrs.tooltipText) {
+            tooltip << "data-toggle=\"tooltip\" data-html=\"true\" title=\"${attrs.tooltipText}\" data-placement=\"top\" ${tooltipOffset}"
+        }
+
+        if (attrs.imageSize) {
+            imgClass << (imageSizes.get(attrs.imageSize)?: imageSizes.get(DEFAULT_IMG_SIZE))
+            sizeOfStickerContainer = imageSizes.get(attrs.imageSize) ? getStickerSize(attrs.imageSize) : getStickerSize(DEFAULT_IMG_SIZE)
+        } else {
+            imgClass << imageSizes.get(DEFAULT_IMG_SIZE)
+        }
+
+        if (attrs.showLink) profilePicHtml << """<a href="${userLink}">"""
+
+        if (user) {
+            if (attrs.sticker) {
+                profilePicHtml << """<div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border" style="border: 1px solid #a9a7a785; width: ${sizeOfStickerContainer + 2}px; border-radius: 50%;">"""
+                profilePicHtml << """<div id="image-background" style="border: 2px solid #ffffff; border-radius: 50%; width: ${sizeOfStickerContainer}px; height: ${sizeOfStickerContainer}px; background-color:  white; ">"""
+
+                if (user.profile?.picture) {
+                    profilePicHtml << """<img src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
+                } else {
+                    profilePicHtml << """<img src="/assets/default_profile.png" class="${imgClass}">"""
+                }
+            } else {
+                if (user.profile?.picture) {
+                    profilePicHtml << """<img ${divId} ${tooltip.toString()} src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">""" << (attrs.showLink? "</a>" : '')
+                } else {
+                    profilePicHtml << """<img ${divId} ${tooltip.toString()} src="/assets/default_profile.png" class="${imgClass}"></a>"""
+                }
+            }
+
+        } else {
+            profilePicHtml << """<img ${tooltip.toString()} src="/assets/default_profile.png" class="${imgClass}">"""
+        }
+
+        if (attrs.showLink) profilePicHtml << "</a>"
+
+        if (attrs.sticker) {
+            profilePicHtml << """</div></div>${body()}</div>"""
+        } else { profilePicHtml << body() }
+
+        out << profilePicHtml.toString()
+    }
     /**
      * Output Yes/No instead of True/False
      */

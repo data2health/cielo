@@ -29,15 +29,17 @@ class ProjectController {
 
     @Secured('isAuthenticated()')
     def view() {
-        Object principal = springSecurityService.principal
-        UserAccount user = principal ? UserAccount.get(principal.id) : null
-        Project project =  Project.findById(Long.valueOf(params.id))
+        Object principal    = springSecurityService.principal
+        UserAccount user    = principal ? UserAccount.get(principal.id) : null
+        Project project     = Project.findById(Long.valueOf(params.id))
+        boolean showTeams   = params.teams ? Boolean.valueOf(params.teams) : false
 
         projectService.incrementViewsCounter(project)
 
         return [userProfile: user.profile,
                 annotations: Annotation.list(),
-                project: project]
+                project: project,
+                showTeams: showTeams]
     }
 
     @Secured('isAuthenticated()')

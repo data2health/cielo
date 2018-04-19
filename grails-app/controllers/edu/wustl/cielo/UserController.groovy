@@ -84,4 +84,29 @@ class UserController {
         if (!successful) flash.danger = messageSource.getMessage("user.failed.un-follow", null, Locale.getDefault())
         render([success: successful] as JSON)
     }
+
+    @Secured('isAuthenticated()')
+    def getUsersIFollow() {
+        TreeSet<UserAccount> users
+        Object principal = springSecurityService?.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+        if (user) {
+            users = user.connections
+        }
+        render(template: "/templates/addUsersDialogContent", model: [follow: users, users: UserAccount.list() - user])
+    }
+
+    @Secured('isAuthenticated()')
+    def updateUsersIFollow() {
+        boolean succeeded
+        List<Long> userIds = params."users[]"
+        Object principal = springSecurityService?.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+        if (user && (userIds?.size() > 0)) {
+            succeeded = userAccountService.updateConnections(user, userIds)
+        }
+        render([success: succeeded] as JSON)
+    }
 }

@@ -213,4 +213,62 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
             assert user.connections.size() == 2
         }
     }
+
+    void "test getUsersFollowing"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword")
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword")
+
+        when:
+            def results = service.getUsersFollowing(user)
+
+        then:
+            results.size() == 0
+
+        when:
+            user.connections.add(user2)
+            user.save()
+            results = service.getUsersFollowing(user)
+
+        then:
+            results.size() == 1
+            results.contains(user2)
+
+    }
+
+    void "test getUsersFollowingMe"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword")
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword")
+
+        when:
+            def results = service.getUsersFollowingMe(user)
+
+        then:
+            results.size() == 0
+
+        when:
+            user2.connections.add(user)
+            user2.save()
+            results = service.getUsersFollowingMe(user)
+
+        then:
+            results.size() == 1
+            results.contains(user2)
+    }
+
+    void "test updateConnections"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword")
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword")
+
+        when:
+            def results = service.getUsersFollowing(user)
+
+        then:
+            results.size() == 0
+
+        when:
+            def results2 = service.updateConnections(user, [user2.id])
+
+        then:
+            results2
+    }
 }

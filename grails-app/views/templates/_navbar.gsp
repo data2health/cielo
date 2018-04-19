@@ -35,10 +35,10 @@
                     </li>
                     <li class="li-spacer d-block d-md-none">&nbsp;</li>
                     <li class="d-block d-md-none">
-                        <a href="#">
+                        <span class="text-secondary" onclick="showUserDialog();">
                             <i class="fa fa-link"></i>
                             Connections
-                        </a>
+                        </span>
                     </li>
                     <li class="li-spacer">&nbsp;</li>
                     <li class="dropdown pull-right">
