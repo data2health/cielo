@@ -162,6 +162,20 @@ class CieloTagLibSpec extends Specification implements TagLibUnitTest<CieloTagLi
             result.contains("/assets/default_profile.png")
     }
 
+    void "test getUserProfilePicNotRaw"() {
+        def result
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+
+        springSecurityService.metaClass.principal = [id: user.id]
+        tagLib.springSecurityService = springSecurityService
+
+        when:
+        result = tagLib.getUserProfilePicNotRaw()
+
+        then:
+        result.contains("/assets/default_profile.png")
+    }
+
     void "test dateDiff"() {
         Date date = new Date()
         def result

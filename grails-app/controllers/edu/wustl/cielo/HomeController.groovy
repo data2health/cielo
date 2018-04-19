@@ -47,4 +47,20 @@ class HomeController {
             return [bundles: projectService.getMostViewedProjects(3, true)]
         }
     }
+
+    @Secured('isAuthenticated()')
+    def sidebarLeft() {
+        Object principal = springSecurityService.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+        if (user) {
+            render(template: "sidebar-left",
+                    model: [followers: userAccountService.getUsersFollowingMe(user),
+                            following: userAccountService.getUsersFollowing(user),
+                            teamsManaged: teamService.getManagedTeams(user),
+                            contributeToTeams: teamService.getTeamsContributedTo(user)
+                    ]
+            )
+        }
+    }
 }

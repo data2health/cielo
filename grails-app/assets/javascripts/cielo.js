@@ -480,7 +480,8 @@ function showAllUsersModal(id, type) {
         title: '',
         message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
         closeButton: false,
-        size: "small"
+        size: "small",
+        className: 'dark-theme'
     });
 
     //make body of dialog scrollable

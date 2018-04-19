@@ -211,6 +211,12 @@
 <script type="application/javascript">
 
     $( function() {
+        var showTeamsTab = ${showTeams};
+
+        if (showTeamsTab) {
+            $('.nav-tabs a[href="#teams"]').tab('show');
+        }
+
         $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
                 $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (-25) + 'px');
             });

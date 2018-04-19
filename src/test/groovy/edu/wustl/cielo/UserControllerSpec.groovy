@@ -103,4 +103,43 @@ class UserControllerSpec extends Specification implements ControllerUnitTest<Use
             !user.connections.contains(toFollow)
 
     }
+
+    void "test getUsersIFollow"() {
+        given:
+            UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+            UserAccount user2 = new UserAccount(username: "followMe", password: "somePassword").save()
+            springSecurityService.metaClass.principal = [id: user.id]
+            controller.userAccountService = userAccountService
+            controller.springSecurityService = springSecurityService
+
+            views["/templates/_addUsersDialogContent.gsp"] = "mock view"
+        when:
+            controller.getUsersIFollow()
+
+        then:
+            response.text == "mock view"
+    }
+
+    void "test updateUsersIFollow"() {
+        given:
+            UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+            UserAccount user2 = new UserAccount(username: "followMe", password: "somePassword").save()
+            springSecurityService.metaClass.principal = [id: user.id]
+            controller.userAccountService = userAccountService
+            controller.springSecurityService = springSecurityService
+
+        when:
+            controller.updateUsersIFollow()
+
+        then:
+            !response.json.success
+            response.reset()
+
+        when:
+            params."users[]" = [user2]
+            controller.updateUsersIFollow()
+
+        then:
+            response.json.success
+    }
 }

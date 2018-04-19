@@ -5,9 +5,11 @@
 <section class="mbr-fullscreen">
     <div class="container-fluid activity-feed">
         <div class="row">
-            <g:render template="sidebar-left" model="[followers: followers, following: following,
-                                                      teamsManaged: teamsManaged, contributeToTeams: contributeToTeams]"/>
-            <div id="collapse-panel" class="d-none d-md-block col-md-0 sidebar-parent collapse-icon-div">
+            <div id="sidebar-options" class="col-md-3 d-none d-md-block sidebar-parent">
+                <g:render template="sidebar-left" model="[followers: followers, following: following,
+                                                          teamsManaged: teamsManaged, contributeToTeams: contributeToTeams]"/>
+            </div>
+           <div id="collapse-panel" class="d-none d-md-block col-md-0 sidebar-parent collapse-icon-div">
                 <span class="collapse-icon-span">
                     <i id="sidebar-toggle-button" class="fa fa-angle-double-left collapse-icon collapse-open"></i>
                 </span>
@@ -34,4 +36,46 @@
             handleInfiniteScroll(event);
         }, false);
     });
+
+    function showUserDialog() {
+
+        if($('.navbar').attr("class").indexOf('opened') > -1) {
+            $('.navbar-toggler').click();
+        }
+
+        var usersWindow = bootbox.confirm({
+            title: '',
+            message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+            closeButton: false,
+            buttons: {
+                confirm: {
+                    label: 'Save'
+                },
+                cancel: {
+                    label: 'Cancel',
+                    className: 'btn-dark'
+                }
+            },
+            size: "medium",
+            className: "dark-theme",
+            callback: function (result) {
+            if (result === true) {
+
+                var usersSelected = $('.multiple-select').val();
+                $.post("${createLink(controller: "user", action: "updateUsersIFollow")}", {'users': usersSelected}, function (data) {
+                    if (data.success === true) {
+                        $('.activity-feed #sidebar-options').load("${createLink(controller: "home", action: "sidebarLeft")}")
+                    }
+                });
+            }
+        }
+        });
+
+        //make body of dialog scrollable
+        usersWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert");
+
+        $.get("${createLink(controller: "user", action: "getUsersIFollow")}", function (data) {
+            usersWindow.find('.bootbox-body').html(data);
+        });
+    }
 </script>

@@ -526,4 +526,54 @@ class UserAccountService {
         }
         return true
     }
+
+    /**
+     * Update the users connections
+     *
+     * @param user the user who's connections we will update
+     * @param userIds the id's of the users to follow
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean updateConnections(UserAccount user, List<Long> userIds) {
+        user.connections.clear()
+
+        userIds.each { userId ->
+            UserAccount followingUser = UserAccount.findById(userId)
+            if (followingUser) {
+                user.connections.add(followingUser)
+            }
+        }
+
+        if(!user.save()) {
+            user.errors.allErrors.each { ObjectError error ->
+                log.error(error.toString())
+            }
+            return false
+        }
+        return true
+    }
+
+    /**
+     * Get the latest list of users followed
+     *
+     * @param user the person we retrieve the list for
+     *
+     * @return list of users
+     */
+    Set<UserAccount> getUsersFollowing(UserAccount user) {
+        return user.connections
+    }
+
+    /**
+     * Get the latest list of users that are following someone
+     *
+     * @param user the user to retrieve the list for
+     *
+     * @return list of users
+     */
+    Set<UserAccount> getUsersFollowingMe(UserAccount user) {
+        return user.followers
+    }
+
 }

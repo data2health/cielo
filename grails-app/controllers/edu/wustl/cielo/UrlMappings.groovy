@@ -26,12 +26,15 @@ class UrlMappings {
 
         //Home
         "/home"(controller: "home", action: "home")
+        "/refreshLeftSidebar"(controller: "home", action: "sidebarLeft")
 
         //user
         "/user/$id"(controller: "user", action: "view")
         "/user/update/"(controller: "user", action: "updateUser")
         "/user/follow/"(controller: "user", action: "followUser")
         "/user/unFollow/"(controller: "user", action: "unFollowUser")
+        "/user/following/"(controller: "user", action: "getUsersIFollow")
+        "/user/updateConnections"(controller: "user", action: "updateUsersIFollow")
 
         //project
         "/project/$id"(controller: "project", action: "view")

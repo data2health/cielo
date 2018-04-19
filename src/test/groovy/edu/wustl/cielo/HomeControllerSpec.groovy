@@ -11,12 +11,14 @@ class HomeControllerSpec extends Specification implements ControllerUnitTest<Hom
     ActivityService activityService
     ProjectService projectService
     SpringSecurityService springSecurityService
+    UserAccountService userAccountService
 
     void setup() {
         mockDomains(Profile)
         projectService = Mock()
         teamService = Mock()
         activityService = Mock()
+        userAccountService = Mock()
         springSecurityService = new SpringSecurityService()
     }
 
@@ -75,4 +77,23 @@ class HomeControllerSpec extends Specification implements ControllerUnitTest<Hom
             !response.redirectedUrl
             response.status == 200
     }
+
+    void "test sidebarLeft"() {
+        controller.activityService = activityService
+        controller.teamService = teamService
+        controller.projectService = projectService
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword")
+        user.save()
+
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+        controller.userAccountService = userAccountService
+
+        when:
+            controller.sidebarLeft()
+
+        then:
+            response.text.contains("Following")
+    }
+
 }
