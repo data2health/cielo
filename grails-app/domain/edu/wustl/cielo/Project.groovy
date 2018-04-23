@@ -15,6 +15,7 @@ class Project {
     String description
     Date dateCreated
     Date lastUpdated
+    Date lastChanged = new Date() //last time the someone made a change to the domain object other than updating count
     SoftwareLicense license
     List<Team> teams = []
     List<Code> codes = []
@@ -44,5 +45,6 @@ class Project {
         name(nullable: false)
         projectOwner(nullable: false)
         description(nullable: false, blank: false, maxSize: 255)
+        lastChanged(nullable: false)
     }
 }
