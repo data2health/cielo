@@ -291,6 +291,7 @@ class ProjectService {
     private void saveProjectAndLog(Project project) {
         //flush here to avoid problems with subsequent saves
         if (project) {
+            project.lastChanged = new Date()
             if (!project.save()) {
                 project.errors.allErrors.each { ObjectError error ->
                     log.error(error.toString())
@@ -472,7 +473,8 @@ class ProjectService {
                     project.license = SoftwareLicense.findById(softwareLicenseId)
                 }
 
-                project.shared = shared
+                project.shared      = shared
+                project.lastChanged = new Date()
 
                 //now save the project
                 if (!project.save()) {
@@ -690,6 +692,7 @@ class ProjectService {
             }
 
             project.teams.add(team)
+            project.lastChanged = new Date()
 
             if (!project.save()) {
                 project.errors.allErrors.each { ObjectError error ->
