@@ -59,7 +59,8 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/team/view',   access: ['isAuthenticated()']],
 	[pattern: '/templates/**', access: ['permitAll']],
 	[pattern: '/**/favicon.ico', access: ['permitAll']],
-	[pattern: '/**/cielo_icon.png', access: ['permitAll']]
+	[pattern: '/**/cielo_icon.png', access: ['permitAll']],
+	[pattern: '/verification', access: ['permitAll']]
 ]
 
 grails.plugin.springsecurity.filterChain.chainMap = [
