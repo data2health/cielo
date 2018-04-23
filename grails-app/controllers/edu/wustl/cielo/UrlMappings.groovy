@@ -73,5 +73,8 @@ class UrlMappings {
         //Errors
         "500"(view:'/error')
         "404"(view:'/notFound')
+
+        //Google domain verification
+        "/google7a73685f036100a5.html"(view: "/verification")
     }
 }
