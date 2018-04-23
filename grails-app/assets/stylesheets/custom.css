@@ -305,6 +305,32 @@ ul.list-group.list-group-flush {
     margin: 0;
 }
 
+.card-footer.team-users {
+    background-color: rgba(0, 0, 0, 0.62);
+    color: white;
+    max-width: 164px;
+    align-items: center;
+    align-content: center;
+    align-self: center;
+    text-align: center;
+    border-radius: 8px;
+    border: 2px solid #b5b5b5;
+    display: none;
+    margin-left: 20%;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.table-card {
+    border: 1px solid lightgray;
+    margin-bottom: 1em;
+    margin-top: 0.5em;
+}
+
+.myprojects-card {
+    margin-top: -10em;
+}
+
 /*From bootstrap and navbar settings for hiding menu items. Adjust when needed*/
 @media (min-width: 768px) {
     .arrow_box {
@@ -367,6 +393,18 @@ ul.list-group.list-group-flush {
 
     .myprojects-section {
         margin-top: -22em;
+    }
+
+    .card-footer.team-users {
+        margin-left: 0;
+    }
+
+    .team-deck {
+        margin-left: 3em;
+    }
+
+    .myprojects-card {
+        margin-top: 3em;
     }
 }
 
@@ -451,7 +489,6 @@ ul.list-group.list-group-flush {
 .tab-content.project-tab-content {
     margin-top: 5em;
     margin-left: -5em;
-    padding-bottom: 3em;
     word-break: keep-all;
 }
 
@@ -480,6 +517,8 @@ ul.list-group.list-group-flush {
 
 .projects-comments-header-text {
     margin-left: 75px;
+    padding-top: 1px;
+    font-size: 1.25em;
 }
 
 .scrollable-bootbox-alert {
@@ -528,12 +567,6 @@ ul.list-group.list-group-flush {
 
 .table-hover tbody tr:hover {
     background-color: #edecfe;
-}
-
-.table-card {
-    border: 1px solid lightgray;
-    margin-bottom: 1em;
-    margin-top: 0.5em;
 }
 
 .team-deck {
@@ -646,5 +679,11 @@ ul.list-group.list-group-flush {
 }
 
 .dark-theme > * > .modal-body {
+    color: white;
+}
+
+.btn-red {
+    background-color: #dc3545;
+    border-color: #dc3545;
     color: white;
 }

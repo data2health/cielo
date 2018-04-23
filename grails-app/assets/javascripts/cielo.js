@@ -41,22 +41,6 @@ $( function() {
         }
     );
 
-    $('.team-member').hover(
-        function() {
-            var cardTitle   = $(this).find('.card-title');
-            var cardFooter  = $(this).find('.card-footer');
-
-            cardTitle.show();
-            cardFooter.show();
-        },
-        function() {
-            var cardTitle   = $(this).find('.card-title');
-            var cardFooter  = $(this).find('.card-footer');
-
-            cardTitle.hide();
-            cardFooter.hide();
-        }
-    );
 
     $('.jarallax').jarallax({
         type: 'scale',
@@ -475,7 +459,7 @@ function resetImage(imageToResetTo) {
     }
 }
 
-function showAllUsersModal(id, type) {
+function showAllUsersModal(id, url) {
     var usersWindow = bootbox.alert({
         title: '',
         message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
@@ -487,17 +471,10 @@ function showAllUsersModal(id, type) {
     //make body of dialog scrollable
     usersWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert");
 
-    if (type.toLowerCase() === "activity") {
-
-        $.get("/activity/getCommentLikeUsers/" + id, function (data) {
-            usersWindow.find('.bootbox-body').html(data);
-        });
-    } else if (type.toLowerCase() === "project") {
-
-        $.get("/project/getCommentLikeUsers/" + id, function (data) {
-            usersWindow.find('.bootbox-body').html(data);
-        });
+    if (url) {
+        $.get(url, {id: id},  function (data) {
+                    usersWindow.find('.bootbox-body').html(data);});
     } else {
-        usersWindow.find('.bootbox-body').html("<div class=\"jumbotron-fluid\">type=" + type + " not supported</div>");
+        usersWindow.find('.bootbox-body').html("<div class=\"jumbotron-fluid\">" + url + " not supported</div>");
     }
 }

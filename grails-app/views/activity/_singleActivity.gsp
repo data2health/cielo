@@ -42,7 +42,7 @@
 </span>
 
 <g:if test="${activity.likedByUsers.size() > 0 && activity?.likedByUsers?.size() > 4}">
-    <button id="${activity.id}_usersLink" class="btn btn-link" style="padding: 0; margin: 0;" onclick="showAllUsersModal(${activity.id}, 'activity');">...</button>
+    <button id="${activity.id}_usersLink" class="btn btn-link" style="padding: 0; margin: 0;" onclick="showAllUsersModal(${activity.id}, '${createLink(controller: "activity", action: "getCommentLikeUsers")}');">...</button>
 </g:if>
 
 </div>

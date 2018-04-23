@@ -48,6 +48,8 @@ class UrlMappings {
         "/project/myList/"(controller: "project", action: "myProjects")
         "/project/delete/"(controller: "project", action: "deleteProject")
         "/project/public/list"(controller: "project", action: "publicProjectsList")
+        "/project/addTeam"(controller: "project", action: "addTeamToProject")
+        "/project/getTeams"(controller: "project", action: "getTeams")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")
@@ -60,6 +62,12 @@ class UrlMappings {
         "/activity/likePost"(controller: "activity", action: "likeActivity")
         "/activity/removelike"(controller: "activity", action: "removeActivityLike")
         "/activity/getUsers/"(controller: "activity", action: "getCommentLikeUsers")
+
+        //Team
+        "/team/members"(controller:"team", action: "getTeamMembers")
+        "/team/membersStrip"(controller:"team", action: "teamMembersSnippet")
+        "/team/deleteTeam"(controller: "team", action: "deleteTeam")
+        "/team/newTeam"(controller: "team", action: "newTeamForm")
 
         //Errors
         "500"(view:'/error')

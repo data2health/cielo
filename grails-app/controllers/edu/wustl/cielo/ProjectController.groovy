@@ -190,4 +190,33 @@ class ProjectController {
         }
         render([success: succeeded] as JSON)
     }
+
+    @Secured('isAuthenticated()')
+    def addTeamToProject() {
+        boolean succeeded
+        Object principal = springSecurityService.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+        String teamName = params.name
+        Long projectId = params.id ? Long.valueOf(params.id) : -1L
+        List<Long> userIds = []
+
+        if (params."members[]".class.simpleName == "String[]") {
+            userIds = params."members[]"
+        } else {
+            userIds.add(params."members[]")
+        }
+
+
+        if (user) {
+            succeeded = projectService.addTeamToProject(user, projectId, teamName, userIds)
+        }
+        render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def getTeams() {
+        Long projectId = params.id ? Long.valueOf(params.id) : -1L
+
+        render(template: "/project/teams", model: [project: Project.findById(projectId)])
+    }
 }

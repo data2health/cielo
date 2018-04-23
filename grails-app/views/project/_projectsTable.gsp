@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row justify-content-md-start">
                 <div class="col-lg-auto myprojects-section" style="padding-top: 2em;">
-                    <div class="card table-card">
+                    <div class="card table-card myprojects-card">
                         <div class="card-body" style="padding: 0; background-color: white;">
                             <h6 class="card-header">
                                 <i class="fas fa-cube"></i>&nbsp;Projects

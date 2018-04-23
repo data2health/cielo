@@ -154,12 +154,18 @@
         </div>
         <g:render template="bundles" model="[project: project]"/>
         <div class="tab-pane" id="teams" role="tabpanel" aria-labelledby="teams-tab">
-            <g:render template="teams" model="[project: project]"/>
+            <div class="container-fluid">
+                <div class="row" style="margin-left: -5em;">
+                    <div id="teams_div" class="col-lg-12" style="padding: 0;">
+                        <g:render template="teams" model="[project: project]"/>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 <div>
-    <hr>
+    <hr style="margin: 0;">
     <div class="container-fluid projects-comments-header">
         <div class="projects-comments-header-text">Posts&nbsp;<i class="far fa-comment fa-1x"></i></div>
     </div>
@@ -176,7 +182,7 @@
 
 <section class="features1" id="project-comments-section">
     <div class="container-fluid">
-        <div class="media-body">
+        <div class="media-body" style="padding: 0;">
             <div id="project-comments-body" class="card p-3 col-lg-12">
                 <div class="comment-add-box" id="project_new_comment_box_${project.id}">
                     <div class="input-group">
@@ -219,11 +225,13 @@
 
         $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
                 $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (-25) + 'px');
-            });
+        });
 
-            $('[data-toggle="tooltip"]').on('hidden.bs.tooltip', function () {
-                $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (+25) + 'px');
-            });
+        $('[data-toggle="tooltip"]').on('hidden.bs.tooltip', function () {
+            $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (+25) + 'px');
+        });
+
+        handleOnHoverForTeamMembers();
     });
 
     function showProjectCommentBox(commentId) {
@@ -460,5 +468,126 @@
 
     function resetMultiSelect() {
         $('.multiple-select').val(null).trigger("change");
+    }
+
+    function addTeam(projectId) {
+        var usersWindow = bootbox.confirm({
+            title: 'Create new team',
+            message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+            closeButton: false,
+            buttons: {
+                confirm: {
+                    label: 'Save'
+                },
+                cancel: {
+                    label: 'Cancel',
+                    className: 'btn-dark'
+                }
+            },
+            size: "large",
+            callback: function (result) {
+                if (result === true) {
+                    var teamName        = $('#teamName').val();
+                    var usersSelected = new Array();
+
+                    $.each($('.multiple-select').find(':selected'), function (index, option) {
+                        usersSelected[index] = option.value;
+                    });
+
+                    $.post("${createLink(controller: "project", action: "addTeamToProject")}", {id: projectId, name: teamName, members: usersSelected}, function (data) {
+                        if (data.success === true) {
+                            getProjectTeams(projectId);
+                        }
+                    });
+                }
+            }
+        });
+
+        //make body of dialog scrollable
+        usersWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert");
+
+        $.get("${createLink(controller: "team", action: "newTeamForm")}", function (data) {
+            usersWindow.find('.bootbox-body').html(data);
+        });
+    }
+
+    function handleOnHoverForTeamMembers() {
+        $('.team-member').hover(
+            function() {
+                var cardTitle   = $(this).find('.card-title');
+                var cardFooter  = $(this).find('.card-footer');
+
+                cardTitle.show();
+                cardFooter.show();
+            },
+            function() {
+                var cardTitle   = $(this).find('.card-title');
+                var cardFooter  = $(this).find('.card-footer');
+
+                cardTitle.hide();
+                cardFooter.hide();
+            }
+        );
+    }
+
+    function editTeamMembers(teamId, projectId) {
+        var getUrl = "${createLink(controller: 'team', action:'getTeamMembers')}";
+        var updateTeamMembersUrl = "${createLink(controller: 'team', action:'updateTeamUsers')}";
+
+        if($('.navbar').attr("class").indexOf('opened') > -1) {
+            $('.navbar-toggler').click();
+        }
+
+        var usersWindow = bootbox.confirm({
+            title: '',
+            message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+            closeButton: false,
+            buttons: {
+                confirm: {
+                    label: 'Save'
+                },
+                cancel: {
+                    label: 'Cancel',
+                    className: 'btn-dark'
+                }
+            },
+            size: "medium",
+            className: "dark-theme",
+            callback: function (result) {
+                if (result === true) {
+                    var usersSelected = new Array();
+
+                    $.each($('.multiple-select').find(':selected'), function (index, option) {
+                        usersSelected[index] = option.value;
+                    });
+
+                    $.post("${createLink(controller: "team", action: "updateTeamUsers")}", {id: teamId, users: usersSelected}, function (data) {
+                        if (data.success === true) {
+                            $("#accordion_" + teamId + " #team_" + teamId).load("${createLink(controller: "team", action: "teamMembersSnippet")}", {teamId: teamId, projectId: projectId});
+                            handleOnHoverForTeamMembers();
+                        }
+                    });
+                }
+            }
+        });
+
+        //make body of dialog scrollable
+        usersWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert");
+
+        $.get(getUrl, {id: teamId}, function (data) {
+            usersWindow.find('.bootbox-body').html(data);
+        });
+    }
+
+    function deleteTeam(teamId, projectId) {
+        $.post("${createLink(controller: "team", action: "deleteTeam")}", {projectId: projectId, teamId: teamId}, function (data) {
+            if (data.success === true) {
+                getProjectTeams(projectId);
+            }
+        });
+    }
+
+    function getProjectTeams(projectId) {
+        $("#teams #teams_div").load("${createLink(controller: "project", action: "getTeams")}", {id: projectId});
     }
 </script>

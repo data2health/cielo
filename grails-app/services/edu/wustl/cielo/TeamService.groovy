@@ -65,4 +65,73 @@ class TeamService {
         }
         return teamsUserContributesTo
     }
+
+    /**
+     * Get list of members of a team
+     *
+     * @param teamId the team to get the members from
+     *
+     * @return list of members
+     */
+    ArrayList<UserAccount> getTeamMembers(Long teamId) {
+        return Team.findById(teamId).members
+    }
+
+    /**
+     * Update the members of a team
+     *
+     * @param userAccount the user initiating the change
+     * @param teamId the team that we are modifying the members for
+     * @param userIds the members to be associated to the team
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean updateTeamMembers(UserAccount userAccount, Long teamId, List<Long> userIds) {
+        Team team = Team.findById(teamId)
+
+        if (team) {
+            if (team.administrator.equals(userAccount)) {
+                team.members.clear()
+                userIds.each { Long id ->
+                    UserAccount member = UserAccount.findById(id)
+                    if (member) {
+                        team.members.add(member)
+                    }
+                }
+                if (!team.save()) {
+                    team.errors.allErrors.each { ObjectError error ->
+                        log.error(error.toString())
+                    }
+                    return false
+                }
+                return true
+            }
+        }
+    }
+
+    /**
+     * Delete a team that is associated to a given project
+     *
+     * @param teamId the id of the team to delete
+     * @param projectId the project the team is associated with
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean deleteTeam(Long teamId, Long projectId) {
+        Project project = Project.findById(projectId)
+        Team team       = Team.findById(teamId)
+
+        if (project && team) {
+            project.removeFromTeams(team)
+
+            if (!project.save()) {
+                project.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+            team.delete()
+            return true
+        }
+    }
 }
