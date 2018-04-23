@@ -56,6 +56,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/team/teamMembersSnippet',   access: ['isAuthenticated()']],
 	[pattern: '/team/deleteTeam',   access: ['isAuthenticated()']],
 	[pattern: '/team/newTeamForm',   access: ['isAuthenticated()']],
+	[pattern: '/team/view',   access: ['isAuthenticated()']],
 	[pattern: '/templates/**', access: ['permitAll']],
 	[pattern: '/**/favicon.ico', access: ['permitAll']],
 	[pattern: '/**/cielo_icon.png', access: ['permitAll']]

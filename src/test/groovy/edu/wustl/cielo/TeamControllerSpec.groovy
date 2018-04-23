@@ -132,4 +132,28 @@ class TeamControllerSpec extends Specification implements ControllerUnitTest<Tea
         then:
             response.text == "mock data"
     }
+
+    void "test view"() {
+        when:
+            controller.view()
+
+        then:
+            response.status == 302
+            flash.danger
+            response.reset()
+
+        when:
+            flash.danger = null
+            SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                    url: "http://www.rerlicense.com").save()
+            Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                    description: "some description", shared: true).save()
+            Team team = new Team(name: "Team1", administrator: user).save()
+            params.id = team.id
+            controller.view()
+
+        then:
+            response.status == 302
+            !flash.danger
+    }
 }

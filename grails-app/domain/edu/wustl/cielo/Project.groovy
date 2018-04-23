@@ -45,6 +45,6 @@ class Project {
         name(nullable: false)
         projectOwner(nullable: false)
         description(nullable: false, blank: false, maxSize: 255)
-        lastChanged(nullable: false)
+        lastChanged(nullable: true)
     }
 }

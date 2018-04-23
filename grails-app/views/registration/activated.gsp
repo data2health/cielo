@@ -10,7 +10,6 @@
             <div class="col-lg-12">
                 <div class="form-container">
                     <div class="media-container-column">
-                        <g:render template="/templates/alerts"/>
                         <p style="padding: 100px; text-align: left;">
                         <g:if test="${successful}">
                         You have successfully activated your account. Please go to the login page <a href="${link}">here</a>

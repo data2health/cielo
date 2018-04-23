@@ -78,5 +78,6 @@
     </div>
 </section>
 <g:render template="/templates/scriptFiles"/>
+<g:render template="/templates/alerts"/>
 </body>
 </html>

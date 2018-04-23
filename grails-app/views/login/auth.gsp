@@ -1,4 +1,4 @@
-<g:render template="/templates/headerIncludes"/>
+ <g:render template="/templates/headerIncludes"/>
 <g:render template="/templates/navbar"/>
 
 <section class="engine"></section><section class="cid-qIklYeJO9W mbr-fullscreen jarallax-scroll" id="header15-w">
@@ -14,7 +14,6 @@
                 </p>
             </div>
         </div>
-        <g:render template="/templates/alerts"/>
         <div class="row">
             <div class="col-lg-12">
                 <div class="form-container">

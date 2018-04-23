@@ -6,6 +6,7 @@ import grails.converters.JSON
 class TeamController {
     def teamService
     def springSecurityService
+    def messageSource
 
     @Secured('isAuthenticated()')
     def getTeamMembers() {
@@ -67,6 +68,27 @@ class TeamController {
 
         if (user) {
             render(template: "newTeam", model: [users: UserAccount.list() - user])
+        }
+    }
+
+    @Secured('isAuthenticated()')
+    def view() {
+        Long teamId = params.id ? Long.valueOf(params.id) : -1L
+        Team team = Team.findById(teamId)
+
+        if (team) {
+            Project project
+            Project.list().each {
+                if (it.teams.contains(team)) project = it
+            }
+
+            if (project) {
+                redirect(controller: "project", action: "view",  params: [id: project.id, teams: true])
+            } else redirect(url: request.getHeader("referer"))
+        } else {
+            flash.danger = messageSource.getMessage('team.doesNotExist', null, 'Team has been deleted',
+                    request.locale)
+            redirect(url: request.getHeader("referer"))
         }
     }
 }
