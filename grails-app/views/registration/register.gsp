@@ -14,7 +14,6 @@
                 </p>
             </div>
         </div>
-        <g:render template="/templates/alerts"/>
         <div class="row">
             <div class="col-lg-12">
                 <div class="form-container">

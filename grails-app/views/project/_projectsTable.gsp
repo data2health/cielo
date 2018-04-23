@@ -69,7 +69,7 @@
                                             <g:dateDiff date="${project.dateCreated}"/>
                                         </td>
                                         <td>
-                                            <g:dateDiff date="${project.lastChanged}"/>
+                                            <g:dateDiff date="${project.lastChanged?: project.lastUpdated}"/>
                                         </td>
                                         <g:if test="${usersProject}">
                                             <td style="text-align: right;"><i class="fas fa-trash-alt" onclick="deleteProject(${project.id}, '${project.name}');"></i></td>

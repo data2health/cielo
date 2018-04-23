@@ -478,3 +478,43 @@ function showAllUsersModal(id, url) {
         usersWindow.find('.bootbox-body').html("<div class=\"jumbotron-fluid\">" + url + " not supported</div>");
     }
 }
+
+function showAlert(message, level) {
+    var backgroundColor;
+    var title;
+    var icon;
+
+    switch (level.toLowerCase()) {
+        case 'danger':
+            icon = "fas fa-times";
+            title = "Error";
+            backgroundColor = "#ffafb4f6";
+            break;
+        case 'success':
+            icon = "far fa-check-circle";
+            title = "Success";
+            backgroundColor = "#a6efb8f6";
+            break;
+        case 'warning':
+            icon = "fas fa-exclamation-triangle";
+            title = "Warning";
+            backgroundColor = "#ffcfa5f6";
+            break;
+        default:
+            icon = "fas fa-info-circle";
+            title = "Info";
+            backgroundColor = "#9ddefff6";
+    }
+
+    iziToast.show({
+        title: title,
+        icon: icon,
+        message: message,
+        position: 'topCenter',
+        progressBarColor: '#a6efb8',
+        backgroundColor: backgroundColor,
+        zindex: 1040
+    });
+    $('.iziToast-wrapper').removeClass('iziToast-wrapper-topCenter');
+    $('.iziToast-wrapper').addClass('iziToast-wrapper-topRight');
+}

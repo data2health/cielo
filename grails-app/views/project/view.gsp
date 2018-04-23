@@ -59,7 +59,7 @@
                         Managed by ${project?.projectOwner?.profile?.firstName} ${project?.projectOwner?.profile?.lastName}<br>
                         <span>${project?.projectOwner?.profile?.institution.fullName}</span><br>
                         <span style="font-size: 80%; font-style: oblique;">
-                            Last updated <g:dateDiff date="${project?.lastChanged}"/>
+                            Last updated <g:dateDiff date="${project?.lastChanged?:project.lastUpdated}"/>
                         </span>
                         <span style="font-size: 80%; font-style: oblique;"></span>
                     </div>

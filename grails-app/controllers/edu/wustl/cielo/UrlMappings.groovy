@@ -68,6 +68,7 @@ class UrlMappings {
         "/team/membersStrip"(controller:"team", action: "teamMembersSnippet")
         "/team/deleteTeam"(controller: "team", action: "deleteTeam")
         "/team/newTeam"(controller: "team", action: "newTeamForm")
+        "/team/$id"(controller: "team", action: "view")
 
         //Errors
         "500"(view:'/error')
