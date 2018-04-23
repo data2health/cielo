@@ -207,7 +207,6 @@ class UserAccountService {
                 log.info("\tSaved default admin role")
             } else {
                 throw new Exception("Could not set the admin's authority. Exiting")
-                System.exit(-1)
             }
         }
     }

@@ -351,4 +351,73 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         then:
             !response.json.success
     }
+
+    void "test addTeamToProject"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description", shared: true).save()
+        Project project2 = new Project(projectOwner: user2, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        projectService.metaClass.addTeamToProject = { UserAccount userAccount, Long projectId,
+                String teamName, List<Long> userIds ->
+            return true
+        }
+
+        controller.projectService = projectService
+
+        when:
+            params.name         = "The Avengers"
+            params.id           = project.id
+            params."members[]"  = [user2.id]
+            controller.addTeamToProject()
+
+        then:
+            response.json.success
+    }
+
+    void "test getTeams"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description", shared: true).save()
+        Project project2 = new Project(projectOwner: user2, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        projectService.metaClass.addTeamToProject = { UserAccount userAccount, Long projectId,
+                                                      String teamName, List<Long> userIds ->
+            return true
+        }
+
+        controller.projectService = projectService
+
+        views["/project/_teams.gsp"] = "addTeamToolbar"
+
+        when:
+            params.name         = "The Avengers"
+            params.id           = project.id
+            params."members[]"  = [user2.id]
+            controller.addTeamToProject()
+
+        then:
+            response.json.success
+            response.reset()
+
+        when:
+            params.id = project.id
+            def result = controller.getTeams()
+
+        then:
+            response.text == "addTeamToolbar"
+    }
+
 }

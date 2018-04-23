@@ -23,6 +23,7 @@ class TeamServiceSpec extends Specification implements ServiceUnitTest<TeamServi
             new ByteArrayResource(new File(assetsRoot + "/images/${URI}").bytes)
         }]
     }
+
     void "test bootstrapTeams"() {
         given: "no teams"
             Team.list() == []
@@ -55,5 +56,56 @@ class TeamServiceSpec extends Specification implements ServiceUnitTest<TeamServi
             Team.list().each { team ->
                 assert team.members.size() == 2
             }
+    }
+
+    void "test getTeamMembers"() {
+        InstitutionService institutionService = new InstitutionService()
+        institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
+        AnnotationService annotationService = new AnnotationService()
+        annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+        userAccountService.bootstrapUserRoles()
+        userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
+        userAccountService.setupMockAppUsers(4, 0)
+        service.bootstrapTeams(3,2)
+
+        when:
+            Team team = Team.list().take(1)[0]
+            ArrayList<UserAccount> users = service.getTeamMembers(team.id)
+
+        then:
+            users.each { UserAccount userAccount ->
+                team.members.contains(userAccount)
+            }
+
+    }
+
+    void "test updateTeamMembers"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+
+        when:
+            def result = service.updateTeamMembers(user, team.id, [user2.id])
+
+        then:
+            result
+    }
+
+    void "test deleteTeam"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description", shared: true).save()
+
+        project.teams.add(team)
+
+        when:
+            def result = service.deleteTeam(team.id, project.id)
+
+        then:
+            result
     }
 }

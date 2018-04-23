@@ -1,6 +1,6 @@
 <select class="multiple-select dark-theme" id="follow-users-select" multiple="multiple">
     <g:each in="${users}" var="user">
-        <g:if test="${follow.contains(user)}">
+        <g:if test="${follow?.contains(user)}">
             <option value="${user.id}" selected="selected">
         </g:if>
         <g:else>

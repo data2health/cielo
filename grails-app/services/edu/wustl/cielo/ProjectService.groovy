@@ -658,6 +658,50 @@ class ProjectService {
     }
 
     /**
+     * Add a new team to an existing project
+     *
+     * @param user the user who is the administrator for the team
+     * @param projectId the id of the project the team belongs to
+     * @param teamName the name of the new team
+     * @param members the list of ids for the members of the team
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean addTeamToProject(UserAccount user, Long projectId, String teamName, List<Long> members) {
+        Project project = Project.findById(projectId)
+
+        if (project && members.size() > 0 && teamName) {
+
+            Team team = new Team([name: teamName])
+            team.administrator = user
+
+            members.each { userId ->
+                UserAccount member = UserAccount.findById(userId)
+                if (member) {
+                    team.members.add(member)
+                }
+            }
+
+            if (!team.save()) {
+                team.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+
+            project.teams.add(team)
+
+            if (!project.save()) {
+                project.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+            return true
+        }
+    }
+
+    /**
      * Is the logged in user the owner or contributor to a project
      *
      * @param project the project to check
