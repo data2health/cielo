@@ -50,6 +50,8 @@ class UrlMappings {
         "/project/public/list"(controller: "project", action: "publicProjectsList")
         "/project/addTeam"(controller: "project", action: "addTeamToProject")
         "/project/getTeams"(controller: "project", action: "getTeams")
+        "/project/newProject"(controller: "project", action: "newProject")
+        "/project/saveProject"(controller: "project", action: "saveProject")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")

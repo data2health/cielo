@@ -14,6 +14,9 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         projectService = new ProjectService()
         springSecurityService = new SpringSecurityService()
         mockDomains(Profile, UserAccount, UserAccountUserRole)
+
+        messageSource.addMessage('project.creation.succeeded', Locale.getDefault(), "hello")
+        messageSource.addMessage('project.creation.failed', Locale.getDefault(), "hello")
     }
 
     void "test getMostPopularProjects"() {
@@ -420,4 +423,49 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
             response.text == "addTeamToolbar"
     }
 
+    void "test newProject"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+
+        views["/project/_newProjectWizard.gsp"] = "newProjectWizard Dialog"
+
+        when:
+            controller.newProject()
+
+        then:
+            response.text == "newProjectWizard Dialog"
+    }
+
+
+    void "test SaveProject"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+
+        when:
+            projectService.metaClass.saveNewProject = { UserAccount userAccount, Project project, ArrayList annotations,
+                                                        Long licenseId, String teamName, ArrayList teamMembers ->
+                return true
+            }
+            controller.projectService = projectService
+            controller.saveProject()
+
+        then:
+            flash.info
+            response.json.success
+
+        when:
+            response.reset()
+            projectService.metaClass.saveNewProject = { UserAccount userAccount, Project project, ArrayList annotations,
+                                                        Long licenseId, String teamName, ArrayList teamMembers ->
+                return false
+            }
+            controller.projectService = projectService
+            controller.saveProject()
+
+        then:
+            flash.danger
+            !response.json.success
+    }
 }
