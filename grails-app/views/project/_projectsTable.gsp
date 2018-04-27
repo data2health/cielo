@@ -6,7 +6,11 @@
                     <div class="card table-card myprojects-card">
                         <div class="card-body" style="padding: 0; background-color: white;">
                             <h6 class="card-header">
-                                <i class="fas fa-cube"></i>&nbsp;Projects
+                                <i class="fas fa-cube"></i>&nbsp;Projects&nbsp;
+                                <button type="button" onclick="showNewProjectWizard()" class="btn btn-primary"
+                                        style="margin: 0; padding: 3px;">
+                                    <i class="fas fa-plus"></i>
+                                </button>
                             </h6>
                             <table class="table table-hover table-responsive" style="min-height: 300px;
                             background-color: white;">
@@ -31,7 +35,14 @@
                                     <tr>
                                         <th scope="row">${count}</th>
                                         <td><a class="btn btn-link" style="padding-top:0; margin: 0;" href="${createLink(controller: "project", action: "view", id: project.id)}">${project.name}</a></td>
-                                        <td data-toggle="tooltip" title="${project.description}">${project.description.substring(0,20)}...</td>
+                                        <td data-toggle="tooltip" title="${project.description}">
+                                            <g:if test="${project.description.size() > 20}">
+                                                ${project.description.substring(0,20)}...
+                                            </g:if>
+                                            <g:else>
+                                                ${project.description}
+                                            </g:else>
+                                        </td>
                                         <td>
                                             <button id="softwareLicenseButton" onclick="showSoftwareLicense(${project.license.id}, '${project.license.label}')"
                                                     class="btn btn-link" style="padding: 0; margin: 0; margin-left: -2px;">
@@ -49,7 +60,7 @@
                                         </td>
                                         <td>
                                             <g:if test="${project.teams}">
-                                                <g:set var="numberOfTeams" value="${project.teams.size()}"/>
+                                                <g:set var="numberOfTeams" value="${project.teams?.size()}"/>
                                                 <g:set var="index" value="${1}"/>
                                                 <g:each in="${project.teams}" var="team">
                                                     <g:if test="${index == 1}">

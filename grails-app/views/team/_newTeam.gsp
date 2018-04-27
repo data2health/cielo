@@ -17,7 +17,7 @@
             </label>
         </div>
         <div class="col-md-7">
-            <select class="multiple-select form-control" id="members" multiple="multiple">
+            <select class="multiple-select form-control multi-users" id="members" multiple="multiple">
                 <g:each in="${users}" var="user">
                     <option value="${user.id}">
                     <g:getUserProfilePicNotRaw user="${user}" sticker="${false}" showLink="${true}">
