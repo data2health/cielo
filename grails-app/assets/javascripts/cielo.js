@@ -518,3 +518,90 @@ function showAlert(message, level) {
     $('.iziToast-wrapper').removeClass('iziToast-wrapper-topCenter');
     $('.iziToast-wrapper').addClass('iziToast-wrapper-topRight');
 }
+
+function showNewProjectWizard() {
+    var dialog = bootbox.dialog({
+        title: ' ',
+        className: "new-project-wizard",
+        message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+        closeButton: false,
+        size: 'large',
+        buttons: {
+            previous: {
+                id: 'previous-button',
+                label: "<i class='far fa-arrow-alt-circle-left'></i>",
+                className: 'btn-link wizard-button previous',
+                callback: function() {
+                    var stepId = $('.current-step').attr('id');
+                    handlePrevious();
+                    return false;
+                }
+            },
+            next: {
+                id: 'next-button',
+                label: "<i class='far fa-arrow-alt-circle-right'></i>",
+                className: 'btn-link wizard-button next',
+                callback: function(){
+                    handleNext();
+                    return false;
+                }
+            },
+            cancel: {
+                label: "Cancel",
+                className: 'btn-red cancel-btn'
+            },
+            ok: {
+                label: "Continue",
+                className: 'btn-primary continue-btn',
+                callback: function(){
+                    var idOfCurrentStep     = $($('#screens').find('.screen.current-step')).attr('id');
+                    var indexOfCurrentStep  = window.stepIds.indexOf(idOfCurrentStep);
+                    var indexOfNextStep     = indexOfCurrentStep + 1;
+                    var idOfNextStep        = window.stepIds[indexOfNextStep];
+
+                    //hide the form body and get next one to show
+                    transitionStep(idOfCurrentStep, idOfNextStep, indexOfNextStep);
+
+                    $('.continue-btn').hide();
+                    $('.cancel-btn').hide();
+                    $('.cancel-btn').css('right', '3em');
+                    $('.cancel-btn').show();
+
+                    //show other controls
+                    $('.wizard-button.previous').css('display', 'flex');
+                    $('.wizard-button.next').css('display', 'flex');
+
+                    return false
+                }
+            },
+            finish: {
+                label: "Save Project",
+                className: 'finish-btn btn-primary',
+                callback: function() {
+                    handleSave();
+                }
+            }
+        }
+    });
+
+    dialog.init(function(){
+        $('.wizard-button.previous').css('display', 'none');
+        $('.wizard-button.next').css('display', 'none');
+        $('.finish-btn').css('display', 'none');
+        $('.modal-footer').css('display', 'inline-flex');
+
+        $.get("/project/newProject", function (data) {
+            $('.modal-body').html(data);
+
+            var wizardWindows = $('#screens').find('.screen');
+            window.stepIds = new Array(wizardWindows.length);
+
+            wizardWindows.each( function(index) {
+                window.stepIds[index] = $(wizardWindows[index]).attr('id');
+            });
+
+            //initial title
+            $('.modal-header').html($('#' + window.stepIds[0] + '_title').clone());
+        });
+    });
+}

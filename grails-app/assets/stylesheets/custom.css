@@ -687,3 +687,33 @@ ul.list-group.list-group-flush {
     border-color: #dc3545;
     color: white;
 }
+
+.wizard-button {
+    background-color: white;
+    color: #007bff;
+    font-size: 3em;
+    border: none;
+    outline: #ffffff;
+    padding: 0;
+    top: 0;
+}
+
+.wizard-button:hover {
+    text-decoration: none;
+}
+
+.wizard-button.previous {
+    position: absolute;
+    left: 1em;
+    top: 0.1em;
+}
+
+.wizard-button.next {
+    position: absolute;
+    right: 1em;
+    top: 0.1em;
+}
+
+.modal-title.offset-title {
+    margin-left: 5em;
+}
