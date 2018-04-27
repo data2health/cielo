@@ -58,10 +58,11 @@
                                 </a>
                             </li>
                             <li>
-                                <a role="link" href="#">
+                                <button type="button" class="btn btn-link" onclick="showNewProjectWizard();"
+                                        style="padding: 0;color: #149dcc;font-weight: 400; margin: 0;margin-left: 1em;">
                                     <i class="fa fa-plus"></i>
-                                    Create Project
-                                </a>
+                                    New Project
+                                </button>
                             </li>
                         </ul>
                     </li>

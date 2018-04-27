@@ -776,4 +776,39 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         then:
             project.getTeams().size() == 1
     }
+
+    void "test getNewEmptyProjectForUser"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+
+        when:
+            project = service.getNewEmptyProjectForUser(user)
+
+        then:
+            project
+            project.projectOwner == user
+    }
+
+    void "test saveNewProject"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description")
+
+        when:
+            service.saveNewProject(user, project, null, softwareLicense.id, "", null)
+
+        then:
+            project.id
+
+        when:
+            service.saveNewProject(user, project, null, softwareLicense.id, "My team", new ArrayList<Long>([user2.id]))
+
+        then:
+            project.teams[0].name == "My team"
+            project.teams[0].members.contains(user2)
+
+    }
 }

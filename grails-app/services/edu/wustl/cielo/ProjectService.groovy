@@ -605,7 +605,7 @@ class ProjectService {
         int numberOfProjects = Project.findAllByProjectOwner(user).size()
 
         if (numberOfProjects == 0 || numberOfProjects <= max) return 1
-        else return numberOfProjects / max
+        else return Math.ceil(numberOfProjects / max).toInteger().intValue()
     }
 
     /**
@@ -656,7 +656,7 @@ class ProjectService {
         int numberOfProjects = Project.findAllByShared(true).size()
 
         if (numberOfProjects == 0 || numberOfProjects <= max) return 1
-        else return numberOfProjects / max
+        else return Math.ceil(numberOfProjects / max).toInteger().intValue()
     }
 
     /**
@@ -705,6 +705,73 @@ class ProjectService {
     }
 
     /**
+     * Create an empty project with just owner set
+     *
+     * @param projectOwner the user that is creating the new project
+     *
+     * @return a project (un-saved)
+     */
+    Project getNewEmptyProjectForUser(UserAccount owner) {
+        return new Project(projectOwner: owner)
+    }
+
+    /**
+     * Save a new project
+     *
+     * @param projectAdmin the user creating the project
+     * @param project the project, bound to params in controller, to save
+     * @param annotationIds a list of annotation ids to apply to project
+     * @param softwareLicenseId the id of the software license
+     * @param teamName (optional) a new team name
+     * @param teamMembers (optional) members of team
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean saveNewProject(UserAccount projectAdmin, Project project, ArrayList<Long> annotationIds, Long softwareLicenseId,
+                           String teamName, ArrayList<Long> teamMembers) {
+
+        project.projectOwner = projectAdmin
+
+        if (teamName) {
+
+            Team team = new Team(name: teamName, administrator: projectAdmin)
+            teamMembers.each { memberId ->
+                UserAccount userAccount = UserAccount.findById(memberId)
+                if (userAccount) {
+                    team.members.add(userAccount)
+                }
+            }
+
+            if (!team.save()) {
+                team.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+            project.teams.add(team)
+        }
+
+        annotationIds.each { id ->
+            Annotation annotation = Annotation.findById(id)
+
+            if (annotation) {
+                project.annotations.add(annotation)
+            }
+        }
+
+        SoftwareLicense softwareLicense = SoftwareLicense.findById(softwareLicenseId)
+        if (softwareLicense) project.license = softwareLicense
+
+        if (!project.save()) {
+            project.errors.allErrors.each { ObjectError error ->
+                log.error(error.toString())
+            }
+            return false
+        }
+        return true
+    }
+
+    /**
      * Is the logged in user the owner or contributor to a project
      *
      * @param project the project to check
@@ -719,7 +786,7 @@ class ProjectService {
         List<UserAccount> contributors  = new ArrayList<UserAccount>()
 
         project.teams?.each { Team team ->
-            contributors.addAll(team.members) //.each { UserAccount}
+            contributors.addAll(team.members)
         }
 
         //only should increment if the viewing user is not a contributor or owner of project

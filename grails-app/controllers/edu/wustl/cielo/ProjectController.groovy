@@ -8,6 +8,7 @@ class ProjectController {
 
     ProjectService projectService
     def springSecurityService
+    def messageSource
 
     static allowedMethods = [save: "POST"]
 
@@ -218,5 +219,49 @@ class ProjectController {
         Long projectId = params.id ? Long.valueOf(params.id) : -1L
 
         render(template: "/project/teams", model: [project: Project.findById(projectId)])
+    }
+
+    @Secured('isAuthenticated()')
+    def newProject() {
+        Object principal        = springSecurityService.principal
+        UserAccount user        = principal ? UserAccount.get(principal.id) : null
+
+       render(template: "newProjectWizard", model: [annotations: Annotation.list(),
+                                                    licences: SoftwareLicense.list(),
+                                                    users: UserAccount.list() - user])
+    }
+
+    @Secured('isAuthenticated()')
+    def saveProject() {
+        boolean succeeded
+        String teamName
+        Object principal        = springSecurityService.principal
+        UserAccount user        = principal ? UserAccount.get(principal.id) : null
+        ArrayList annotations   = []
+        ArrayList teamMembers   = []
+        Long licenseId          = -1L
+        Project project
+
+        if (user) {
+            project = projectService.getNewEmptyProjectForUser(user)
+            bindData(project, params, [exclude: ['annotations']])
+
+            if (params.annotations) {
+                annotations         = params.annotations.tokenize(',').collect { Long.valueOf(it) }
+            }
+
+            if (params.teamName) {
+                teamName    = params.teamName
+                teamMembers = params.members.tokenize(',').collect { Long.valueOf(it) }
+            }
+
+            if (params.license) licenseId = Long.valueOf(params.license)
+
+            succeeded = projectService.saveNewProject(user, project, annotations, licenseId, teamName, teamMembers)
+
+            if (!succeeded) flash.danger = messageSource.getMessage("project.creation.failed", null, Locale.getDefault())
+            else flash.info = messageSource.getMessage("project.creation.succeeded", null, Locale.getDefault())
+        }
+        render([success: succeeded] as JSON)
     }
 }

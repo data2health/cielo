@@ -52,6 +52,8 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/project/publicProjectsList',   access: ['isAuthenticated()']],
 	[pattern: '/project/addTeamToProject',   access: ['isAuthenticated()']],
 	[pattern: '/project/getTeams',   access: ['isAuthenticated()']],
+	[pattern: '/project/newProject',   access: ['isAuthenticated()']],
+	[pattern: '/project/saveProject',   access: ['isAuthenticated()']],
 	[pattern: '/team/getTeamMembers',   access: ['isAuthenticated()']],
 	[pattern: '/team/teamMembersSnippet',   access: ['isAuthenticated()']],
 	[pattern: '/team/deleteTeam',   access: ['isAuthenticated()']],

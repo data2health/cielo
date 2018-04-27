@@ -1,7 +1,6 @@
 <g:render template="/templates/headerIncludes"/>
 <g:render template="/templates/navbar"/>
 
-<section class="engine"></section>
 <div class="mbr-fullscreen jarallax" id="header2-8">
     <asset:image src="clouds-hd-wallpaper-landscape-67832.jpg" class="jarallax-img"/>
     <div class="mbr-overlay" style="opacity: 0.2; background-color: rgb(15, 118, 153);"></div>
