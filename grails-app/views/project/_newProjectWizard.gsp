@@ -130,10 +130,12 @@
 
 
         //For file inputs: data and code are optional
-        $( "input:file" ).each( function () {
+        $('input:file').each( function () {
            var elementId    = $(this).attr('id');
            var file         = document.getElementById(elementId).files[0];
-            formData.append(elementId, file);
+           if (typeof file !== undefined) {
+               formData.append(elementId, file);
+           }
         });
 
         $.ajax({

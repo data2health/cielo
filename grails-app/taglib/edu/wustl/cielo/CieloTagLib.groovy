@@ -253,29 +253,26 @@ class CieloTagLib {
                 } else {
                     long days = from.until(today, ChronoUnit.DAYS)
 
-                    if (days) {
+                    if (!(days < 0L)) {
                         if (days > 1L) {
                             returnVal = "${days} days ago"
                         } else {
-                            //here it is technically not a full day difference (based on hours) so check the day value
-                            //and use it instead
-                            def diff = today.date.day - from.date.day
+                            def daysDiff = today.date.day - from.date.day
 
-                            if (diff) {
-                                if (diff == 1) returnVal = "yesterday"
-                                else returnVal = "${diff} days ago"
-                            } else {
-                                returnVal = "today"
-                            }
+                            if   (daysDiff == 1L) returnVal = "yesterday"
+                            else  returnVal = "today"
                         }
                     } else {
-                        def diff = today.date.day - from.date.day
+                        //must be either hours or something smaller than that
+                        def hoursDiff = from.until(today, ChronoUnit.HOURS)
 
-                        if (diff) {
-                            if (diff == 1) returnVal = "yesterday"
-                            else returnVal = "${diff} days ago"
+                        if (hoursDiff) {
+                            returnVal = "${hoursDiff} hours ago"
                         } else {
-                            returnVal = "today"
+                            def minutesDiff = from.until(today, ChronoUnit.MINUTES)
+
+                            if (minutesDiff) returnVal = "${minutesDiff} minutes ago"
+                            else returnVal = "seconds ago"
                         }
                     }
                 }

@@ -11,7 +11,7 @@
     <div class="container-fluid">
         <div class="row justify-content-md-start">
             <div class="col-md-2" style="margin-right: -70px; align-self: center;">
-                <span class="display-4" style="font-size: 2em;padding-left: 2em;">Public Projects</span>
+                <span class="display-4" style="font-size: 2em;padding-left: 2em; white-space: nowrap;">Public Projects</span>
             </div>
         </div>
     </div>

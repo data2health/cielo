@@ -33,9 +33,13 @@ class UserController {
         if (params.userId) user = UserAccount.findById(Long.valueOf(params.userId))
 
         if (user) {
-            bindData(user, params)
+            bindData(user, params, [exclude: ['password']])
             if (user.id) {
                 if (user.profile) bindData(user.profile, params)
+                if (params.profilePic) {
+                    user.profile.picture.fileContents  = params.profilePic.bytes
+                    user.profile.picture.fileExtension = params.profilePic.filename.tokenize('.')[1]
+                }
             }
 
             userUpdated = userAccountService.updateUser(user)
