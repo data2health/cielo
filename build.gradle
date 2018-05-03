@@ -3,7 +3,7 @@ buildscript {
         bootstrapFrameworkVersion = "1.0.3"
         grailsVersion = project.grailsVersion
         bootstrapFramework = [
-                version             : "4.0.0",
+                version             : "4.1.1",
                 //cssPath             : "",
                 //jsPath              : "",
                 useIndividualJs: true,
@@ -82,6 +82,7 @@ dependencies {
     compile 'com.thedeanda:lorem:2.1'
     compile 'com.mailjet:mailjet-client:4.1.1'
     compile 'org.grails.plugins:quartz:2.0.13'
+    compile 'com.google.cloud:google-cloud-storage:1.26.0'
     console "org.grails:grails-console"
     profile "org.grails.profiles:web"
     runtime "org.glassfish.web:el-impl:2.1.2-b03"

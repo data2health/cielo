@@ -7,12 +7,14 @@
                         <div class="card-body" style="padding: 0; background-color: white;">
                             <h6 class="card-header">
                                 <i class="fas fa-cube"></i>&nbsp;Projects&nbsp;
-                                <button type="button" onclick="showNewProjectWizard()" class="btn btn-primary"
-                                        style="margin: 0; padding: 3px;">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                                <g:if test="${usersProject}">
+                                    <button type="button" onclick="showNewProjectWizard()" class="btn btn-primary"
+                                            style="margin: 0; padding: 3px;">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </g:if>
                             </h6>
-                            <table class="table table-hover table-responsive" style="min-height: 300px;
+                            <table class="table table-hover table-responsive" style="min-height: 300px; max-width: 98vw;
                             background-color: white;">
                                 <thead class="thead-light">
                                 <tr>

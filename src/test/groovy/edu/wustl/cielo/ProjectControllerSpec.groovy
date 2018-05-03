@@ -3,6 +3,8 @@ package edu.wustl.cielo
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.gorm.DomainUnitTest
 import grails.testing.web.controllers.ControllerUnitTest
+import edu.wustl.cielo.enums.FileUploadType
+import javax.servlet.http.Part
 import spock.lang.*
 
 class ProjectControllerSpec extends Specification implements ControllerUnitTest<ProjectController>, DomainUnitTest<Project> {
@@ -445,7 +447,7 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         when:
             projectService.metaClass.saveNewProject = { UserAccount userAccount, Project project, ArrayList annotations,
-                                                        Long licenseId, String teamName, ArrayList teamMembers ->
+                                                        Long licenseId, String teamName, ArrayList teamMembers, Map dataUpload, Map codeUpload ->
                 return true
             }
             controller.projectService = projectService
@@ -458,7 +460,7 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         when:
             response.reset()
             projectService.metaClass.saveNewProject = { UserAccount userAccount, Project project, ArrayList annotations,
-                                                        Long licenseId, String teamName, ArrayList teamMembers ->
+                                                        Long licenseId, String teamName, ArrayList teamMembers, Map dataUpload, Map codeUpload ->
                 return false
             }
             controller.projectService = projectService
@@ -467,5 +469,55 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         then:
             flash.danger
             !response.json.success
+    }
+
+    void "test renderNewUploadScreen"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description", shared: true).save()
+        when:
+            params.projectId = project.id
+            params.type = "data"
+            controller.renderNewUploadScreen()
+
+        then:
+            response.text.contains(params.projectId + "_upload_" + params.type)
+    }
+
+    void "test addBundleToProject"() {
+        projectService.metaClass.addBundleToProject = { Long projectId, FileUploadType type, String externalFileLink, Part filePart,
+            String filename, String description ->
+            return false
+        }
+        controller.projectService = projectService
+
+        when:
+            params.urlInput         = "http://myurl.edu/folder/subfolder"
+            params.uploadDescription="some description"
+            params.projectId        = 1L
+            params.type             = "data"
+            controller.addBundleToProject()
+
+        then:
+            !response.json.success
+
+        when:
+            projectService.metaClass.addBundleToProject = { Long projectId, FileUploadType type, String externalFileLink, Part filePart,
+                                                            String filename, String description ->
+                return true
+            }
+            controller.projectService = projectService
+            response.reset()
+            params.urlInput         = "http://myurl.edu/folder/subfolder"
+            params.uploadDescription="some description"
+            params.projectId        = 1L
+            params.type             = "data"
+            controller.addBundleToProject()
+
+        then:
+            response.json.success
+
     }
 }

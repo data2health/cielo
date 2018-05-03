@@ -605,3 +605,34 @@ function showNewProjectWizard() {
         });
     });
 }
+
+function grabFormData(formParentSelector) {
+    var formData = new FormData();
+
+    //get all the data from all the forms from the wizard for the types in the find clause
+    $(formParentSelector).each ( function() {
+        $(this).find("textarea, input:not('.form-check-input'), select").each ( function() {
+            if($(this).attr('id') !== undefined && $(this).attr('disabled') === undefined) {
+                if ($(this).prop('value') !== null && $(this).prop('value').length > 0 ) {
+                    formData.append($(this).attr('id'), $(this).prop('value'));
+                }
+            }
+        });
+    });
+
+    //For file inputs: data and code are optional
+    $('input:file').each( function () {
+        var elementId    = $(this).attr('id');
+        var file         = document.getElementById(elementId).files[0];
+        if (typeof file !== undefined && elementId !== undefined &&
+            $(this).attr('disabled') === undefined && typeof file !== "string") {
+            if (formData.has(elementId)) {
+                formData.set(elementId, file);
+            } else {
+                formData.append(elementId, file);
+            }
+        }
+    });
+
+    return formData;
+}

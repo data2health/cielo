@@ -1,9 +1,11 @@
 package edu.wustl.cielo
 
+import edu.wustl.cielo.enums.FileUploadType
 import edu.wustl.cielo.enums.ProjectStatusEnum
 import grails.testing.services.ServiceUnitTest
 import grails.web.mapping.LinkGenerator
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.security.access.method.P
 import spock.lang.Specification
 import grails.testing.gorm.DomainUnitTest
 import grails.plugin.springsecurity.SpringSecurityService
@@ -798,17 +800,43 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
                 description: "some description")
 
         when:
-            service.saveNewProject(user, project, null, softwareLicense.id, "", null)
+            service.saveNewProject(user, project, null, softwareLicense.id, "", null, null, null)
 
         then:
             project.id
 
         when:
-            service.saveNewProject(user, project, null, softwareLicense.id, "My team", new ArrayList<Long>([user2.id]))
+            service.saveNewProject(user, project, null, softwareLicense.id, "My team", new ArrayList<Long>([user2.id]), null, null)
 
         then:
             project.teams[0].name == "My team"
             project.teams[0].members.contains(user2)
 
+    }
+
+    void "test addBundleToProject"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        given:
+            project.codes.size() == 0
+            project.datas.size() == 0
+
+        when:
+            service.addBundleToProject(project.id, FileUploadType.CODE, "http://myurl.edu/folder", null, "file.ext", "short desctiption")
+
+        then:
+            project.codes.size() == 1
+            project.datas.size() == 0
+
+        when:
+            service.addBundleToProject(project.id, FileUploadType.DATA, "http://myurl.edu/folder", null, "file.ext", "short desctiption")
+
+        then:
+            project.codes.size() == 1
+            project.datas.size() == 1
     }
 }

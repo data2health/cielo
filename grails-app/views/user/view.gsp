@@ -295,7 +295,58 @@
 
     function updateUser() {
         $('#username').attr('disabled', '');
-        $('#userUpdateForm').submit();
+
+        var formData = new FormData();
+
+        //get all the data from all the forms from the wizard for the types in the find clause
+            $('#userUpdateForm').find('textarea, input, select').each ( function() {
+                if($(this).attr('id') !== undefined) {
+                    if ($(this).prop('value') !== null && $(this).prop('value').length > 0 ) {
+                        formData.append($(this).attr('id'), $(this).prop('value'));
+                    }
+                }
+            });
+
+        //for multiselect
+        $('.multiple-select').each( function () {
+            var controlId       = $(this).attr('id');
+            var selections      = $(this).select2('data');
+            var selectedIds     = [];
+
+            for (index in selections) {
+                if (selectedIds.indexOf(selections[index].id) === -1) {
+                    selectedIds[index] = selections[index].id;
+                }
+            }
+            if (formData.has(controlId)) {
+                formData.set(controlId, selectedIds);
+            } else {
+                formData.append(controlId, selectedIds);
+            }
+        } );
+
+
+        //For file inputs: data and code are optional
+        $('input:file').each( function () {
+            var elementId    = $(this).attr('id');
+            var file         = document.getElementById(elementId).files[0];
+            if (typeof file !== "undefined") {
+                formData.append(elementId, file);
+            }
+        });
+
+        $.ajax({
+            type: "POST",
+            url: "${createLink(controller: "user", action: "updateUser")}",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success : function () {
+                window.location.reload();
+            }
+        });
+
+
         $('#username').attr('disabled', 'disabled');
     }
 
