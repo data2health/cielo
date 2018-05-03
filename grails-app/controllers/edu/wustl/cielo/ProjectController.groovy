@@ -2,7 +2,8 @@ package edu.wustl.cielo
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.springframework.validation.ObjectError
+import edu.wustl.cielo.enums.FileUploadType
+import javax.servlet.http.Part
 
 class ProjectController {
 
@@ -241,6 +242,8 @@ class ProjectController {
         ArrayList teamMembers   = []
         Long licenseId          = -1L
         Project project
+        Map dataUpload          = [:]
+        Map codeUpload          = [:]
 
         if (user) {
             project = projectService.getNewEmptyProjectForUser(user)
@@ -257,11 +260,44 @@ class ProjectController {
 
             if (params.license) licenseId = Long.valueOf(params.license)
 
-            succeeded = projectService.saveNewProject(user, project, annotations, licenseId, teamName, teamMembers)
+            if (params.dataFile) {
+                dataUpload = [filename: params.dataFile.filename, type: FileUploadType.DATA, part: params.dataFile.part]
+
+            }
+
+            if (params.codeFile) {
+                codeUpload = [filename: params.codeFile.filename, type: FileUploadType.CODE, part: params.codeFile.part]
+            }
+
+            succeeded = projectService.saveNewProject(user, project, annotations, licenseId, teamName, teamMembers, dataUpload, codeUpload)
 
             if (!succeeded) flash.danger = messageSource.getMessage("project.creation.failed", null, Locale.getDefault())
             else flash.info = messageSource.getMessage("project.creation.succeeded", null, Locale.getDefault())
         }
+        render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def renderNewUploadScreen() {
+        render(template: "newUploadScreen", model: [projectId: params.projectId, type: params.type])
+    }
+
+    @Secured('isAuthenticated()')
+    def addBundleToProject() {
+        boolean succeeded
+        String filename
+        String externalFileLink = params.urlInput
+        String description      = params.uploadDescription
+        Long projectId          = Long.valueOf(params.projectId)
+        FileUploadType type     = FileUploadType.valueOf(params.type.toString().toUpperCase())
+        Part filePart
+
+        if (params.fileInputControl) {
+            filename    = params.fileInputControl?.filename
+            filePart    = params.fileInputControl?.part
+        } else filename = params.externalFileName
+
+        succeeded = projectService.addBundleToProject(projectId, type, externalFileLink, filePart, filename, description)
         render([success: succeeded] as JSON)
     }
 }

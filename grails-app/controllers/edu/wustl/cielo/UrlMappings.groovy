@@ -52,6 +52,8 @@ class UrlMappings {
         "/project/getTeams"(controller: "project", action: "getTeams")
         "/project/newProject"(controller: "project", action: "newProject")
         "/project/saveProject"(controller: "project", action: "saveProject")
+        "/project/newUploadScreen"(controller: "project", action: "renderNewUploadScreen")
+        "/project/addBundle"(controller: "project", action: "addBundleToProject")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")

@@ -1,6 +1,7 @@
 package edu.wustl.cielo
 
 import grails.compiler.GrailsCompileStatic
+import com.google.cloud.storage.BlobId
 import groovy.transform.ToString
 
 @GrailsCompileStatic
@@ -14,12 +15,14 @@ class Data {
     Date dateCreated
     Date lastUpdated
     URL url
+    BlobId blobId
 
     static constraints = {
         name(nullable: false)
         description(nullable: false)
         url(nullable: true)
-        revision(nullable: false)
+        blobId(nullable: true)
+        revision(min: 0, max: Integer.MAX_VALUE)
         repository(blank: false)
     }
 

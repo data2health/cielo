@@ -1,6 +1,8 @@
 package edu.wustl.cielo
 
+import com.google.cloud.storage.BlobId
 import edu.wustl.cielo.enums.ActivityTypeEnum
+import edu.wustl.cielo.enums.FileUploadType
 import grails.gorm.transactions.ReadOnly
 import grails.gorm.transactions.Transactional
 import grails.plugin.cache.Cacheable
@@ -11,6 +13,7 @@ import org.apache.commons.lang.RandomStringUtils
 import org.springframework.validation.ObjectError
 import com.thedeanda.lorem.Lorem
 import com.thedeanda.lorem.LoremIpsum
+import javax.servlet.http.Part
 
 @Transactional
 @Slf4j
@@ -31,6 +34,7 @@ class ProjectService {
     def activityService
     def messageSource
     def springSecurityService
+    def cloudService
 
     /**
      * Main call used in bootstrap to generated project data
@@ -588,7 +592,7 @@ class ProjectService {
         if (max == -1)      max     = DEFAULT_MAX
         if (offset == -1)   offset  = DEFAULT_OFFSET
 
-        return Project.findAllByProjectOwner(user, [offset: offset * max, max: max, sort: 'id', order: 'asc'])
+        return Project.findAllByProjectOwner(user, [offset: offset * max, max: max, sort: 'dateCreated', order: 'desc'])
     }
 
     /**
@@ -620,7 +624,25 @@ class ProjectService {
 
         if (project.projectOwner.equals(user)) {
             try {
+                //grab the BlobId for all datas and codes
+                List<BlobId> blobIdList = []
+
+                //get all the blobIds for codes
+                project.codes.each { code ->
+                    blobIdList.add(code.blobId)
+                }
+
+                //get all the blobIds for codes
+                project.datas.each { data ->
+                    blobIdList.add(data.blobId)
+                }
+
                 project.delete(failOnError: true)
+
+                //no error so now need to delete all the uploaded files
+                blobIdList.each { blobId ->
+                    cloudService.deleteFile(blobId)
+                }
                 return true
             } catch (Exception e) {
                 project.errors.allErrors.each { ObjectError error ->
@@ -728,7 +750,7 @@ class ProjectService {
      * @return true if successful, false otherwise
      */
     boolean saveNewProject(UserAccount projectAdmin, Project project, ArrayList<Long> annotationIds, Long softwareLicenseId,
-                           String teamName, ArrayList<Long> teamMembers) {
+                           String teamName, ArrayList<Long> teamMembers, Map dataUpload, Map codeUpload) {
 
         project.projectOwner = projectAdmin
 
@@ -768,7 +790,116 @@ class ProjectService {
             }
             return false
         }
+
+        //use the project id as part of the name of the file to keep unique
+        if (dataUpload) {
+            Map results = cloudService.uploadFile("${project.id}_${dataUpload.filename}", dataUpload.type, dataUpload.part)
+            String dataURL  = results.url
+            BlobId blobId   = results.blobId
+
+            if (dataURL) {
+                project.addToDatas(new Data(url: dataURL, blobId: blobId, name: dataUpload.filename, description: "new upload", repository: "gcs"))
+            }
+        }
+
+        if (codeUpload) {
+            Map results     = cloudService.uploadFile("${project.id}_${codeUpload.filename}", codeUpload.type, codeUpload.part)
+            String codeURL  = results.url
+            BlobId blobId   = results.blobId
+
+            if (codeURL) {
+                project.addToCodes(new Code(url: codeURL, blobId: blobId, name: codeUpload.filename, description: "new upload", repository: "gcs"))
+            }
+        }
+
+        //save again
+        if (!project.save()) {
+            project.errors.allErrors.each { ObjectError error ->
+                log.error(error.toString())
+            }
+            return false
+        }
         return true
+    }
+
+    /**
+     * Save an uploaded file or a URL to the project
+     *
+     * @param projectId the id of the project
+     * @param type the type of upload
+     * @param externalFileLink the external link or null
+     * @param filePart the file object or null
+     * @param filename the filename or null
+     *
+     * @return true if save was successful, false otherwise
+     */
+    boolean addBundleToProject(Long projectId, FileUploadType type, String externalFileLink, Part filePart,
+                               String filename, String description) {
+
+        boolean saveProject
+        Project project = Project.findById(projectId)
+
+        if (project) {
+            URL fileURL
+            BlobId blobId
+            if (externalFileLink) {
+                fileURL = new URI(externalFileLink).toURL()
+            } else {
+                Map results = cloudService.uploadFile("${project.id}_${filename}", type, filePart)
+                fileURL  = new URI(results.url).toURL()
+                blobId   = results.blobId
+            }
+
+            switch(type) {
+                case FileUploadType.DATA:
+                    Data data   = new Data()
+                    data.name   = filename
+                    data.url    = fileURL
+                    data.blobId = blobId
+                    data.description = description
+                    if (blobId) data.repository = "GCS"
+                    else data.repository = "EXTERNAL"
+                    if (!data.save()) {
+                        data.errors.allErrors.each { ObjectError error ->
+                            log.error(error.toString())
+                        }
+                    } else  {
+                        saveProject = true
+                        project.addToDatas(data)
+                    }
+                    break
+                case FileUploadType.CODE:
+                    Code code   = new Code()
+                    code.name   = filename
+                    code.url    = fileURL
+                    code.blobId = blobId
+                    code.description = description
+                    if (blobId) code.repository = "GCS"
+                    else code.repository = "EXTERNAL"
+                    if (!code.save()) {
+                        code.errors.allErrors.each { ObjectError error ->
+                            log.error(error.toString())
+                        }
+                    } else {
+                        saveProject = true
+                        project.addToCodes(code)
+                    }
+                    break
+            }
+
+            if (saveProject) {
+                project.lastChanged = new Date()
+                if (!project.save()) {
+                    project.errors.allErrors.each { ObjectError error ->
+                        log.error(error.toString())
+                    }
+                    return false
+                }
+                return true
+            }
+            return false
+        }
+        return false
     }
 
     /**

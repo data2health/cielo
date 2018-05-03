@@ -118,7 +118,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="row" style="align-items: center;">
+                    <div class="row" style="align-items: center; padding-bottom: 2em;">
                         <div class="col-sm-3">Visibility:</div>
                         <div class="col-sm-9">
                             <span id="sharedSelectSpan" style="display: none;">
@@ -589,5 +589,47 @@
 
     function getProjectTeams(projectId) {
         $("#teams #teams_div").load("${createLink(controller: "project", action: "getTeams")}", {id: projectId});
+    }
+
+    function addNewBundle(projectId, type) {
+        var dialog = bootbox.dialog({
+            title: 'Upload or link external file(s)',
+            className: "new-project-wizard",
+            message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+            closeButton: false,
+            size: 'large',
+            buttons: {
+                cancel: {
+                    label: "Cancel",
+                    className: 'btn-red cancel-btn'
+                },
+                ok: {
+                    label: "Save",
+                    className: 'finish-btn btn-primary',
+                    callback: function() {
+                        var formData = grabFormData('.new-upload-dialog');
+                        formData.append("projectId", projectId);
+                        formData.append("type", type);
+
+                        $.ajax({
+                            type: "POST",
+                            url: "${createLink(controller: "project", action: "addBundleToProject")}",
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success : function () {
+                                window.location.reload();
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
+        dialog.init(function(){
+            $.get("/project/newUploadScreen", {projectId: projectId, type: type}, function (data) {
+                $('.modal-body').html(data);
+            });
+        });
     }
 </script>

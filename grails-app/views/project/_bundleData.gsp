@@ -5,7 +5,7 @@
             &nbsp;Project Data
             <g:userCanMakeChangesToProject project="${project}">
                 <span style="float: right;margin-top: -10px;">
-                    <button type="button" class="btn btn-secondary btn-xs" style="padding: 3px;background-color: grey;border-color: grey;" onclick="addProjectPublication()">
+                    <button type="button" class="btn btn-secondary btn-xs" style="padding: 3px;background-color: grey;border-color: grey;" onclick="addNewBundle(${project.id}, 'data')">
                         <i class="fa fa-plus"></i>
                     </button>
                 </span>
@@ -29,7 +29,9 @@
                     <th scope="row">${count}</th>
                     <td>${data.revision}</td>
                     <td>${data.name}</td>
-                    <td data-toggle="tooltip" title="${data.description}">${data.description.substring(0,50)}...</td>
+                    <td data-toggle="tooltip" title="${data.description}">
+                        ${data.description.size() > 50 ? data.description.substring(0,50) : data.description}...
+                    </td>
                     <td><g:formatDateWithTimezone date="${data.dateCreated}"/></td>
                     <td><a href="${data.url}">${data.url}</a></td>
                 </tr>
