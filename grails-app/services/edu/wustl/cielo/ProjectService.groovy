@@ -793,22 +793,30 @@ class ProjectService {
 
         //use the project id as part of the name of the file to keep unique
         if (dataUpload) {
-            Map results = cloudService.uploadFile("${project.id}_${dataUpload.filename}", dataUpload.type, dataUpload.part)
-            String dataURL  = results.url
-            BlobId blobId   = results.blobId
+            if (dataUpload.part) {
+                Map results = cloudService.uploadFile("${project.id}_${dataUpload.filename}", dataUpload.type, dataUpload.part)
+                String dataURL  = results.url
+                BlobId blobId   = results.blobId
 
-            if (dataURL) {
-                project.addToDatas(new Data(url: dataURL, blobId: blobId, name: dataUpload.filename, description: "new upload", repository: "gcs"))
+                if (dataURL) {
+                    project.addToDatas(new Data(url: dataURL, blobId: blobId, name: dataUpload.filename, description: dataUpload.description, repository: "gcs"))
+                }
+            } else {
+                project.addToDatas(new Data(url: dataUpload.url, blobId: null, name: dataUpload.filename, description: dataUpload.description, repository: "external"))
             }
         }
 
         if (codeUpload) {
-            Map results     = cloudService.uploadFile("${project.id}_${codeUpload.filename}", codeUpload.type, codeUpload.part)
-            String codeURL  = results.url
-            BlobId blobId   = results.blobId
+            if (codeUpload.part) {
+                Map results     = cloudService.uploadFile("${project.id}_${codeUpload.filename}", codeUpload.type, codeUpload.part)
+                String codeURL  = results.url
+                BlobId blobId   = results.blobId
 
-            if (codeURL) {
-                project.addToCodes(new Code(url: codeURL, blobId: blobId, name: codeUpload.filename, description: "new upload", repository: "gcs"))
+                if (codeURL) {
+                    project.addToCodes(new Code(url: codeURL, blobId: blobId, name: codeUpload.filename, description: codeUpload.description, repository: "gcs"))
+                }
+            } else {
+                project.addToCodes(new Code(url: codeUpload.url, blobId: null, name: codeUpload.filename, description: codeUpload.description, repository: "external"))
             }
         }
 

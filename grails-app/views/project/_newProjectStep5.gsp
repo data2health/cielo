@@ -7,6 +7,6 @@
             Add data to the project, if you have any now. You can always add data at a later date from the project edit
             screen
         </div><p>&nbsp;</p>
-        <input type="file" name="dataFile" id="dataFile" value="">
+        <g:render template="newUploadScreen" model="[type: 'data', projectId: 'unsaved', requireDescription: false]"/>
     </div>
 </div>

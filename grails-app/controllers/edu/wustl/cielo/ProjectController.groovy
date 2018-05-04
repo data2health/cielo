@@ -263,11 +263,19 @@ class ProjectController {
             if (params.dataFile) {
                 dataUpload = [filename: params.dataFile.filename, type: FileUploadType.DATA, part: params.dataFile.part]
 
+            } else if (params.dataExternalFileName) {
+                dataUpload = [filename: params.dataExternalFileName, type: FileUploadType.CODE, part: null, url: params.dataUrlInput]
             }
+
+            if (params.dataUploadDescription) dataUpload.description = params.dataUploadDescription
 
             if (params.codeFile) {
                 codeUpload = [filename: params.codeFile.filename, type: FileUploadType.CODE, part: params.codeFile.part]
+            } else if (params.codeExternalFileName) {
+                codeUpload = [filename: params.codeExternalFileName, type: FileUploadType.CODE, part: null, url: params.codeUrlInput]
             }
+
+            if (params.codeUploadDescription) codeUpload.description = params.codeUploadDescription
 
             succeeded = projectService.saveNewProject(user, project, annotations, licenseId, teamName, teamMembers, dataUpload, codeUpload)
 
@@ -279,23 +287,24 @@ class ProjectController {
 
     @Secured('isAuthenticated()')
     def renderNewUploadScreen() {
-        render(template: "newUploadScreen", model: [projectId: params.projectId, type: params.type])
+        render(template: "newUploadScreen", model: [projectId: params.projectId, type: params.type, requireDescription: true])
     }
 
     @Secured('isAuthenticated()')
     def addBundleToProject() {
         boolean succeeded
         String filename
-        String externalFileLink = params.urlInput
-        String description      = params.uploadDescription
+        String typeParam        = params.type.toString()
+        String externalFileLink = params."${typeParam}UrlInput"
+        String description      = params."${typeParam}UploadDescription"
         Long projectId          = Long.valueOf(params.projectId)
-        FileUploadType type     = FileUploadType.valueOf(params.type.toString().toUpperCase())
+        FileUploadType type     = FileUploadType.valueOf(typeParam.toUpperCase())
         Part filePart
 
-        if (params.fileInputControl) {
-            filename    = params.fileInputControl?.filename
-            filePart    = params.fileInputControl?.part
-        } else filename = params.externalFileName
+        if (params."${typeParam}File") {
+            filename    = params."${typeParam}File"?.filename
+            filePart    = params."${typeParam}File"?.part
+        } else filename = params."${typeParam}ExternalFileName"
 
         succeeded = projectService.addBundleToProject(projectId, type, externalFileLink, filePart, filename, description)
         render([success: succeeded] as JSON)
