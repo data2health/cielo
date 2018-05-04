@@ -7,6 +7,6 @@
             Add code to the project, if you have any now. You can always add data at a later date from the project edit
             screen
         </div><p>&nbsp;</p>
-        <input type="file" name="codeFile" id="codeFile" value="">
+        <g:render template="newUploadScreen" model="[type: 'code', projectId: 'unsaved', requireDescription: false]"/>
     </div>
 </div>
