@@ -65,11 +65,11 @@
                                                 <g:set var="numberOfTeams" value="${project.teams?.size()}"/>
                                                 <g:set var="index" value="${1}"/>
                                                 <g:each in="${project.teams}" var="team">
-                                                    <g:if test="${index == 1}">
-                                                        <a href="${createLink(controller: "project", action: "view", id: project.id, params: ['teams': true])}" class="btn btn-link" style="padding-top:0; padding-left: 0; margin: 0;">${team.name}</a>
+                                                    <g:if test="${index < numberOfTeams}">
+                                                        <a href="${createLink(controller: "project", action: "view", id: project.id, params: ['teams': true])}" class="btn btn-link" style="padding-top:0; padding-left: 0; margin: 0;">${team.name},</a>
                                                     </g:if>
                                                     <g:else>
-                                                        ,&nbsp;<a href="${createLink(controller: "project", action: "view", id: project.id, params: ['teams': true])}" class="btn btn-link" style="padding-top:0; padding-left: 0; margin: 0;">${team.name}</a>
+                                                       <a href="${createLink(controller: "project", action: "view", id: project.id, params: ['teams': true])}" class="btn btn-link" style="padding-top:0; padding-left: 0; margin: 0;">${team.name}</a>
                                                     </g:else>
                                                     <g:set var="index" value="${index+1}"/>
                                                 </g:each>

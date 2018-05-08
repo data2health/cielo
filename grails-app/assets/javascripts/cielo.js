@@ -624,7 +624,7 @@ function grabFormData(formParentSelector) {
     $('input:file').each( function () {
         var elementId    = $(this).attr('id');
         var file         = document.getElementById(elementId).files[0];
-        if (typeof file !== undefined && elementId !== undefined &&
+        if (typeof file !== 'undefined' && elementId !== 'undefined' &&
             $(this).attr('disabled') === undefined && typeof file !== "string") {
             if (formData.has(elementId)) {
                 formData.set(elementId, file);

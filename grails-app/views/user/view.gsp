@@ -331,7 +331,11 @@
             var elementId    = $(this).attr('id');
             var file         = document.getElementById(elementId).files[0];
             if (typeof file !== "undefined") {
-                formData.append(elementId, file);
+                if (formData.has(elementId)) {
+                    formData.set(elementId, file);
+                } else {
+                    formData.append(elementId, file);
+                }
             }
         });
 

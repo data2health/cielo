@@ -3,8 +3,8 @@
         <div class="row">
             <div class="form-group col-md-12">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="uploadType" id="${type}UploadFile" onchange="selectRadioOption(this, '${type}')" value="option1" checked>
-                    <label class="form-check-label" for="${type}UploadFile">
+                    <input class="form-check-input" type="radio" name="uploadType" id="${type}UploadFile" onchange="toggleRadioOption(this, '${type}')" value="option1" checked>
+                    <label class="form-check-label" for="${type}UploadFile" style="font-weight: 700;">
                        Upload a file:&nbsp;
                     </label>
                 </div>
@@ -14,8 +14,8 @@
         <div class="row">
             <div class="form-group col-md-12" style="white-space: nowrap;">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="uploadType" id="${type}UploadLink" onchange="selectRadioOption(this, '${type}')" value="option2">
-                    <label class="form-check-label" for="${type}UploadLink">
+                    <input class="form-check-input" type="radio" name="uploadType" id="${type}UploadLink" onchange="toggleRadioOption(this, '${type}')" value="option2">
+                    <label class="form-check-label" for="${type}UploadLink" style="font-weight: 700;">
                         Link to an external file:&nbsp;
                     </label>
                 </div>
@@ -45,7 +45,7 @@
 
 <script type="application/javascript">
 
-    function selectRadioOption(control, type) {
+    function toggleRadioOption(control, type) {
         var radioControlId = $(control).attr('id');
 
         if (radioControlId.indexOf("UploadLink") !== -1) {
