@@ -9,14 +9,16 @@
             <div class="container-fluid" style="background-color: white; border-radius: 10px;
                 border: 1px solid #dcdcdc; padding-top: 0.3em; padding-bottom: 0.3em;
                 margin-top: 1.5em;display: inline-table;">
-                <button type="button" class="btn btn-primary" style="padding: 10px;" onclick="editTeamMembers(${team.id}, ${project.id});">
-                    <i class="far fa-edit"></i>
-                    <span style="font-size: 0.75em; cursor: default;">&nbsp;Edit Team</span>
-                </button>
+                <g:userOwnsTeam team="${team}">
+                    <button type="button" class="btn btn-primary" style="padding: 10px;" onclick="editTeamMembers(${team.id}, ${project.id});">
+                        <i class="far fa-edit"></i>
+                        <span style="font-size: 0.75em; cursor: default;">&nbsp;Edit Team</span>
+                    </button>
+                </g:userOwnsTeam>
 
-                <button type="button" class="btn btn-red" style="padding: 10px;" onclick="deleteTeam(${team.id}, ${project.id});">
+                <button type="button" class="btn btn-red" style="padding: 10px;" onclick="removeTeam(${team.id}, ${project.id});">
                     <i class="fa fa-trash-alt"></i>
-                    <span style="font-size: 0.75em; cursor: default;">&nbsp;Delete Team</span>
+                    <span style="font-size: 0.75em; cursor: default;">&nbsp;Remove Team</span>
                 </button>
             </div>
         </g:userOwnsProject>
@@ -49,10 +51,3 @@
         </div>
     </div>
 </div>
-
-<asset:javascript src="jquery/jquery.min.js"/>
-<script type="application/javascript">
-    $( function () {
-        handleOnHoverForTeamMembers();
-    });
-</script>

@@ -9,7 +9,7 @@ import grails.web.mapping.LinkGenerator
 class CieloTagLib {
     static defaultEncodeAs  = [taglib:'html'] //html escapes characters
     static encodeAsForTags  = [rawOutput: [taglib:'raw'], getUserProfilePic: [taglib: 'raw'], dateDiff: [taglib: 'raw'],
-                               userOwnsProject: [taglib: 'raw'], userCanMakeChangesToProject: [taglib: 'raw'],
+                               userOwnsProject: [taglib: 'raw'], userOwnsTeam: [taglib: 'raw'],userCanMakeChangesToProject: [taglib: 'raw'],
                                loggedInUserCanMakeChangesToUser: [taglib: 'raw'], getSoftwareLicenseOptions: [taglib: 'raw'],
                                customTimeZoneSelect: [taglib: 'raw']] //, otherTagName: [taglib:'none']]
     static String DEFAULT_IMG_SIZE  = 'medium'
@@ -301,6 +301,17 @@ class CieloTagLib {
             UserAccount user = UserAccount.get(principal?.id)
 
             if (user && attrs.project.projectOwner == user) {
+                out << body()
+            }
+        }
+    }
+
+    def userOwnsTeam = { attrs, body ->
+        if (attrs.team) {
+            def principal    = springSecurityService?.principal
+            UserAccount user = UserAccount.get(principal?.id)
+
+            if (user && ((Team)attrs.team).administrator.equals(user)) {
                 out << body()
             }
         }

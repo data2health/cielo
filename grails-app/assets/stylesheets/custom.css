@@ -597,10 +597,14 @@ ul.list-group.list-group-flush {
     background-color: #5897fb;
     border: 1px solid #0063ff;
     color: white;
+    border-radius: 1.5em;
+    padding: 0.25em;
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
     color: #9c1717;
+    font-size: 1.5em;
+    font-weight: 900;
 }
 
 .select2-container--default .select2-selection--multiple {

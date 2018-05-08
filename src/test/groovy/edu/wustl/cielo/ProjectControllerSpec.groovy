@@ -374,12 +374,24 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
             return true
         }
 
+        projectService.metaClass.addTeamToProject = { Long projectId, Long teamId ->
+            return true
+        }
+
         controller.projectService = projectService
 
         when:
             params.name         = "The Avengers"
             params.id           = project.id
             params."members[]"  = [user2.id]
+            controller.addTeamToProject()
+
+        then:
+            response.json.success
+
+        when:
+            response.reset()
+            params.teamId = 2L
             controller.addTeamToProject()
 
         then:
@@ -447,20 +459,21 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         when:
             projectService.metaClass.saveNewProject = { UserAccount userAccount, Project project, ArrayList annotations,
-                                                        Long licenseId, String teamName, ArrayList teamMembers, Map dataUpload, Map codeUpload ->
+                                                        Long licenseId, String teamName, ArrayList teamMembers, Long teamId,
+                                                        Map dataUpload, Map codeUpload ->
                 return true
             }
             controller.projectService = projectService
             controller.saveProject()
 
         then:
-            flash.info
+            flash.success
             response.json.success
 
         when:
             response.reset()
             projectService.metaClass.saveNewProject = { UserAccount userAccount, Project project, ArrayList annotations,
-                                                        Long licenseId, String teamName, ArrayList teamMembers, Map dataUpload, Map codeUpload ->
+                                                        Long licenseId, String teamName, ArrayList teamMembers, Long teamId,  Map dataUpload, Map codeUpload ->
                 return false
             }
             controller.projectService = projectService
@@ -519,5 +532,48 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         then:
             response.json.success
 
+    }
+
+    void "test removeTeam"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description", shared: true).save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+
+        projectService.metaClass.addTeamToProject = { Long projectId, Long teamId ->
+            project.addToTeams(team)
+            project.save()
+            return true
+        }
+
+        projectService.metaClass.removeTeam = { UserAccount userAccount, Long teamId, Long projectId ->
+            project.removeFromTeams(team)
+            return true
+        }
+
+        controller.projectService = projectService
+
+        when:
+            params.id = project.id
+            params.teamId = team.id
+            controller.addTeamToProject()
+
+        then:
+            response.json.success
+            project.teams.contains(team)
+
+        when:
+            response.reset()
+            params.projectId = project.id
+            params.teamId = team.id
+            controller.removeTeam()
+
+        then:
+            response.json.success
+            !project.teams.contains(team)
     }
 }

@@ -238,4 +238,25 @@ class CieloTagLibSpec extends Specification implements TagLibUnitTest<CieloTagLi
             result.contains("US/Eastern")
 
     }
+
+    void "test userOwnsTeam"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+
+        springSecurityService.metaClass.principal = [id: user.id]
+        tagLib.springSecurityService = springSecurityService
+
+        when:
+            def result = tagLib.userOwnsTeam([team: null])
+
+        then:
+            !result
+
+        when:
+            Team team   = new Team(administrator: user, name: "The Avengers")
+            result      = tagLib.userOwnsTeam([team: team])
+
+        then:
+            result != null
+    }
 }

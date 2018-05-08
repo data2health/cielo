@@ -198,19 +198,25 @@ class ProjectController {
         boolean succeeded
         Object principal = springSecurityService.principal
         UserAccount user = principal ? UserAccount.get(principal.id) : null
-        String teamName = params.name
+        String teamName
         Long projectId = params.id ? Long.valueOf(params.id) : -1L
         List<Long> userIds = []
 
-        if (params."members[]".class.simpleName == "String[]") {
-            userIds = params."members[]"
+        if (params.teamId) {
+            Long teamId = Long.valueOf(params.teamId)
+            succeeded   = projectService.addTeamToProject(projectId, teamId)
         } else {
-            userIds.add(params."members[]")
-        }
+            teamName = params.name
 
+            if (params."members[]".class.simpleName == "String[]") {
+                userIds = params."members[]"
+            } else {
+                userIds.add(params."members[]")
+            }
 
-        if (user) {
-            succeeded = projectService.addTeamToProject(user, projectId, teamName, userIds)
+            if (user) {
+                succeeded = projectService.addTeamToProject(user, projectId, teamName, userIds)
+            }
         }
         render([success: succeeded] as JSON)
     }
@@ -229,7 +235,8 @@ class ProjectController {
 
        render(template: "newProjectWizard", model: [annotations: Annotation.list(),
                                                     licences: SoftwareLicense.list(),
-                                                    users: UserAccount.list() - user])
+                                                    users: UserAccount.list() - user,
+                                                    teams: Team.list()])
     }
 
     @Secured('isAuthenticated()')
@@ -241,6 +248,7 @@ class ProjectController {
         ArrayList annotations   = []
         ArrayList teamMembers   = []
         Long licenseId          = -1L
+        Long teamId             = -1L
         Project project
         Map dataUpload          = [:]
         Map codeUpload          = [:]
@@ -256,6 +264,8 @@ class ProjectController {
             if (params.teamName) {
                 teamName    = params.teamName
                 teamMembers = params.members.tokenize(',').collect { Long.valueOf(it) }
+            } else if (params.teamSelect) {
+                teamId = Long.valueOf(params.teamSelect)
             }
 
             if (params.license) licenseId = Long.valueOf(params.license)
@@ -277,10 +287,11 @@ class ProjectController {
 
             if (params.codeUploadDescription) codeUpload.description = params.codeUploadDescription
 
-            succeeded = projectService.saveNewProject(user, project, annotations, licenseId, teamName, teamMembers, dataUpload, codeUpload)
+
+            succeeded = projectService.saveNewProject(user, project, annotations, licenseId, teamName, teamMembers, teamId, dataUpload, codeUpload)
 
             if (!succeeded) flash.danger = messageSource.getMessage("project.creation.failed", null, Locale.getDefault())
-            else flash.info = messageSource.getMessage("project.creation.succeeded", null, Locale.getDefault())
+            else flash.success = messageSource.getMessage("project.creation.succeeded", null, Locale.getDefault())
         }
         render([success: succeeded] as JSON)
     }
@@ -307,6 +318,21 @@ class ProjectController {
         } else filename = params."${typeParam}ExternalFileName"
 
         succeeded = projectService.addBundleToProject(projectId, type, externalFileLink, filePart, filename, description)
+        render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def removeTeam() {
+        boolean succeeded
+        Object principal        = springSecurityService.principal
+        UserAccount user        = principal ? UserAccount.get(principal.id) : null
+        Long teamId    = params.teamId      ? Long.valueOf(params.teamId)       : -1L
+        Long projectId = params.projectId   ? Long.valueOf(params.projectId)    : -1L
+
+        if (teamId && projectId && user) {
+            succeeded = projectService.removeTeam(user, teamId, projectId)
+        }
+
         render([success: succeeded] as JSON)
     }
 }
