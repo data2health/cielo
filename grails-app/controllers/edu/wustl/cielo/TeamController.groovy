@@ -67,7 +67,7 @@ class TeamController {
         UserAccount user = springSecurityService.principal ? UserAccount.get(springSecurityService.principal.id) : null
 
         if (user) {
-            render(template: "newTeam", model: [users: UserAccount.list() - user])
+            render(template: "newTeam", model: [users: UserAccount.list() - user, teams: Team.list()])
         }
     }
 

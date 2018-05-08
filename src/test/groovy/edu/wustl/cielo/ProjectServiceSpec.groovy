@@ -777,6 +777,14 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
 
         then:
             project.getTeams().size() == 1
+
+        when:
+            Team team = new Team(name: "The avengers", administrator: user).save()
+            boolean results = service.addTeamToProject(project.id, team.id)
+
+        then:
+            results
+            project.teams[1].name == "The avengers"
     }
 
     void "test getNewEmptyProjectForUser"() {
@@ -800,18 +808,17 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
                 description: "some description")
 
         when:
-            service.saveNewProject(user, project, null, softwareLicense.id, "", null, null, null)
+            service.saveNewProject(user, project, null, softwareLicense.id, "", null, -1L , null, null)
 
         then:
             project.id
 
         when:
-            service.saveNewProject(user, project, null, softwareLicense.id, "My team", new ArrayList<Long>([user2.id]), null, null)
+            service.saveNewProject(user, project, null, softwareLicense.id, "My team", new ArrayList<Long>([user2.id]), -1L, null, null)
 
         then:
             project.teams[0].name == "My team"
             project.teams[0].members.contains(user2)
-
     }
 
     void "test addBundleToProject"() {
@@ -838,5 +845,37 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         then:
             project.codes.size() == 1
             project.datas.size() == 1
+    }
+
+    void "test removeTeam"() {
+        Project project
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense
+        softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
+                description: "some description", shared: true).save()
+
+        springSecurityService = new SpringSecurityService()
+        springSecurityService.metaClass.principal = [id: user.id]
+        service.springSecurityService = springSecurityService
+
+        when:
+            Team team = new Team(name: "The avengers", administrator: user).save()
+            boolean results = service.addTeamToProject(project.id, team.id)
+
+        then:
+            results
+            project.teams[0].name == "The avengers"
+
+        when:
+            service.removeTeam(user, team.id, project.id)
+
+        then:
+            project.teams.size() == 0
+            team //but team is still there - not deleted
     }
 }

@@ -3,7 +3,7 @@
     <g:render template="newProjectStep1"/>
     <g:render template="newProjectStep2" model="[annotations: annotations]"/>
     <g:render template="newProjectStep3" model="[licences: licences]"/>
-    <g:render template="newProjectStep4" model="[users: users]"/>
+    <g:render template="newProjectStep4" model="[users: users, teams: teams]"/>
     <g:render template="newProjectStep5"/>
     <g:render template="newProjectStep6"/>
     <g:render template="finalStep"/>
@@ -104,7 +104,14 @@
             $(this).find('textarea, input, select').each ( function() {
                 if($(this).attr('id') !== undefined) {
                     if ($(this).prop('value') !== null && $(this).prop('value').length > 0 ) {
-                        formData.append($(this).attr('id'), $(this).prop('value'));
+
+                        var controlId = $(this).attr('id');
+
+                        if (formData.has(controlId)) {
+                            formData.set(controlId, $(this).prop('value'));
+                        } else {
+                            formData.append(controlId, $(this).prop('value'));
+                        }
                     }
                 }
             });
@@ -133,7 +140,7 @@
         $('input:file').each( function () {
             var elementId    = $(this).attr('id');
             var file         = document.getElementById(elementId).files[0];
-            if (typeof file !== undefined && elementId !== undefined &&
+            if (typeof file !== 'undefined' && elementId !== undefined &&
                 $(this).attr('disabled') === undefined && typeof file !== "string") {
                 if (formData.has(elementId)) {
                     formData.set(elementId, file);

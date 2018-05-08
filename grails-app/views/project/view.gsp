@@ -215,7 +215,6 @@
 <g:render template="/templates/footerlncludes"/>
 
 <script type="application/javascript">
-
     $( function() {
         var showTeamsTab = ${showTeams};
 
@@ -472,7 +471,7 @@
 
     function addTeam(projectId) {
         var usersWindow = bootbox.confirm({
-            title: 'Create new team',
+            title: 'Add/Create new team',
             message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
             closeButton: false,
             buttons: {
@@ -481,7 +480,7 @@
                 },
                 cancel: {
                     label: 'Cancel',
-                    className: 'btn-dark'
+                    className: 'btn-dark btn-red'
                 }
             },
             size: "large",
@@ -494,7 +493,14 @@
                         usersSelected[index] = option.value;
                     });
 
-                    $.post("${createLink(controller: "project", action: "addTeamToProject")}", {id: projectId, name: teamName, members: usersSelected}, function (data) {
+                    var parameters;
+                    if ($('#newTeamRadio').is(':checked')) {
+                        parameters = {id: projectId, name: teamName, members: usersSelected};
+                    } else {
+                        parameters = {id: projectId, teamId: $('#teamSelect').val()}
+                    }
+
+                    $.post("${createLink(controller: "project", action: "addTeamToProject")}", parameters, function (data) {
                         if (data.success === true) {
                             getProjectTeams(projectId);
                         }
@@ -561,7 +567,7 @@
                         usersSelected[index] = option.value;
                     });
 
-                    $.post("${createLink(controller: "team", action: "updateTeamUsers")}", {id: teamId, users: usersSelected}, function (data) {
+                    $.post(updateTeamMembersUrl, {id: teamId, users: usersSelected}, function (data) {
                         if (data.success === true) {
                             $("#accordion_" + teamId + " #team_" + teamId).load("${createLink(controller: "team", action: "teamMembersSnippet")}", {teamId: teamId, projectId: projectId});
                             handleOnHoverForTeamMembers();
@@ -587,8 +593,19 @@
         });
     }
 
+    function removeTeam(teamId, projectId) {
+        $.post("${createLink(controller: "project", action: "removeTeam")}", {projectId: projectId, teamId: teamId}, function (data) {
+            if (data.success === true) {
+                getProjectTeams(projectId);
+            }
+        });
+    }
+
     function getProjectTeams(projectId) {
-        $("#teams #teams_div").load("${createLink(controller: "project", action: "getTeams")}", {id: projectId});
+        $("#teams #teams_div").load("${createLink(controller: "project", action: "getTeams")}", {id: projectId}, function() {
+            initMultiSelect();
+            handleOnHoverForTeamMembers();
+        });
     }
 
     function addNewBundle(projectId, type) {

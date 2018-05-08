@@ -727,6 +727,33 @@ class ProjectService {
     }
 
     /**
+     * Add an existing team to a project
+     *
+     * @param projectId the id of the project to make the change to
+     * @param teamId the id of the team to associate to the project
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean addTeamToProject(Long projectId, Long teamId) {
+        Project project = Project.findById(projectId)
+
+        if (project) {
+            Team team = Team.findById(teamId)
+            if (team) {
+                project.addToTeams(team)
+
+                if (!project.save()) {
+                    project.errors.allErrors.each { ObjectError error ->
+                        log.error(error.toString())
+                    }
+                    return false
+                }
+                return true
+            }
+        }
+        return false
+    }
+    /**
      * Create an empty project with just owner set
      *
      * @param projectOwner the user that is creating the new project
@@ -735,99 +762,6 @@ class ProjectService {
      */
     Project getNewEmptyProjectForUser(UserAccount owner) {
         return new Project(projectOwner: owner)
-    }
-
-    /**
-     * Save a new project
-     *
-     * @param projectAdmin the user creating the project
-     * @param project the project, bound to params in controller, to save
-     * @param annotationIds a list of annotation ids to apply to project
-     * @param softwareLicenseId the id of the software license
-     * @param teamName (optional) a new team name
-     * @param teamMembers (optional) members of team
-     *
-     * @return true if successful, false otherwise
-     */
-    boolean saveNewProject(UserAccount projectAdmin, Project project, ArrayList<Long> annotationIds, Long softwareLicenseId,
-                           String teamName, ArrayList<Long> teamMembers, Map dataUpload, Map codeUpload) {
-
-        project.projectOwner = projectAdmin
-
-        if (teamName) {
-
-            Team team = new Team(name: teamName, administrator: projectAdmin)
-            teamMembers.each { memberId ->
-                UserAccount userAccount = UserAccount.findById(memberId)
-                if (userAccount) {
-                    team.members.add(userAccount)
-                }
-            }
-
-            if (!team.save()) {
-                team.errors.allErrors.each { ObjectError error ->
-                    log.error(error.toString())
-                }
-                return false
-            }
-            project.teams.add(team)
-        }
-
-        annotationIds.each { id ->
-            Annotation annotation = Annotation.findById(id)
-
-            if (annotation) {
-                project.annotations.add(annotation)
-            }
-        }
-
-        SoftwareLicense softwareLicense = SoftwareLicense.findById(softwareLicenseId)
-        if (softwareLicense) project.license = softwareLicense
-
-        if (!project.save()) {
-            project.errors.allErrors.each { ObjectError error ->
-                log.error(error.toString())
-            }
-            return false
-        }
-
-        //use the project id as part of the name of the file to keep unique
-        if (dataUpload) {
-            if (dataUpload.part) {
-                Map results = cloudService.uploadFile("${project.id}_${dataUpload.filename}", dataUpload.type, dataUpload.part)
-                String dataURL  = results.url
-                BlobId blobId   = results.blobId
-
-                if (dataURL) {
-                    project.addToDatas(new Data(url: dataURL, blobId: blobId, name: dataUpload.filename, description: dataUpload.description, repository: "gcs"))
-                }
-            } else {
-                project.addToDatas(new Data(url: dataUpload.url, blobId: null, name: dataUpload.filename, description: dataUpload.description, repository: "external"))
-            }
-        }
-
-        if (codeUpload) {
-            if (codeUpload.part) {
-                Map results     = cloudService.uploadFile("${project.id}_${codeUpload.filename}", codeUpload.type, codeUpload.part)
-                String codeURL  = results.url
-                BlobId blobId   = results.blobId
-
-                if (codeURL) {
-                    project.addToCodes(new Code(url: codeURL, blobId: blobId, name: codeUpload.filename, description: codeUpload.description, repository: "gcs"))
-                }
-            } else {
-                project.addToCodes(new Code(url: codeUpload.url, blobId: null, name: codeUpload.filename, description: codeUpload.description, repository: "external"))
-            }
-        }
-
-        //save again
-        if (!project.save()) {
-            project.errors.allErrors.each { ObjectError error ->
-                log.error(error.toString())
-            }
-            return false
-        }
-        return true
     }
 
     /**
@@ -906,6 +840,132 @@ class ProjectService {
                 return true
             }
             return false
+        }
+        return false
+    }
+
+    /**
+     * Save a new project
+     *
+     * @param projectAdmin the user creating the project
+     * @param project the project, bound to params in controller, to save
+     * @param annotationIds a list of annotation ids to apply to project
+     * @param softwareLicenseId the id of the software license
+     * @param teamName (optional) a new team name
+     * @param teamMembers (optional) members of team
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean saveNewProject(UserAccount projectAdmin, Project project, ArrayList<Long> annotationIds, Long softwareLicenseId,
+                           String teamName, ArrayList<Long> teamMembers, Long teamId, Map dataUpload, Map codeUpload) {
+
+        project.projectOwner = projectAdmin
+
+        Team team
+        if (teamId != -1L) {
+            team = Team.findById(teamId)
+            if (team) {
+                project.teams.add(team)
+            }
+        }
+        else if (teamName) {
+            team = new Team(name: teamName, administrator: projectAdmin)
+            teamMembers.each { memberId ->
+                UserAccount userAccount = UserAccount.findById(memberId)
+                if (userAccount) {
+                    team.members.add(userAccount)
+                }
+            }
+
+            if (!team.save()) {
+                team.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+            project.teams.add(team)
+        }
+
+        annotationIds.each { id ->
+            Annotation annotation = Annotation.findById(id)
+
+            if (annotation) {
+                project.annotations.add(annotation)
+            }
+        }
+
+        SoftwareLicense softwareLicense = SoftwareLicense.findById(softwareLicenseId)
+        if (softwareLicense) project.license = softwareLicense
+
+        if (!project.save()) {
+            project.errors.allErrors.each { ObjectError error ->
+                log.error(error.toString())
+            }
+            return false
+        }
+
+        //use the project id as part of the name of the file to keep unique
+        if (dataUpload) {
+            if (dataUpload.part) {
+                Map results = cloudService.uploadFile("${project.id}_${dataUpload.filename}", dataUpload.type, dataUpload.part)
+                String dataURL  = results.url
+                BlobId blobId   = results.blobId
+
+                if (dataURL) {
+                    project.addToDatas(new Data(url: dataURL, blobId: blobId, name: dataUpload.filename, description: dataUpload.description, repository: "gcs"))
+                }
+            } else {
+                project.addToDatas(new Data(url: dataUpload.url, blobId: null, name: dataUpload.filename, description: dataUpload.description, repository: "external"))
+            }
+        }
+
+        if (codeUpload) {
+            if (codeUpload.part) {
+                Map results     = cloudService.uploadFile("${project.id}_${codeUpload.filename}", codeUpload.type, codeUpload.part)
+                String codeURL  = results.url
+                BlobId blobId   = results.blobId
+
+                if (codeURL) {
+                    project.addToCodes(new Code(url: codeURL, blobId: blobId, name: codeUpload.filename, description: codeUpload.description, repository: "gcs"))
+                }
+            } else {
+                project.addToCodes(new Code(url: codeUpload.url, blobId: null, name: codeUpload.filename, description: codeUpload.description, repository: "external"))
+            }
+        }
+
+        //save again
+        if (!project.save()) {
+            project.errors.allErrors.each { ObjectError error ->
+                log.error(error.toString())
+            }
+            return false
+        }
+        return true
+    }
+
+    /**
+     * Remove a team from the associated project
+     *
+     * @param user the user that is attempting the change
+     * @param teamId the id of the team to remove
+     * @param projectId the id of the project to remove the team from,
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean removeTeam(UserAccount user, Long teamId, Long projectId) {
+        Project project = Project.findById(projectId)
+        Team team       = Team.findById(teamId)
+
+        if (team && project && (project.projectOwner.equals(user))) {
+            project.removeFromTeams(team)
+
+            if (!project.save()) {
+                project.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                return false
+            }
+            return true
         }
         return false
     }

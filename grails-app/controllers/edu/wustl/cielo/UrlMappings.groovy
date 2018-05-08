@@ -54,6 +54,7 @@ class UrlMappings {
         "/project/saveProject"(controller: "project", action: "saveProject")
         "/project/newUploadScreen"(controller: "project", action: "renderNewUploadScreen")
         "/project/addBundle"(controller: "project", action: "addBundleToProject")
+        "/project/removeTeam"(controller: "project", action: "removeTeam")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")
@@ -73,6 +74,7 @@ class UrlMappings {
         "/team/deleteTeam"(controller: "team", action: "deleteTeam")
         "/team/newTeam"(controller: "team", action: "newTeamForm")
         "/team/$id"(controller: "team", action: "view")
+        "/team/updateMembers"(controller: "team", action: "updateTeamUsers")
 
         //Errors
         "500"(view:'/error')
