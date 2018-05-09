@@ -5,7 +5,7 @@
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="uploadType" id="${type}UploadFile" onchange="toggleRadioOption(this, '${type}')" value="option1" checked>
                     <label class="form-check-label" for="${type}UploadFile" style="font-weight: 700;">
-                       Upload a file:&nbsp;
+                       Upload a file (max file size = 150MB):&nbsp;
                     </label>
                 </div>
                 <input id="${type}File" class="form-control" type="file">
