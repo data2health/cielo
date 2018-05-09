@@ -102,7 +102,7 @@
         //get all the data from all the forms from the wizard for the types in the find clause
         $('.new-project-wizard .screen .form-group').each ( function() {
             $(this).find('textarea, input, select').each ( function() {
-                if($(this).attr('id') !== undefined) {
+                if($(this).attr('id') !== undefined && $(this).attr('disabled') === undefined) {
                     if ($(this).prop('value') !== null && $(this).prop('value').length > 0 ) {
 
                         var controlId = $(this).attr('id');

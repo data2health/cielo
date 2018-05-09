@@ -7,6 +7,7 @@ import grails.gorm.transactions.ReadOnly
 import grails.gorm.transactions.Transactional
 import grails.plugin.cache.Cacheable
 import grails.plugin.springsecurity.annotation.Secured
+import grails.util.Environment
 import groovy.util.logging.Slf4j
 import grails.web.mapping.LinkGenerator
 import org.apache.commons.lang.RandomStringUtils
@@ -969,6 +970,63 @@ class ProjectService {
         }
         return false
     }
+
+    /**
+     * Delete a bundle from a project
+     *
+     * @param user the user initiating the change
+     * @param projectId the id of the project affected
+     * @param bundleId the id of the bundle to remove
+     * @param type the type of bundle: either CODE or DATA
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean removeBundleFromProject(UserAccount user, Long projectId, Long bundleId, FileUploadType type) {
+        Project project = Project.findById(projectId)
+        BlobId fileBlobId
+
+        if (project) {
+            if (project.projectOwner.equals(user)) {
+                boolean saveChanges
+                switch (type) {
+                   case FileUploadType.CODE:
+                       Code code = Code.findById(bundleId)
+                       if (code) {
+                           fileBlobId = code.blobId
+                           project.removeFromCodes(code)
+                           saveChanges = true
+                       }
+                       break
+                   case FileUploadType.DATA:
+                       Data data = Data.findById(bundleId)
+                       if (data) {
+                           fileBlobId = data.blobId
+                           project.removeFromDatas(data)
+                           saveChanges = true
+                       }
+                       break
+                }
+
+                if (saveChanges) {
+                    if (!project.save()) {
+                        project.errors.allErrors.each { ObjectError error ->
+                            log.error(error.toString())
+                        }
+                        return false
+                    }
+                    //now delete the file from cloud
+                    if (Environment.current != Environment.TEST) {
+                        if (fileBlobId) {
+                            if (!cloudService.deleteFile(fileBlobId)) return false
+                        }
+                    }
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
 
     /**
      * Is the logged in user the owner or contributor to a project

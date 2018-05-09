@@ -20,6 +20,7 @@
                 <th scope="col">Description</th>
                 <th scope="col">Created</th>
                 <th scope="col">Url</th>
+                <th scope="col"></th>
             </tr>
             </thead>
             <tbody>
@@ -34,6 +35,9 @@
                     </td>
                     <td><g:formatDateWithTimezone date="${code.dateCreated}"/></td>
                     <td><a href="${code.url}">${code.url}</a></td>
+                    <g:userCanMakeChangesToProject project="${project}">
+                        <td><i class="fas fa-trash-alt" style="color: red;" onclick="deleteBundle('${project.id}', '${code.id}', 'code');"></i> </td>
+                    </g:userCanMakeChangesToProject>
                 </tr>
                 <g:set var="count" value="${count+1}"/>
             </g:each>

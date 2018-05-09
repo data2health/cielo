@@ -576,4 +576,33 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
             response.json.success
             !project.teams.contains(team)
     }
+
+    void "test removeBundleFromProject"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description", shared: true).save()
+        Code code
+
+        projectService.metaClass.removeBundleFromProject = { UserAccount userAccount, Long projectId, Long bundleId,
+                                                             FileUploadType type ->
+            return true
+        }
+
+        controller.projectService = projectService
+
+        when:
+            code = new Code(name: "Some name", description: "Some description", repository: "repo", project: project).save()
+            params.projectId = project.id
+            params.bundleId = code.id
+            params.type = "code"
+            controller.removeBundleFromProject()
+
+        then:
+            response.json.success
+
+    }
 }
