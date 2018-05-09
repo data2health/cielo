@@ -721,3 +721,17 @@ ul.list-group.list-group-flush {
 .modal-title.offset-title {
     margin-left: 5em;
 }
+
+.busy-div {
+    display: inline-block;
+    text-align: center;
+    position: fixed;
+    bottom: 50vh;
+    right: 50vw;
+    z-index: 6000;
+    color: white;
+    background-color: rgba(0,0,0,0.70);
+    border-radius: 0.75em;
+    height: 8em;
+    width: 20em;
+}

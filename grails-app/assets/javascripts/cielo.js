@@ -28,6 +28,13 @@ $('.panel-collapse').on('show.bs.collapse', function() {
 
 $( function() {
 
+    //hook onto global ajax events
+    $(document).bind("ajaxSend", function() {
+        showWaitDialog();
+    }).bind("ajaxComplete", function() {
+        hideWaitDialog();
+    });
+
     //autoload count initialization
     sessionStorage.setItem("autoloadCount", 1);
 
@@ -635,4 +642,12 @@ function grabFormData(formParentSelector) {
     });
 
     return formData;
+}
+
+function showWaitDialog() {
+    $('#busyDiv').show();
+}
+
+function hideWaitDialog() {
+    $('#busyDiv').hide();
 }
