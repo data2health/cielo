@@ -878,4 +878,37 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
             project.teams.size() == 0
             team //but team is still there - not deleted
     }
+
+    void "test removeBundleFromProject"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        given:
+            project.codes.size() == 0
+            project.datas.size() == 0
+
+        when:
+            service.addBundleToProject(project.id, FileUploadType.CODE, "http://myurl.edu/folder", null, "file.ext", "short desctiption")
+
+        then:
+            project.codes.size() == 1
+            project.datas.size() == 0
+
+        when:
+            service.addBundleToProject(project.id, FileUploadType.DATA, "http://myurl.edu/folder", null, "file.ext", "short desctiption")
+
+        then:
+            project.codes.size() == 1
+            project.datas.size() == 1
+
+        when:
+            service.removeBundleFromProject(user, project.id, project.codes[0].id, FileUploadType.CODE)
+
+        then:
+            project.codes.size() == 0
+            project.datas.size() == 1
+    }
 }

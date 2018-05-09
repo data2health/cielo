@@ -335,4 +335,20 @@ class ProjectController {
 
         render([success: succeeded] as JSON)
     }
+
+    @Secured('isAuthenticated()')
+    def removeBundleFromProject() {
+        boolean succeeded
+        Object principal    = springSecurityService.principal
+        UserAccount user    = principal ? UserAccount.get(principal.id) : null
+        Long bundleId       = params.bundleId    ? Long.valueOf(params.bundleId)      : -1L
+        Long projectId      = params.projectId   ? Long.valueOf(params.projectId)   : -1L
+        FileUploadType type = FileUploadType.valueOf(params.type.toString().toUpperCase())
+
+        if (type && bundleId && projectId && user) {
+            succeeded = projectService.removeBundleFromProject(user, projectId, bundleId, type)
+        }
+
+        render([success: succeeded] as JSON)
+    }
 }

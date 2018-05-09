@@ -55,6 +55,7 @@ class UrlMappings {
         "/project/newUploadScreen"(controller: "project", action: "renderNewUploadScreen")
         "/project/addBundle"(controller: "project", action: "addBundleToProject")
         "/project/removeTeam"(controller: "project", action: "removeTeam")
+        "/project/removeBundle"(controller: "project", action: "removeBundleFromProject")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")

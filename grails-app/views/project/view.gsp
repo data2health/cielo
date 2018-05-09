@@ -649,4 +649,11 @@
             });
         });
     }
+
+    function deleteBundle(projectId, bundleId, type) {
+        $.post("${createLink(controller: 'project', action: 'removeBundleFromProject')}", {projectId: projectId, bundleId: bundleId, type: type}, function (data) {
+            window.location.reload();
+        });
+
+    }
 </script>
