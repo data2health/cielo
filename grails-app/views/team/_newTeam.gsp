@@ -2,7 +2,7 @@
     <div class="form-group row" style="white-space: nowrap; padding-top: 2em;">
         <div class="col-md-2">
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="TeamRadio" id="existingTeamRadio" onchange="selectRadioOption(this)" value="option1" checked>
+                <input class="form-check-input" type="radio" name="TeamRadio" id="existingTeamRadio" onchange="selectRadioOption(this)" value="option2" checked>
                 <label class="form-check-label" for="existingTeamRadio" style="font-weight: 700;">
                     Existing Team&nbsp;
                 </label>
@@ -34,7 +34,7 @@
     <div class="form-group row" style="white-space: nowrap; padding-top: 2em;">
         <div class="col-md-2">
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="TeamRadio" id="newTeamRadio" onchange="selectRadioOption(this)" value="option2">
+                <input class="form-check-input" type="radio" name="TeamRadio" id="newTeamRadio" onchange="selectRadioOption(this)" value="option3">
                 <label class="form-check-label" for="newTeamRadio" style="font-weight: 700;">
                     New Team&nbsp;
                 </label>
@@ -104,6 +104,10 @@
             $('#teamSelect').attr('disabled', 'disabled');
             $('#teamName').removeAttr('disabled');
             $('#members').removeAttr('disabled');
+        } else if ($(control).attr('id') === "noneTeamRadio") {
+            $('#teamSelect').attr('disabled', 'disabled');
+            $('#teamName').attr('disabled', 'disabled');
+            $('#members').attr('disabled', 'disabled');
         } else {
             $('#teamName').attr('disabled', 'disabled');
             $('#members').attr('disabled', 'disabled');

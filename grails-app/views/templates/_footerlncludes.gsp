@@ -79,5 +79,6 @@
 </section>
 <g:render template="/templates/scriptFiles"/>
 <g:render template="/templates/alerts"/>
+<g:render template="/templates/busy"/>
 </body>
 </html>
