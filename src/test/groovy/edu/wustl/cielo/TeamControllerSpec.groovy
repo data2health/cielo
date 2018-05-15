@@ -20,9 +20,6 @@ class TeamControllerSpec extends Specification implements ControllerUnitTest<Tea
         controller.springSecurityService = springSecurityService
     }
 
-    def cleanup() {
-    }
-
     void "test getTeamMembers"() {
         UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
         SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",

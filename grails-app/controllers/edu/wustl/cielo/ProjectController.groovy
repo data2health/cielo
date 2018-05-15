@@ -18,6 +18,7 @@ class ProjectController {
      *
      * @return a list of properties for most popular projects
      */
+    @Secured('permitAll')
     def getMostPopularProjects() {
         List<Object> popularBundles
 
@@ -35,13 +36,15 @@ class ProjectController {
         UserAccount user    = principal ? UserAccount.get(principal.id) : null
         Project project     = Project.findById(Long.valueOf(params.id))
         boolean showTeams   = params.teams ? Boolean.valueOf(params.teams) : false
+        boolean showBundles = params.bundles ? Boolean.valueOf(params.bundles) : false
 
         projectService.incrementViewsCounter(project)
 
         return [userProfile: user.profile,
                 annotations: Annotation.list(),
                 project: project,
-                showTeams: showTeams]
+                showTeams: showTeams,
+                showBundles: showBundles]
     }
 
     @Secured('isAuthenticated()')
