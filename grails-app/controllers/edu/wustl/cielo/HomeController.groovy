@@ -39,6 +39,7 @@ class HomeController {
      *
      * @return
      */
+    @Secured('permitAll')
     def index() {
         if (springSecurityService.isLoggedIn()) {
             redirect(action: 'home')

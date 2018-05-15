@@ -216,10 +216,13 @@
 
 <script type="application/javascript">
     $( function() {
-        var showTeamsTab = ${showTeams};
+        var showTeamsTab    = ${showTeams};
+        var showBundleTab   = ${showBundles};
 
-        if (showTeamsTab) {
+        if (showTeamsTab === true) {
             $('.nav-tabs a[href="#teams"]').tab('show');
+        } else if (showBundleTab === true) {
+            $('.nav-tabs a[href="#bundles"]').tab('show');
         }
 
         $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {

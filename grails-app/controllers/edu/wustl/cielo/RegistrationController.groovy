@@ -1,5 +1,6 @@
 package edu.wustl.cielo
 
+import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.validation.ObjectError
 import grails.web.mapping.LinkGenerator
 import grails.gsp.PageRenderer
@@ -19,6 +20,7 @@ class RegistrationController {
      *
      * @return map with the necessary data for view
      */
+    @Secured('permitAll')
     def register() {
         return [institutes: institutionService.getAvailableInstitutions(),
                 annotations: Annotation.list(),
@@ -30,6 +32,7 @@ class RegistrationController {
      *
      * @return
      */
+    @Secured('permitAll')
     def saveNewUser() {
         boolean registered
         String institutionFName
@@ -72,6 +75,7 @@ class RegistrationController {
      *
      * @return map with the users email
      */
+    @Secured('permitAll')
     def registered() {
         registrationService.scheduleRegistrationEmail(params.userEmail)
         return [emailAddress: params.userEmail]
@@ -80,6 +84,7 @@ class RegistrationController {
     /**
      * Given the key passed in activate the user that the key belongs to
      */
+    @Secured('permitAll')
     def activateUser() {
         if (!params.ukey) render(view: "/error")
         boolean activated = userAccountService.activateUserAccount(params.ukey)

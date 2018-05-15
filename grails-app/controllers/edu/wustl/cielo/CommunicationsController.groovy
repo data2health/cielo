@@ -1,5 +1,7 @@
 package edu.wustl.cielo
 
+import grails.plugin.springsecurity.annotation.Secured
+
 class CommunicationsController {
     def messageSource
     def communicationsService
@@ -9,6 +11,7 @@ class CommunicationsController {
      *
      * @return redirect to the page the request originated from
      */
+    @Secured('permitAll')
     def contactUs() {
 
         if (communicationsService.scheduleContactUsEmail(params)) {
