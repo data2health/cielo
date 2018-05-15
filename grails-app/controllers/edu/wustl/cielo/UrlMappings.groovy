@@ -77,6 +77,12 @@ class UrlMappings {
         "/team/$id"(controller: "team", action: "view")
         "/team/updateMembers"(controller: "team", action: "updateTeamUsers")
 
+        //code
+        "/code/$id"(controller: "code", action: "view")
+
+        //data
+        "/data/$id"(controller: "data", action: "view")
+
         //Errors
         "500"(view:'/error')
         "404"(view:'/notFound')
