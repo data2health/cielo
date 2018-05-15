@@ -59,6 +59,7 @@ class UrlMappings {
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")
+        "/license/termsOfUse"(controller: "license", action: "getTermsOfUse")
 
         //Activity
         "/activity/getActivities"(controller: "activity", action: "getActivities")

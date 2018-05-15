@@ -201,18 +201,68 @@ function getAttributes(element) {
 }
 
 function showTermsOfUse() {
-    var alertWindow = bootbox.alert({
+    var alertWindow = bootbox.dialog({
         title: 'Terms of Use',
+        className: 'scrollable-bootbox-alert',
         message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
         closeButton: false,
-        size: "large"
+        size: "large",
+        buttons: {
+            ok: {
+                id: 'agreeButton',
+                className: 'btn-default',
+                label: 'I agree with the Terms of Use',
+                callback: function () {
+                    $('#register').prop('disabled', false);
+                   return true;
+                }
+            },
+            cancel: {
+                id: 'disagree',
+                className: 'btn-red',
+                label: 'I disagree',
+                callback: function () {
+                    $('#register').prop('disabled', 'disabled');
+                    showAlert('You will not be able to register until accepting the terms of use', 'info');
+                    return true;
+                }
+            }
+        }
     });
 
     alertWindow.init(function() {
-        setTimeout(function(){
-            alertWindow.find('.bootbox-body').html('<div>some information here....</div>');
-        }, 1500)
+        //grab the text for the license from db
+        $.get("/license/termsOfUse", function (data) {
+            alertWindow.find('.bootbox-body').html(data);
+        });
     });
+}
+
+function showTermsOfUseNoAcknowledge() {
+    var alertWindow = bootbox.dialog({
+        title: 'Terms of Use',
+        className: 'scrollable-bootbox-alert',
+        message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+        closeButton: true,
+        size: "large",
+        buttons: {
+            ok: {
+                className: 'btn-default',
+                label: 'OK',
+                callback: function () {
+                    return true;
+                }
+            }
+        }
+    });
+
+    alertWindow.init(function() {
+        //grab the text for the license from db
+        $.get("/license/termsOfUse", function (data) {
+            alertWindow.find('.bootbox-body').html(data);
+        });
+    });
+
 }
 
 function showSoftwareLicense(licenseId, licenseLabel) {
