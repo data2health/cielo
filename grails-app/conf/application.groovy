@@ -40,7 +40,7 @@ environments {
 		annotations="/WEB-INF/startup/shorter_mshd2014.txt"
 	}
 	production {
-		annotations="/WEB-INF/startup/mshd2014.txt"
+		annotations="/WEB-INF/startup/shorter_mshd2014.txt"
 	}
 }
 

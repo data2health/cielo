@@ -19,43 +19,19 @@
 <div class="project-header-container-bottom" style="height: 1em;">
     &nbsp;
 </div>
-<div id="projectsDiv">
+<section id="projectsDiv" class="mbr-fullscreen">
     <g:render template="projectsTable" model="[projects: projects, offset: offset, numberOfPages: numberOfPages,
                                                  onChangeCallback: 'onPageSelection', onFirstPageCallback: 'onFirstPage',
                                                  onPreviousPageCallback: 'onPreviousPage',
                                                  onNextPageCallback: 'onNextPage',
                                                  onLastPageCallback: 'onLastPage',
                                                  usersProject: false]"/>
-</div>
+</section>
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/contactUsSection"/>
 <g:render template="/templates/footerlncludes"/>
 
 <script type="application/javascript">
-    function deleteProject(projectId, projectName) {
-        bootbox.confirm({
-            title: "Delete Project?",
-            message: "Do you really want to delete <em style='font-weight: 300;color: #149dcc;'>" + projectName + "</em> ? This cannot be undone. <p>&nbsp;<p>*Please note that any data and code will also be deleted.",
-            closeButton: false,
-            buttons: {
-                cancel: {
-                    label: '<i class="fa fa-times"></i>&nbsp;Cancel'
-                },
-                confirm: {
-                    label: '<i class="fa fa-check"></i>&nbsp;Confirm'
-                }
-            },
-            callback: function (result) {
-                if (result === true) {
-                    $.post("${createLink(controller: "project", action: "deleteProject")}", {'id': projectId}, function (data) {
-                        if (data.success === true) {
-                            window.location.reload();
-                        }
-                    });
-                }
-            }
-        });
-    }
 
     function onPageSelection() {
         var offsetVal = $('#paging-options').val();

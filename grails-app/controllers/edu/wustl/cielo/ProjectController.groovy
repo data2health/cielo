@@ -193,6 +193,9 @@ class ProjectController {
         if (user) {
             succeeded = projectService.deleteProject(user, projectId)
         }
+
+        if (!succeeded) flash.danger = messageSource.getMessage("project.deletion.failed", null, Locale.getDefault())
+        else flash.success = messageSource.getMessage("project.deletion.succeeded", null, Locale.getDefault())
         render([success: succeeded] as JSON)
     }
 

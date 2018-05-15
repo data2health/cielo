@@ -630,12 +630,12 @@ class ProjectService {
 
                 //get all the blobIds for codes
                 project.codes.each { code ->
-                    blobIdList.add(code.blobId)
+                    if (code.blobId) blobIdList.add(code.blobId)
                 }
 
                 //get all the blobIds for codes
                 project.datas.each { data ->
-                    blobIdList.add(data.blobId)
+                    if (data.blobId) blobIdList.add(data.blobId)
                 }
 
                 project.delete(failOnError: true)
