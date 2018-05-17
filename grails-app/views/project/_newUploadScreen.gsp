@@ -1,3 +1,6 @@
+<div>
+    <g:message code="upload.deidentified.message"/>
+</div>
 <div id="${projectId}_upload_${type}" class="container-fluid new-upload-dialog">
     <form id="${type}Form">
         <div class="row">

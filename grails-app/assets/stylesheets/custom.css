@@ -745,3 +745,7 @@ ul.list-group.list-group-flush {
     right: 20px;
     font-size: 2em;
 }
+
+.dropdown-menu {
+    margin: 0;
+}
