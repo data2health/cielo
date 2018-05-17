@@ -20,14 +20,14 @@
     &nbsp;
 </div>
 
-<div id="projectsDiv">
+<section id="projectsDiv" class="mbr-fullscreen">
     <g:render template="projectsTable" model="[projects: projects, offset: offset, numberOfPages: numberOfPages,
                                                  onChangeCallback: 'onPageSelection', onFirstPageCallback: 'onFirstPage',
                                                  onPreviousPageCallback: 'onPreviousPage',
                                                  onNextPageCallback: 'onNextPage',
                                                  onLastPageCallback: 'onLastPage',
                                                  usersProject: true]"/>
-</div>
+</section>
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/contactUsSection"/>
 <g:render template="/templates/footerlncludes"/>
@@ -49,9 +49,7 @@
             callback: function (result) {
                 if (result === true) {
                     $.post("${createLink(controller: "project", action: "deleteProject")}", {'id': projectId}, function (data) {
-                        if (data.success === true) {
-                            window.location.reload();
-                        }
+                        window.location.reload();
                     });
                 }
             }

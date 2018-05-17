@@ -164,11 +164,11 @@
                             </div>
 
                             <div class="form-group row">
-                                <label class="col-sm-8 col-sm-offset-2" for="agreement">
-                                    <input type="checkbox" value="true" name="agreement" id="agreement" required="" aria-required="true">
-                                    <span>I have read and agree with the
-                                        <button onclick="showTermsOfUse()" style="padding-left: 0px;" type="button" class="btn btn-link">Terms of use</button></span>
-                                </label>
+                                <div class="col-sm-8 col-sm-offset-3">
+                                    *You must agree to
+                                    <button onclick="showTermsOfUse()" style="padding: 0; margin: 0;padding-bottom: 0.2em;" type="button" class="btn btn-link">Terms of use</button>
+                                    in order to register
+                                </div>
                             </div>
                             <div class="form-group row">
                                 <div id="agreementInvalidFeedBack" class="col-md-7 invalid-feedback"></div>
@@ -177,7 +177,7 @@
 
                             <div class="form-group row">
                                 <div class="col-sm-12">
-                                    <button type="submit" class="btn btn-primary" id="register">
+                                    <button type="submit" class="btn btn-primary" id="register" disabled="disabled">
                                         join
                                     </button>
                                     <button id="resetButton" type="reset" value="Reset" class="btn btn-primary" onclick="resetImage()">reset

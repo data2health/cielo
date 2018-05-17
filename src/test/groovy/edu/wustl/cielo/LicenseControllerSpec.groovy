@@ -24,4 +24,13 @@ class LicenseControllerSpec extends Specification implements ControllerUnitTest<
         then:
             response.json.licenseText == "Some text\nhere."
     }
+
+    void "test getTermsOfUse"() {
+        views["/templates/_termsOfUse.gsp"] = "terms of use"
+        when:
+            controller.getTermsOfUse()
+
+        then:
+            response.text == "terms of use"
+    }
 }

@@ -88,11 +88,24 @@
                     </li>
                     <li class="li-spacer">&nbsp;</li>
 
-                    <li>
-                        <a href="#contact-us-form">
-                            <i class="fa fa-envelope"></i>
-                            Contact Us
+                    <li class="dropdown pull-right">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="false" aria-expanded="false">
+                            <i class="fas fa-info"></i>
+                            About
                         </a>
+                        <ul class="dropdown-menu arrow_box">
+                            <li>
+                                <a href="#contact-us-form">
+                                    <i class="fa fa-envelope"></i>
+                                    Contact Us
+                                </a>
+                            </li>
+                            <li style="font-weight:400;">
+                                <button onclick="showTermsOfUseNoAcknowledge()"
+                                        style="font-weight: 400;padding: 0;padding-bottom: 0.2em;color: #149dcc !important;padding-left: 1em;margin: 0;"
+                                        type="button" class="btn btn-link">Terms of Use</button>
+                            </li>
+                        </ul>
                     </li>
                     <li class="li-spacer d-block d-md-none">&nbsp;</li>
                     <li class="dropdown pull-right" style="margin-left: 1em;">

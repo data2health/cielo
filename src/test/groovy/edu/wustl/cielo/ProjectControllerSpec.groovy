@@ -19,6 +19,8 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         messageSource.addMessage('project.creation.succeeded', Locale.getDefault(), "hello")
         messageSource.addMessage('project.creation.failed', Locale.getDefault(), "hello")
+        messageSource.addMessage('project.deletion.succeeded', Locale.getDefault(), "hello")
+        messageSource.addMessage('project.deletion.failed', Locale.getDefault(), "hello")
     }
 
     void "test getMostPopularProjects"() {
@@ -347,6 +349,7 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         then:
             response.json.success
+            flash.success
             response.reset()
 
         when:
@@ -355,6 +358,7 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         then:
             !response.json.success
+            flash.danger
     }
 
     void "test addTeamToProject"() {

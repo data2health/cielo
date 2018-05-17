@@ -266,9 +266,8 @@ ul.list-group.list-group-flush {
     border-right: none;
     margin-bottom: -3em;
     border-bottom: 1px solid #e4e4e4;
-    position: absolute;
-    right: 0;
-    height: calc(100% + 83px);
+    right:  0;
+    min-height: calc(100vh + 80px);
 }
 
 .sidebar-right {
@@ -340,7 +339,7 @@ ul.list-group.list-group-flush {
 
     .arrow_box:after, .arrow_box:before {
         bottom: 100%;
-        left: 56%;
+        left: 25%;
         border: solid transparent;
         content: " ";
         height: 0;
@@ -393,6 +392,7 @@ ul.list-group.list-group-flush {
 
     .myprojects-section {
         margin-top: -18em;
+        min-width: 90vw;
     }
 
     .card-footer.team-users {
@@ -727,11 +727,21 @@ ul.list-group.list-group-flush {
     text-align: center;
     position: fixed;
     bottom: 50vh;
-    right: 50vw;
+    right: 45vw;
     z-index: 6000;
     color: white;
-    background-color: rgba(0,0,0,0.70);
     border-radius: 0.75em;
     height: 8em;
     width: 20em;
+    opacity: 0.95;
+    border: 2px solid #484848e8;
+    background: linear-gradient(to bottom, rgb(123, 123, 123) 0%,rgb(23, 23, 23) 49%,rgb(21, 20, 20) 50%,rgb(49, 49, 49) 100%);
+    box-shadow: 0 0 57px 6px rgba(37, 37, 37, 0.4);
+}
+
+/*Fix for bootbox close button*/
+.bootbox-close-button.close{
+    position: absolute;
+    right: 20px;
+    font-size: 2em;
 }
