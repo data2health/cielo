@@ -210,7 +210,7 @@ function showTermsOfUse() {
         buttons: {
             ok: {
                 id: 'agreeButton',
-                className: 'btn-default',
+                className: 'btn-secondary',
                 label: 'I agree with the Terms of Use',
                 callback: function () {
                     $('#register').prop('disabled', false);
@@ -247,7 +247,7 @@ function showTermsOfUseNoAcknowledge() {
         size: "large",
         buttons: {
             ok: {
-                className: 'btn-default',
+                className: 'btn-secondary',
                 label: 'OK',
                 callback: function () {
                     return true;
