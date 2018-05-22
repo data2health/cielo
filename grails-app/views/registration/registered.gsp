@@ -11,8 +11,7 @@
                 <div class="form-container">
                     <div class="media-container-column">
                         <p style="padding: 100px; text-align: left;">
-                        You have successfully registered, a confirmation email will be sent to <b>${emailAddress}</b>
-                        shortly, please follow the instructions to activate your account.
+                            <g:message code="user.registration.bodyText" args="${[emailAddress]}"/>
                         </p>
                     </div>
                 </div>
