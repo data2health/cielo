@@ -29,9 +29,14 @@ class TeamController {
         UserAccount user = springSecurityService.principal ? UserAccount.get(springSecurityService.principal.id) : null
 
         if (user) {
-            if (teamId && params."users[]") {
-                params."users[]".each { userId ->
-                    userIds.add(Long.valueOf(userId))
+            if (teamId) {
+                if (params."users[]"){
+                    if (params."users[]".class.simpleName == "String") userIds.add(Long.valueOf(params."users[]"))
+                    else {
+                        params."users[]".each { userId ->
+                            userIds.add(Long.valueOf(userId))
+                        }
+                    }
                 }
                 succeeded = teamService.updateTeamMembers(user, teamId, userIds)
             }

@@ -60,8 +60,22 @@
             className: "dark-theme",
             callback: function (result) {
             if (result === true) {
+                var usersSelected;
 
-                var usersSelected = $('.multiple-select').val();
+                if ($('.multiple-select').val() !== null) {
+                    usersSelected = new Array($('.multiple-select').val().length);
+
+                    $('.multiple-select').each( function () {
+                        var selections      = $(this).select2('data');
+
+                        for (index in selections) {
+                            if (usersSelected.indexOf(selections[index].id) === -1) {
+                                usersSelected[index] = selections[index].id;
+                            }
+                        }
+                    });
+                }
+
                 $.post("${createLink(controller: "user", action: "updateUsersIFollow")}", {'users': usersSelected}, function (data) {
                     if (data.success === true) {
                         $('.activity-feed #sidebar-options').load("${createLink(controller: "home", action: "sidebarLeft")}")

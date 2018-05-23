@@ -457,7 +457,7 @@ class ProjectService {
                     project.name = newProjectName
                 }
 
-                if (project.annotations.collect { it.id }.sort() != tags.sort()) {
+                if (project.annotations.collect { it.id }.sort() != tags?.sort()) {
                     List<Long> oldTagIds = project.annotations.collect { it.id }
                     //remove old tags
                     oldTagIds.each {
