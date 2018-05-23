@@ -97,11 +97,18 @@ class ProjectController {
         if (projectId) {
             String newName          = params.name
             String description      = params.desc
-            List<Long> tags
+            List<Long> tags         = []
             Long softwareLicenseId
             boolean shared
 
-            if (params."tags[]")    tags = params."tags[]".collect { Long.valueOf(it) }
+            if (params."tags[]")    {
+                if (params."tags[]".class.simpleName == "String") tags.add( Long.valueOf(params."tags[]") )
+                else {
+                    params."tags[]".each { stringId ->
+                        tags.add(Long.valueOf(stringId))
+                    }
+                }
+            }
             if (params.licenseId)   softwareLicenseId  = Long.valueOf(params.licenseId)
             if (params.shared)      shared = Integer.valueOf(params.shared) ?: false
 

@@ -132,14 +132,17 @@ class UserControllerSpec extends Specification implements ControllerUnitTest<Use
             controller.updateUsersIFollow()
 
         then:
-            !response.json.success
+            response.json.success
+            user.connections.size() == 0
             response.reset()
 
         when:
-            params."users[]" = [user2]
+            params."users[]" = [user2.id.toString()]
             controller.updateUsersIFollow()
 
         then:
             response.json.success
+            user.connections.size() == 1
+            user.connections.contains(user2)
     }
 }

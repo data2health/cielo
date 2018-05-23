@@ -104,11 +104,20 @@ class UserController {
     @Secured('isAuthenticated()')
     def updateUsersIFollow() {
         boolean succeeded
-        List<Long> userIds = params."users[]"
+        List<Long> userIds = []
         Object principal = springSecurityService?.principal
         UserAccount user = principal ? UserAccount.get(principal.id) : null
 
-        if (user && (userIds?.size() > 0)) {
+        if (params."users[]") {
+            if (params."users[]".class.simpleName == "String") userIds.add(Long.valueOf(params."users[]"))
+            else {
+                params."users[]".each { stringId ->
+                    userIds.add(Long.valueOf(stringId))
+                }
+            }
+        }
+
+        if (user) {
             succeeded = userAccountService.updateConnections(user, userIds)
         }
         render([success: succeeded] as JSON)

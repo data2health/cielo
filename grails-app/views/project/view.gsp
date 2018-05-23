@@ -500,7 +500,7 @@
                     if ($('#newTeamRadio').is(':checked')) {
                         parameters = {id: projectId, name: teamName, members: usersSelected};
                     } else {
-                        parameters = {id: projectId, teamId: $('#teamSelect').val()}
+                        parameters = {id: projectId, teamId: $('#teamSelect').val()};
                     }
 
                     $.post("${createLink(controller: "project", action: "addTeamToProject")}", parameters, function (data) {
