@@ -11,7 +11,7 @@
                 </span>
             </g:userCanMakeChangesToProject>
         </h6>
-        <table class="table table-hover table-responsive">
+        <table id="codeTable" class="table table-hover table-responsive">
             <thead class="thead-light">
             <tr>
                 <th scope="col">#</th>
@@ -23,24 +23,8 @@
                 <th scope="col"></th>
             </tr>
             </thead>
-            <tbody>
-            <g:set var="count" value="${1}"/>
-            <g:each in="${project.codes}" var="code">
-                <tr>
-                    <th scope="row">${count}</th>
-                    <td>${code.revision}</td>
-                    <td>${code.name}</td>
-                    <td data-toggle="tooltip" title="${code.description}">
-                        ${code.description.size() > 50 ? code.description.substring(0,50) : code.description}...
-                    </td>
-                    <td><g:formatDateWithTimezone date="${code.dateCreated}"/></td>
-                    <td><a href="${code.url}">${code.url}</a></td>
-                    <g:userCanMakeChangesToProject project="${project}">
-                        <td><i class="fas fa-trash-alt" style="color: red;" onclick="deleteBundle('${project.id}', '${code.id}', 'code');"></i> </td>
-                    </g:userCanMakeChangesToProject>
-                </tr>
-                <g:set var="count" value="${count+1}"/>
-            </g:each>
+            <tbody id="codeRows">
+                <g:render template="bundleRows" model="[projectId: project.id, bundles: project.codes, bundleType: 'code']"/>
             </tbody>
         </table>
     </div>
