@@ -32,6 +32,7 @@ class ProjectService {
     static int DEFAULT_MAX      = 5
     static int DEFAULT_OFFSET   = 0
 
+    def groovyPageRenderer
     def activityService
     def messageSource
     def springSecurityService
@@ -1027,6 +1028,16 @@ class ProjectService {
         return false
     }
 
+    /**
+     * Render table rows for projects view
+     *
+     * @param model the model to use to generate view with
+     *
+     * @return String representation of the HTML of the new table content
+     */
+    String renderTableRows(Map model) {
+        return groovyPageRenderer.render(template: "/project/projectTableRows", model: model)
+    }
 
     /**
      * Is the logged in user the owner or contributor to a project

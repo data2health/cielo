@@ -280,7 +280,7 @@
     function followUser() {
         $.post("${createLink(controller: "user", action: "followUser", params: [id: user.id])}", function (data) {
             if (data.success === true) {
-                window.location.reload();
+                toggleFollowButton();
             }
         });
     }
@@ -288,9 +288,25 @@
     function unFollowUser() {
         $.post("${createLink(controller: "user", action: "unFollowUser", params: [id: user.id])}", function (data) {
             if (data.success === true) {
-                window.location.reload();
+                toggleFollowButton();
             }
         });
+    }
+
+    function toggleFollowButton() {
+        var classList = $('#follow_button').find('i').attr('class');
+
+        if (classList.indexOf('fa-user-times') !== -1) {
+            $('#follow_button').find('i').removeClass('fa-user-times');
+            $('#follow_button').find('i').addClass('fa-user-plus');
+            $('#follow_button').find('span').text("Follow");
+            $('#follow_button').attr('onclick', 'followUser();');
+        } else {
+            $('#follow_button').find('i').removeClass('fa-user-plus');
+            $('#follow_button').find('i').addClass('fa-user-times');
+            $('#follow_button').find('span').text("Un-Follow");
+            $('#follow_button').attr('onclick', 'unFollowUser();');
+        }
     }
 
     function updateUser() {
@@ -346,7 +362,7 @@
             contentType: false,
             processData: false,
             success : function () {
-                window.location.reload();
+                cancelEditUser();
             }
         });
 

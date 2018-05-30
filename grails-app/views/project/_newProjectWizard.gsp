@@ -157,7 +157,12 @@
             contentType: false,
             processData: false,
             success : function () {
-                window.location.reload();
+                if (window.location.href.indexOf('/project/myList') !== -1) {
+                    var offsetVal = parseInt($('#paging-options').val()) - 1;
+                    $.get("${createLink(controller: "project", action: "projectsTableRows")}", {offset: offsetVal, myProjects: true}, function (data) {
+                        replaceProjectTableContent(data);
+                    });
+                }
             }
         });
     }

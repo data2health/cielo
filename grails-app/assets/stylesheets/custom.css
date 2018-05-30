@@ -124,8 +124,8 @@ a.dropdown-toggle {
 
 .card.activity-post {
     margin-left: 0;
-    border: 2px solid #cacaca;
-    border-left-width: .35em;
+    border: 0.05em solid #cacaca;
+    border-left-width: .25em;
     border-left-color: #21a0c9;
     background-color: white;
     border-radius: 4px;
@@ -282,8 +282,8 @@ ul.list-group.list-group-flush {
 }
 
 #connections-nav-tabContent, #teams-nav-tabContent {
-    max-height: 12em;
-    min-height: 7em;
+    min-height: 35vh;
+    max-height: 40vh;
 }
 
 .cid-qIfhXo2QYg {
