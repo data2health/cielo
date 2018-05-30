@@ -31,8 +31,13 @@ $( function() {
     //hook onto global ajax events
     $(document).bind("ajaxSend", function() {
         showWaitDialog();
-    }).bind("ajaxComplete", function() {
+    }).bind("ajaxComplete", function(event, xhr, ajaxOptions) {
         hideWaitDialog();
+        if (xhr.responseJSON !== undefined) {
+            for (obj in xhr.responseJSON["messages"]) {
+                showAlert(xhr.responseJSON["messages"][obj], obj);
+            }
+        }
     });
 
     //autoload count initialization
@@ -650,16 +655,20 @@ function showNewProjectWizard() {
         $.get("/project/newProject", function (data) {
             $('.modal-body').html(data);
 
-            var wizardWindows = $('#screens').find('.screen');
-            window.stepIds = new Array(wizardWindows.length);
-
-            wizardWindows.each( function(index) {
-                window.stepIds[index] = $(wizardWindows[index]).attr('id');
-            });
+            initStepIds();
 
             //initial title
             $('.modal-header').html($('#' + window.stepIds[0] + '_title').clone());
         });
+    });
+}
+
+function initStepIds() {
+    var wizardWindows = $('#screens').find('.screen');
+    window.stepIds = new Array(wizardWindows.length);
+
+    wizardWindows.each( function(index) {
+        window.stepIds[index] = $(wizardWindows[index]).attr('id');
     });
 }
 
@@ -700,4 +709,60 @@ function showWaitDialog() {
 
 function hideWaitDialog() {
     $('#busyDiv').hide();
+}
+
+function replaceProjectTableContent(data) {
+    var currentPageCount = $('#paging-options').find('option').length;
+
+    //fix the number of pages
+    if (currentPageCount !== data.pagesCount) {
+        if (data.pagesCount > currentPageCount) {
+            $('#paging-options option').last().after('<option value="' + data.pagesCount +'">' + data.pagesCount + '</option>');
+        } else {
+            $('#paging-options option').last().remove();
+            $('#paging-options').change();
+        }
+        $('#ofPages').text('of ' + data.pagesCount);
+    }
+
+    //replace rows
+    $('#projectTableBody').html(data.html);
+
+    //disable/enable buttons as necessary
+    updateToolbarButtons();
+}
+
+function updateToolbarButtons() {
+    var offset = parseInt($('#paging-options').val());
+    var numberOfPages = parseInt($('#ofPages').text().trim().split('of ')[1]);
+
+    if (offset <= 0 || offset === 1) {
+        $('#left-table-toolbar').find('i').each( function() {
+            $(this).addClass('fa-disabled');
+        });
+
+        $('#right-table-toolbar').find('i').each( function() {
+            $(this).removeClass('fa-disabled');
+        });
+    } else {
+        $('#left-table-toolbar').find('i').each( function() {
+            $(this).removeClass('fa-disabled');
+        });
+    }
+
+    if (offset === numberOfPages) {
+        $('#right-table-toolbar').find('i').each( function() {
+            $(this).addClass('fa-disabled');
+        });
+
+        if (offset !== 1) {
+            $('#left-table-toolbar').find('i').each( function() {
+                $(this).removeClass('fa-disabled');
+            });
+        }
+    } else {
+        $('#right-table-toolbar').find('i').each( function() {
+            $(this).removeClass('fa-disabled');
+        });
+    }
 }

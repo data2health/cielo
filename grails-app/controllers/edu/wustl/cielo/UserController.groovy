@@ -23,7 +23,6 @@ class UserController {
     /**
      * Update user using post data from form
      *
-     * @return [success: true/false] as JSON
      */
     @Secured('isAuthenticated()')
     def updateUser() {
@@ -52,10 +51,11 @@ class UserController {
     /**
      * Follow a user
      *
-     * @return [success: true/false] as json
+     * @return [success: true/false, messages: messages] (where messages is a collection of flash messages) as JSON
      */
     @Secured('isAuthenticated()')
     def followUser() {
+        Map messages = [:]
         boolean successful = false
         Long userToFollow
 
@@ -68,12 +68,13 @@ class UserController {
             successful = userAccountService.addConnection(user, userToFollow)
         }
 
-        if (!successful) flash.danger = messageSource.getMessage("user.failed.follow", null, Locale.getDefault())
-        render([success: successful] as JSON)
+        if (!successful) messages.danger = messageSource.getMessage("user.failed.follow", null, Locale.getDefault())
+        render([success: successful, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')
     def unFollowUser() {
+        Map messages = [:]
         boolean successful = false
         Long userToFollow
 
@@ -85,8 +86,8 @@ class UserController {
         if (userToFollow && user) {
             successful = userAccountService.removeConnection(user, userToFollow)
         }
-        if (!successful) flash.danger = messageSource.getMessage("user.failed.un-follow", null, Locale.getDefault())
-        render([success: successful] as JSON)
+        if (!successful) messages.danger = messageSource.getMessage("user.failed.un-follow", null, Locale.getDefault())
+        render([success: successful, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')
@@ -103,6 +104,7 @@ class UserController {
 
     @Secured('isAuthenticated()')
     def updateUsersIFollow() {
+        Map messages = [:]
         boolean succeeded
         List<Long> userIds = []
         Object principal = springSecurityService?.principal
@@ -120,6 +122,7 @@ class UserController {
         if (user) {
             succeeded = userAccountService.updateConnections(user, userIds)
         }
-        render([success: succeeded] as JSON)
+        if (!succeeded) messages.danger = messageSource.getMessage("user.followed.update.failed", null, Locale.getDefault())
+        render([success: succeeded, messages: messages] as JSON)
     }
 }

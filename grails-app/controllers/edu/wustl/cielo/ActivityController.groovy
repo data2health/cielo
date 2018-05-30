@@ -9,6 +9,7 @@ class ActivityController {
 
     def activityService
     def springSecurityService
+    def messageSource
 
     @Secured('isAuthenticated()')
     def getActivities() {
@@ -30,12 +31,17 @@ class ActivityController {
     @Secured('isAuthenticated()')
     def saveComment() {
         boolean savedComment
+        Map messages = [:]
         Object principal = springSecurityService?.principal
         UserAccount user = principal ? UserAccount.get(principal.id) : null
 
         savedComment = activityService.saveComment(Long.valueOf(params.activityId), params.text, user)
 
-        render ([success: savedComment] as JSON)
+        if (savedComment) messages.success = messageSource.getMessage('activity.comment.save.success', null, 'Comment was saved',
+                request.locale)
+        else messages.danger = messageSource.getMessage('activity.comment.save.failure', null, 'Comment save failed',
+                request.locale)
+        render ([success: savedComment, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')

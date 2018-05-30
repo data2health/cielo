@@ -49,6 +49,7 @@ class ProjectController {
 
     @Secured('isAuthenticated()')
     def saveProjectComment() {
+        Map messages = [:]
         boolean succeeded
         Long projectId = Long.valueOf(params.id)
         String commentStr = params.comment
@@ -59,11 +60,14 @@ class ProjectController {
             succeeded = projectService.saveProjectComment(user, projectId, commentStr)
         }
 
-        render ([success: succeeded] as JSON)
+        if (!succeeded) messages.danger = messageSource.getMessage('project.comment.save.failure', null,
+                'Unable to save project comment', request.locale)
+        render ([success: succeeded, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')
     def saveCommentReply () {
+        Map messages = [:]
         boolean succeeded
         Long commentId = Long.valueOf(params.id)
         String commentStr = params.reply
@@ -74,7 +78,9 @@ class ProjectController {
             succeeded = projectService.saveProjectCommentReply(user, commentId, commentStr)
         }
 
-        render ([success: succeeded] as JSON)
+        if (!succeeded) messages.danger = messageSource.getMessage('project.comment.save.failure', null,
+                'Unable to save project comment', request.locale)
+        render ([success: succeeded, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')
@@ -91,6 +97,7 @@ class ProjectController {
 
     @Secured('isAuthenticated()')
     def saveProjectBasicChanges() {
+        Map messages = [:]
         boolean succeeded
         Long projectId = Long.valueOf(params.id)
 
@@ -115,7 +122,11 @@ class ProjectController {
             succeeded = projectService.saveProjectBasicChanges(projectId, newName, description, tags,
                     softwareLicenseId, shared)
         }
-        render([success: succeeded] as JSON)
+        if (succeeded) messages.success = messageSource.getMessage('project.creation.succeeded', null, 'Successfully saved project',
+                request.locale)
+        else messages.danger = messageSource.getMessage('project.creation.failed', null, 'Unable to save project',
+                request.locale)
+        render ([success: succeeded, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')
@@ -162,13 +173,41 @@ class ProjectController {
 
         if (user) {
             if (params.max)     max     = Integer.valueOf(params.max)
-            if (params.offset)  offset  = Integer.valueOf(params.offset) - 1
+            if (params.offset)  offset  = Integer.valueOf(params.offset)
 
             myProjects = projectService.getMyProjects(user, max, offset)
         }
 
-        return [userProfile: user?.profile, projects: myProjects, offset: offset <= 0 ? 1 : offset,
+        return [userProfile: user?.profile, projects: myProjects, offset: (offset <= 0 ? 1 : (offset + 1)),
                 numberOfPages: projectService.getNumberOfPagesForMyProjects(user, max)]
+    }
+
+    @Secured('isAuthenticated()')
+    def projectsTableRows() {
+        Object principal = springSecurityService.principal
+        UserAccount user = principal ? UserAccount.get(principal.id) : null
+        List<Project> projects
+        int max     = -1
+        int offset  = -1
+        int numberOfPages = 0
+        boolean isMyProjects = Boolean.valueOf(params.myProjects)
+
+        if (user) {
+            if (params.max)     max     = Integer.valueOf(params.max)
+            if (params.offset)  offset  = Integer.valueOf(params.offset)
+
+            if (isMyProjects) {
+                numberOfPages   = projectService.getNumberOfPagesForMyProjects(user, max)
+                projects        = projectService.getMyProjects(user, max, offset)
+            }
+            else {
+                numberOfPages   = projectService.getNumberOfPagesForPublicProjects(user, max)
+                projects        = projectService.getPublicProjects(offset, max)
+            }
+        }
+
+        def newRowsHTML = projectService.renderTableRows([projects: projects, usersProject: isMyProjects])
+        render([html: newRowsHTML, pagesCount: numberOfPages] as JSON)
     }
 
     @Secured('isAuthenticated()')
@@ -180,7 +219,7 @@ class ProjectController {
         UserAccount user = principal ? UserAccount.get(principal.id) : null
 
         if (params.max)     max     = Integer.valueOf(params.max)
-        if (params.offset)  offset  = Integer.valueOf(params.offset) - 1
+        if (params.offset)  offset  = Integer.valueOf(params.offset)
 
         projects = projectService.getPublicProjects(offset, max)
 
@@ -192,6 +231,7 @@ class ProjectController {
 
     @Secured('isAuthenticated()')
     def deleteProject() {
+        Map messages = [:]
         boolean succeeded
         Long projectId = params.id ? Long.valueOf(params.id) : -1L
         Object principal = springSecurityService.principal
@@ -201,9 +241,9 @@ class ProjectController {
             succeeded = projectService.deleteProject(user, projectId)
         }
 
-        if (!succeeded) flash.danger = messageSource.getMessage("project.deletion.failed", null, Locale.getDefault())
-        else flash.success = messageSource.getMessage("project.deletion.succeeded", null, Locale.getDefault())
-        render([success: succeeded] as JSON)
+        if (!succeeded) messages.danger = messageSource.getMessage("project.deletion.failed", null, Locale.getDefault())
+        else messages.success = messageSource.getMessage("project.deletion.succeeded", null, Locale.getDefault())
+        render([success: succeeded, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')
@@ -254,6 +294,7 @@ class ProjectController {
 
     @Secured('isAuthenticated()')
     def saveProject() {
+        Map messages = [:]
         boolean succeeded
         String teamName
         Object principal        = springSecurityService.principal
@@ -303,10 +344,10 @@ class ProjectController {
 
             succeeded = projectService.saveNewProject(user, project, annotations, licenseId, teamName, teamMembers, teamId, dataUpload, codeUpload)
 
-            if (!succeeded) flash.danger = messageSource.getMessage("project.creation.failed", null, Locale.getDefault())
-            else flash.success = messageSource.getMessage("project.creation.succeeded", null, Locale.getDefault())
+            if (!succeeded) messages.danger = messageSource.getMessage("project.creation.failed", null, Locale.getDefault())
+            else messages.success = messageSource.getMessage("project.creation.succeeded", null, Locale.getDefault())
         }
-        render([success: succeeded] as JSON)
+        render([success: succeeded, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')
@@ -332,6 +373,24 @@ class ProjectController {
 
         succeeded = projectService.addBundleToProject(projectId, type, externalFileLink, filePart, filename, description)
         render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def getBundles() {
+        Long projectId  = Long.valueOf(params.projectId)
+        String type     = params.bundleType
+        Project project = Project.findById(projectId)
+        Map model       = [:]
+
+        if (project && type) {
+            if (type.toLowerCase() == "data") model.bundles = project.datas
+            else model.bundles = project.codes
+
+            model.bundleType    = type
+            model.project       = project
+        }
+
+        render(template: "bundleRows", model: model)
     }
 
     @Secured('isAuthenticated()')
