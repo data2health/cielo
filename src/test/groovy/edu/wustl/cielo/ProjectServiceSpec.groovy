@@ -2,10 +2,10 @@ package edu.wustl.cielo
 
 import edu.wustl.cielo.enums.FileUploadType
 import edu.wustl.cielo.enums.ProjectStatusEnum
+import grails.gsp.PageRenderer
 import grails.testing.services.ServiceUnitTest
 import grails.web.mapping.LinkGenerator
 import org.springframework.core.io.ByteArrayResource
-import org.springframework.security.access.method.P
 import spock.lang.Specification
 import grails.testing.gorm.DomainUnitTest
 import grails.plugin.springsecurity.SpringSecurityService
@@ -15,6 +15,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
     def webRoot
     def assetsRoot
     def assetResourceLocator
+    PageRenderer pageRenderer
     LinkGenerator grailsLinkGenerator
     ActivityService activityService
     SpringSecurityService springSecurityService
@@ -27,6 +28,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         grailsLinkGenerator = Mock()
         activityService = Mock()
         springSecurityService = Mock()
+        pageRenderer = new PageRenderer()
 
         service.grailsLinkGenerator = grailsLinkGenerator
         service.activityService = activityService
@@ -910,5 +912,32 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         then:
             project.codes.size() == 0
             project.datas.size() == 1
+    }
+
+    void "test renderTableRows"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        pageRenderer.metaClass.render = { Map args ->
+            if (args.model.usersProject) return "You want your projects"
+            else return "You want the public projects"
+        }
+
+        service.groovyPageRenderer = pageRenderer
+
+        when:
+            String returnVal = service.renderTableRows([projects: [project], usersProject: true])
+
+        then:
+            returnVal == "You want your projects"
+
+        when:
+            returnVal = service.renderTableRows([projects: [project], usersProject: false])
+
+        then:
+            returnVal == "You want the public projects"
     }
 }

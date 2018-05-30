@@ -349,7 +349,6 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         then:
             response.json.success
-            flash.success
             response.reset()
 
         when:
@@ -358,7 +357,7 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         then:
             !response.json.success
-            flash.danger
+            response.json.messages.danger
     }
 
     void "test addTeamToProject"() {
@@ -471,7 +470,6 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
             controller.saveProject()
 
         then:
-            flash.success
             response.json.success
 
         when:
@@ -484,7 +482,7 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
             controller.saveProject()
 
         then:
-            flash.danger
+            response.json.messages.danger
             !response.json.success
     }
 
@@ -608,5 +606,64 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         then:
             response.json.success
 
+    }
+
+    void "test projectsTableRows"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description")
+
+        projectService.metaClass.getNumberOfPagesForMyProjects = { UserAccount userAccount, int max ->
+            return 1
+        }
+
+        projectService.metaClass.getMyProjects = { UserAccount userAccount, int max, int offset ->
+            return [project]
+        }
+
+        projectService.metaClass.renderTableRows = { Map model ->
+            return "<p>some data</p>"
+        }
+
+        controller.projectService = projectService
+
+        when:
+            params.myProjects = true
+            params.max  = 5
+            params.offset = 0
+            controller.projectsTableRows()
+
+        then:
+            response.json.html == "<p>some data</p>"
+            response.json.pagesCount == 1
+    }
+
+    void "test getBundles"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        when:
+            params.projectId = project.id
+            params.bundleType = "code"
+            controller.getBundles()
+
+        then:
+            response.status == 200
+
+        when:
+            params.projectId = project.id
+            params.bundleType = "data"
+            controller.getBundles()
+
+        then:
+            response.status == 200
     }
 }

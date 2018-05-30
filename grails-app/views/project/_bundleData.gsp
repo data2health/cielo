@@ -11,7 +11,7 @@
                 </span>
             </g:userCanMakeChangesToProject>
         </h6>
-        <table class="table table-hover table-responsive">
+        <table id="dataTable" class="table table-hover table-responsive">
             <thead class="thead-light">
             <tr>
                 <th scope="col">#</th>
@@ -23,24 +23,8 @@
                 <th>&nbsp;</th>
             </tr>
             </thead>
-            <tbody>
-            <g:set var="count" value="${1}"/>
-            <g:each in="${project.datas}" var="data">
-                <tr>
-                    <th scope="row">${count}</th>
-                    <td>${data.revision}</td>
-                    <td>${data.name}</td>
-                    <td data-toggle="tooltip" title="${data.description}">
-                        ${data.description.size() > 50 ? data.description.substring(0,50) : data.description}...
-                    </td>
-                    <td><g:formatDateWithTimezone date="${data.dateCreated}"/></td>
-                    <td><a href="${data.url}">${data.url}</a></td>
-                    <g:userCanMakeChangesToProject project="${project}">
-                        <td><i class="fas fa-trash-alt" style="color: red;" onclick="deleteBundle('${project.id}', '${data.id}', 'data');"></i> </td>
-                    </g:userCanMakeChangesToProject>
-                </tr>
-                <g:set var="count" value="${count+1}"/>
-            </g:each>
+            <tbody id="dataRows">
+                <g:render template="bundleRows" model="[projectId: project.id, bundles: project.datas, bundleType: 'data']"/>
             </tbody>
         </table>
     </div>

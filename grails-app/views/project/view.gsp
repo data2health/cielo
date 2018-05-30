@@ -638,7 +638,7 @@
                             contentType: false,
                             processData: false,
                             success : function () {
-                                window.location.reload();
+                                $('#' + type + 'Table #'+ type + 'Rows').load("${createLink(controller: "project", action: "getBundles")}", {projectId: projectId, bundleType: type});
                             }
                         });
                     }
@@ -655,8 +655,7 @@
 
     function deleteBundle(projectId, bundleId, type) {
         $.post("${createLink(controller: 'project', action: 'removeBundleFromProject')}", {projectId: projectId, bundleId: bundleId, type: type}, function (data) {
-            window.location.reload();
+            $('#' + type + 'Table #'+ type + 'Rows').load("${createLink(controller: "project", action: "getBundles")}", {projectId: projectId, bundleType: type});
         });
-
     }
 </script>

@@ -23,6 +23,7 @@ class TeamController {
 
     @Secured('isAuthenticated()')
     def updateTeamUsers() {
+        Map messages = [:]
         boolean succeeded
         Long teamId = params.id ? Long.valueOf(params.id) : -1L
         List<Long> userIds = []
@@ -41,7 +42,11 @@ class TeamController {
                 succeeded = teamService.updateTeamMembers(user, teamId, userIds)
             }
         }
-        render([success: succeeded] as JSON)
+        if (succeeded) messages.success = messageSource.getMessage('team.update.successful', null, 'Team has been updated',
+                request.locale)
+        else messages.danger = messageSource.getMessage('team.update.failure', null, 'Unable to update team',
+                request.locale)
+        render([success: succeeded, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')

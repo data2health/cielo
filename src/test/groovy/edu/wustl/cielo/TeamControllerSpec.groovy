@@ -136,11 +136,9 @@ class TeamControllerSpec extends Specification implements ControllerUnitTest<Tea
 
         then:
             response.status == 302
-            flash.danger
             response.reset()
 
         when:
-            flash.danger = null
             SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                     url: "http://www.rerlicense.com").save()
             Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
@@ -151,6 +149,5 @@ class TeamControllerSpec extends Specification implements ControllerUnitTest<Tea
 
         then:
             response.status == 302
-            !flash.danger
     }
 }

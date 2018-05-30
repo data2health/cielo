@@ -11,7 +11,7 @@
                     <g:set var="count" value="${count+1}"/>
                 </g:each>
             </select>
-            of ${pages}
+            <span id="ofPages">of ${pages}</span>
         </div>
         <div id="right-table-toolbar" style="width: 33%; text-align: right;">
             <i class="fas fa-play" onclick="${onNextPageCallback + '();'}"></i> &nbsp; <i class="fas fa-fast-forward" onclick="${onLastPageCallback + '();'}"></i>
@@ -24,21 +24,4 @@
     $(function() {
         updateToolbarButtons();
     });
-
-    function updateToolbarButtons() {
-        var offset           = parseInt($('#paging-options').val());
-        var numberOfPages    = parseInt(${pages});
-
-        if (offset <= 0 || offset === 1) {
-            $('#left-table-toolbar').find('i').each( function() {
-                $(this).addClass('fa-disabled');
-            });
-        }
-
-        if (numberOfPages <=1 || (offset === numberOfPages)) {
-            $('#right-table-toolbar').find('i').each( function() {
-                $(this).addClass('fa-disabled');
-            });
-        }
-    }
 </script>

@@ -34,12 +34,14 @@
 
 <script type="application/javascript">
     function deleteProject(projectId, projectName) {
+        var offsetVal = parseInt($('#paging-options').val()) - 1;
         bootbox.confirm({
             title: "Delete Project?",
             message: "Do you really want to delete <em style='font-weight: 300;color: #149dcc;'>" + projectName + "</em> ? This cannot be undone. <p>&nbsp;<p>*Please note that any data and code will also be deleted.",
             closeButton: false,
             buttons: {
                 cancel: {
+                    className: 'btn-red',
                     label: '<i class="fa fa-times"></i>&nbsp;Cancel'
                 },
                 confirm: {
@@ -48,23 +50,22 @@
             },
             callback: function (result) {
                 if (result === true) {
-                    $.post("${createLink(controller: "project", action: "deleteProject")}", {'id': projectId}, function (data) {
-                        window.location.reload();
-                    });
+                    $.post("${createLink(controller: "project", action: "deleteProject")}", {'id': projectId},
+                        function () {
+                            $.get("${createLink(controller: "project", action: "projectsTableRows")}", {offset: offsetVal, myProjects: true}, function (data) {
+                                replaceProjectTableContent(data);
+                            });
+                        }
+                    );
                 }
             }
         });
     }
 
     function onPageSelection() {
-        var offsetVal = $('#paging-options').val();
-        $('#projectsDiv').load("${createLink(controller: "project", action: "myProjects")} #myProjectsTableSection", {'offset': offsetVal, 'onChangeCallback': 'onPageSelection', onFirstPageCallback: 'onFirstPage',
-            'onPreviousPageCallback': 'onPreviousPage',
-            'onNextPageCallback': 'onNextPage',
-            'onLastPageCallback': 'onLastPage'
-        }, function () {
-            $('#paging-options').val(offsetVal);
-            updateToolbarButtons();
+        var offsetVal = parseInt($('#paging-options').val()) - 1;
+        $.get("${createLink(controller: "project", action: "projectsTableRows")}", {offset: offsetVal, myProjects: true}, function (data) {
+            replaceProjectTableContent(data);
         });
     }
 
