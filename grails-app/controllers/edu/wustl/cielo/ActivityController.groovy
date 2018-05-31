@@ -13,9 +13,9 @@ class ActivityController {
 
     @Secured('isAuthenticated()')
     def getActivities() {
-        int max    = Integer.valueOf(params.max)
-        int offset = Integer.valueOf(params.offset)
-        int newOffset = Integer.valueOf(params.offset)+max
+        int max    = params.max     ? Integer.valueOf(params.max)       : activityService.DEFAULT_MAX
+        int offset = params.offset  ? Integer.valueOf(params.offset)    : activityService.DEFAULT_OFFSET
+        int newOffset = offset + max
 
         Object principal = springSecurityService?.principal
         UserAccount user = principal ? UserAccount.get(principal.id) : null
@@ -96,5 +96,24 @@ class ActivityController {
         render(template: "singleActivity",
                 model:[activity: Activity.findById(activityId), user: user]
         )
+    }
+
+    @Secured('isAuthenticated()')
+    def saveNewActivity() {
+        String title        = params.title
+        String message      = params.message
+        Object principal    = springSecurityService?.principal
+        UserAccount user    = principal ? UserAccount.get(principal.id) : null
+        Map messages        = [:]
+        boolean succeeded
+
+        if (user && title && message) {
+            succeeded = activityService.saveActivityForManualPost(user, title, message)
+        }
+
+        if (succeeded == false) messages.danger = messageSource.getMessage('activity.post.failure', null, 'Unable to post activity',
+                request.locale)
+
+        render([success: succeeded, messages: messages] as JSON)
     }
 }

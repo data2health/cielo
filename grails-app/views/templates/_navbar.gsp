@@ -61,7 +61,7 @@
                                 <button type="button" class="btn btn-link" onclick="showNewProjectWizard();"
                                         style="padding: 0;color: #149dcc;font-weight: 400; margin: 0;margin-left: 1em;">
                                     <i class="fa fa-plus"></i>
-                                    New Project
+                                    <span class="menu-button-text">New Project</span>
                                 </button>
                             </li>
                         </ul>
@@ -103,7 +103,7 @@
                             <li style="font-weight:400;">
                                 <button onclick="showTermsOfUseNoAcknowledge()"
                                         style="font-weight: 400;padding: 0;padding-bottom: 0.2em;color: #149dcc !important;padding-left: 1em;margin: 0;"
-                                        type="button" class="btn btn-link">Terms of Use</button>
+                                        type="button" class="btn btn-link"><span class="menu-button-text">Terms of Use</span></button>
                             </li>
                         </ul>
                     </li>

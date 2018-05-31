@@ -1,6 +1,6 @@
 <h6 class="card-header">
     <g:getUserProfilePic user="${activity.user}" sticker="${true}" showLink="${true}">
-        &nbsp;${activity.activityInitiatorUserName}
+        &nbsp;${activity.user.fullName}
     </g:getUserProfilePic>
     <g:dateDiff date="${activity.dateCreated}"/>
 </h6>

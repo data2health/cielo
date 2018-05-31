@@ -8,6 +8,7 @@ enum ActivityTypeEnum {
     ACTIVITY_NEW_UPLOAD_DATA,
     ACTIVITY_NEW_UPLOAD_CODE,
     ACTIVITY_NEW_TEAM,
+    ACTIVITY_MANUAL_POST,
 
     /*Updates*/
     /*PROJECT*/
