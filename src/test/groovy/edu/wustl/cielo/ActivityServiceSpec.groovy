@@ -226,4 +226,33 @@ class ActivityServiceSpec extends Specification implements ServiceUnitTest<Activ
         then:
             activity.likedByUsers.size() == 0
     }
+
+    void "test saveActivityForManualPost"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        boolean returnVal
+
+        when:
+            returnVal = service.saveActivityForManualPost(user, null, null)
+
+        then:
+            !returnVal
+
+        when:
+            returnVal = service.saveActivityForManualPost(user, null, "Message")
+
+        then:
+            !returnVal
+
+        when:
+            returnVal = service.saveActivityForManualPost(user, "title", null)
+
+        then:
+            !returnVal
+
+        when:
+            returnVal = service.saveActivityForManualPost(user, "title", "Message")
+
+        then:
+            returnVal
+    }
 }

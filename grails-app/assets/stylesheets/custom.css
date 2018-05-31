@@ -141,6 +141,7 @@ a.dropdown-toggle {
 .card-footer {
     margin-left: 0;
     margin-right: 0;
+    margin-bottom: 0.01em; /* Fix for missing border in some activity feeds*/
     border-top: none;
     background-color: white;
 }
@@ -330,6 +331,22 @@ ul.list-group.list-group-flush {
     margin-top: -10em;
 }
 
+.add-activity {
+    background-color: rgba(0,0,0,0.4);
+    left: 85vw;
+    top: 2.5em;
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    color: white;
+    font-size: 2em;
+    display: inline-grid;
+    border-radius: 100%;
+}
+
+.menu-button-text {
+    font-size: 1.5em;
+}
 /*From bootstrap and navbar settings for hiding menu items. Adjust when needed*/
 @media (min-width: 768px) {
     .arrow_box {
@@ -405,6 +422,15 @@ ul.list-group.list-group-flush {
 
     .myprojects-card {
         margin-top: 3em;
+    }
+
+    .add-activity {
+        left: 58vw;
+        top: 3.4em;
+    }
+
+    .menu-button-text {
+        font-size: 1em;
     }
 }
 

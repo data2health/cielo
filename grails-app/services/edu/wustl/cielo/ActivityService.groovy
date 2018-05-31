@@ -334,6 +334,42 @@ class ActivityService {
     }
 
     /**
+     * Save a manual post
+     *
+     * @param user the user posting
+     * @param eventTitle the title of the post
+     * @param eventText the text of the post
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean saveActivityForManualPost(UserAccount user, String eventTitle, String eventText) {
+        Activity activity
+        boolean savedActivity = true
+
+        if (!Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText,
+                ActivityTypeEnum.ACTIVITY_MANUAL_POST)) {
+            Activity.withNewTransaction {
+                activity = new Activity()
+                activity.activityInitiatorUserName = user.username
+                activity.eventType  = ActivityTypeEnum.ACTIVITY_MANUAL_POST
+                activity.eventTitle = eventTitle
+                activity.eventText  = eventText
+
+                if (!activity.save()) {
+                    activity.errors.allErrors.each { ObjectError err ->
+                        log.error(err.toString())
+                    }
+                    log.error("Unable to save activity")
+                    savedActivity = false
+                }
+                log.info("Saved activity")
+            }
+        }
+
+        return savedActivity
+    }
+
+    /**
      * Returns the activity type of the update event
      *
      * @param domainClass the parent domain object

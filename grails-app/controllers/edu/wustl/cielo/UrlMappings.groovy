@@ -71,6 +71,7 @@ class UrlMappings {
         "/activity/likePost"(controller: "activity", action: "likeActivity")
         "/activity/removelike"(controller: "activity", action: "removeActivityLike")
         "/activity/getUsers/"(controller: "activity", action: "getCommentLikeUsers")
+        "/activity/post"(controller: "activity", action: "saveNewActivity")
 
         //Team
         "/team/members"(controller:"team", action: "getTeamMembers")

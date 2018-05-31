@@ -188,6 +188,57 @@ $( function() {
     });
 
     $('.multiple-select').select2();
+
+    $('#addActivity').click(function () {
+        bootbox.dialog({
+            title: 'Create a Post',
+            message: "<div class=\"form-group row\">\n" +
+            "         <div class=\"col-sm-12\">\n" +
+            "             <input id=\"title\" name=\"title\" class=\"form-control\" placeholder=\"Enter post title\"\n" +
+            "                    required=\"\" aria-required=\"true\">\n" +
+            "             <div id=\"titleInvalidFeedBack\" class=\"col-md-10 invalid-feedback\"></div>\n" +
+            "         </div></div>" +
+            "<div class=\"form-group row\">\n" +
+            "<div class=\"col-sm-12\">\n" +
+            "    <textarea id=\"postMessage\" name=\"postMessage\" class=\"form-control\" rows=\"4\" placeholder=\"Enter message here\"></textarea>\n" +
+            "    <div id=\"postMessageInvalidFeedBack\" class=\"col-md-10 invalid-feedback\"></div>\n" +
+            "</div></div>",
+            buttons: {
+                cancel: {
+                    label: "Cancel",
+                    className: 'btn-red'
+                },
+                ok: {
+                    label: "Save",
+                    className: 'btn-primary',
+                    callback: function() {
+                        var title   = $('#title').val();
+                        var message = $('#postMessage').val();
+
+                        $('#titleInvalidFeedBack').text("");
+                        $('#postMessageInvalidFeedBack').text("");
+
+                        if (title.length === 0 || message.length === 0) {
+                            if (title.length === 0) {
+                                $('#titleInvalidFeedBack').text("*Required");
+                            }
+
+                            if (message.length === 0) {
+                                $('#postMessageInvalidFeedBack').text("*Required");
+                            }
+                            return false;
+                        } else {
+                            $.post("/activity/post", {title: title, message: message}, function(data) {
+                                if (data.success) {
+                                    $('.activity-feed #activity').load("/activity/getActivities");
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    });
 });
 
 function getAttributes(element) {

@@ -26,6 +26,7 @@
     </div>
 </section>
 <g:render template="/templates/scrollToTop"/>
+<g:render template="/templates/addActivity"/>
 <g:render template="/templates/contactUsSection"/>
 <g:render template="/templates/footerlncludes"/>
 

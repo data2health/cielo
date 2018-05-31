@@ -17,8 +17,9 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
         mockDomain(Profile)
         groovyPageRenderer = Mock()
         activityService = new ActivityService()
-        springSecurityService = Mock()
+        springSecurityService = new SpringSecurityService()
         cieloTagLib = mockTagLib(CieloTagLib)
+        messageSource.addMessage('activity.post.failure', Locale.getDefault(), "Failed to add post")
     }
 
     void "test getActivities"() {
@@ -230,5 +231,33 @@ class ActivityControllerSpec extends Specification implements ControllerUnitTest
 
         then:
             response.text == "mock data"
+    }
+
+    void "test saveNewActivity"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+
+        activityService.metaClass.saveActivityForManualPost = { UserAccount userAccount, String eventTitle, String eventText ->
+            return true
+        }
+
+        controller.springSecurityService = springSecurityService
+        controller.activityService = activityService
+
+        when:
+            controller.saveNewActivity()
+
+        then:
+            !response.json.success
+            response.json.messages.danger
+
+        when:
+            response.reset()
+            params.title   = "My custom title"
+            params.message = "Message here"
+            controller.saveNewActivity()
+
+        then:
+            response.json.success
     }
 }
