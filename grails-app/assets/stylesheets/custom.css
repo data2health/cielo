@@ -230,7 +230,7 @@ a.dropdown-toggle {
 }
 
 .collapse-icon-collapsed {
-    margin-left: 8px;
+    margin-left: 4px;
 }
 
 .nav-tabs .nav-link-rectangle {
@@ -328,12 +328,12 @@ ul.list-group.list-group-flush {
 }
 
 .myprojects-card {
-    margin-top: -10em;
+    margin-top: 0em;
 }
 
 .add-activity {
     background-color: rgba(0,0,0,0.4);
-    left: 85vw;
+    left: 84vw;
     top: 2.5em;
     position: fixed;
     width: 50px;
@@ -347,6 +347,33 @@ ul.list-group.list-group-flush {
 .menu-button-text {
     font-size: 1.5em;
 }
+
+.busy-div {
+    display: inline-block;
+    text-align: center;
+    position: fixed;
+    bottom: 50vh;
+    right: 8vw;
+    z-index: 6000;
+    color: white;
+    border-radius: 0.75em;
+    height: 8em;
+    width: 20em;
+    opacity: 0.95;
+    border: 2px solid #484848e8;
+    background: linear-gradient(to bottom, rgb(123, 123, 123) 0%,rgb(23, 23, 23) 49%,rgb(21, 20, 20) 50%,rgb(49, 49, 49) 100%);
+    box-shadow: 0 0 57px 6px rgba(37, 37, 37, 0.4);
+}
+
+#myProjectsTableSection {
+    width: 100vw;
+}
+
+#projectsDiv {
+    padding-top: 0;
+    align-items: baseline;
+}
+
 /*From bootstrap and navbar settings for hiding menu items. Adjust when needed*/
 @media (min-width: 768px) {
     .arrow_box {
@@ -425,12 +452,20 @@ ul.list-group.list-group-flush {
     }
 
     .add-activity {
-        left: 58vw;
-        top: 3.4em;
+        left: 71vw;
+        top: 3em;
     }
 
     .menu-button-text {
         font-size: 1em;
+    }
+
+    .busy-div {
+        right: 45vw;
+    }
+
+    #projectsDiv {
+        align-items: center;
     }
 }
 
@@ -746,23 +781,6 @@ ul.list-group.list-group-flush {
 
 .modal-title.offset-title {
     margin-left: 5em;
-}
-
-.busy-div {
-    display: inline-block;
-    text-align: center;
-    position: fixed;
-    bottom: 50vh;
-    right: 45vw;
-    z-index: 6000;
-    color: white;
-    border-radius: 0.75em;
-    height: 8em;
-    width: 20em;
-    opacity: 0.95;
-    border: 2px solid #484848e8;
-    background: linear-gradient(to bottom, rgb(123, 123, 123) 0%,rgb(23, 23, 23) 49%,rgb(21, 20, 20) 50%,rgb(49, 49, 49) 100%);
-    box-shadow: 0 0 57px 6px rgba(37, 37, 37, 0.4);
 }
 
 /*Fix for bootbox close button*/
