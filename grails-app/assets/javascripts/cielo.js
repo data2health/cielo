@@ -33,9 +33,31 @@ $( function() {
         showWaitDialog();
     }).bind("ajaxComplete", function(event, xhr, ajaxOptions) {
         hideWaitDialog();
-        if (xhr.responseJSON !== undefined) {
-            for (obj in xhr.responseJSON["messages"]) {
-                showAlert(xhr.responseJSON["messages"][obj], obj);
+
+        //session expired
+        if (xhr.responseText === "Unauthorized") {
+            bootbox.dialog({
+                title: 'Session Expired',
+                message: "Credentials required. Click OK to navigate to login page or cancel to remain on current page.",
+                buttons: {
+                    cancel: {
+                        label: "Cancel",
+                        className: 'btn-red'
+                    },
+                    ok: {
+                        label: "OK",
+                        className: 'btn-primary',
+                        callback: function() {
+                            window.location.reload();
+                        }
+                    }
+                }
+            });
+        } else {
+            if (xhr.responseJSON !== undefined) {
+                for (obj in xhr.responseJSON["messages"]) {
+                    showAlert(xhr.responseJSON["messages"][obj], obj);
+                }
             }
         }
     });
@@ -76,29 +98,24 @@ $( function() {
             $("#sidebar-toggle-button").removeClass("collapse-icon-collapsed");
             $("#sidebar-toggle-button").removeClass("fa-angle-double-right");
             $("#sidebar-options").removeClass("col-md-0");
-            $("#spacer").removeClass("col-md-3");
-            $("#activity").removeClass("col-md-5");
+            $("#activity").removeClass("col-md-8");
             $("#collapse-panel").removeClass('collapse-icon-div-collapsed');
-            $("#spacer").removeClass("spacer-collapsed");
             $('#connections-nav-tab').removeClass('hidden');
             $("#sidebar-options").removeClass("hidden");
             $("#sidebar-options").addClass("col-md-3");
             $("#sidebar-toggle-button").addClass("fa-angle-double-left");
 
-            //spacer
-            $("#spacer").addClass("col-md-2");
-
             //activity div
-            $("#activity").addClass("col-md-4");
+            $("#activity").addClass("col-md-6");
 
+            $(".sidebar-announcements").css("left","");
             //show all children
             $("#sidebar-options").children().show();
         } else {
             $("#sidebar-options").children().hide();
             $("#sidebar-toggle-button").removeClass("fa-angle-double-left");
             $("#sidebar-options").removeClass("col-md-3");
-            $("#spacer").removeClass("col-md-2");
-            $("#activity").removeClass("col-md-4");
+            $("#activity").removeClass("col-md-6");
             $("#sidebar-toggle-button").addClass("collapse-icon-collapsed");
             $("#sidebar-toggle-button").addClass("fa-angle-double-right");
             $("#sidebar-options").addClass("col-md-0");
@@ -107,11 +124,9 @@ $( function() {
             $("#collapse-panel").addClass('collapse-icon-div-collapsed');
 
             //activity div
-            $("#activity").addClass("col-md-5");
+            $("#activity").addClass("col-md-8");
 
-            //spacer
-            $("#spacer").addClass("col-md-3");
-            $("#spacer").addClass("spacer-collapsed");
+            $(".sidebar-announcements").css("left", "7vw");
         }
     });
 

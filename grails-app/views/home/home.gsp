@@ -2,7 +2,7 @@
 <g:render template="/templates/headerIncludes"/>
 <g:render template="/templates/navbar" model="[user: profile.user]"/>
 
-<section class="mbr-fullscreen">
+<section class="mbr-fullscreen" style="background-color: #eaeaea;">
     <div class="container-fluid activity-feed">
         <div class="row">
             <div id="sidebar-options" class="col-md-3 d-none d-md-block sidebar-parent">
@@ -14,13 +14,12 @@
                     <i id="sidebar-toggle-button" class="fa fa-angle-double-left collapse-icon collapse-open"></i>
                 </span>
             </div>
-            <div id="activity" class="col-md-4">
+            <div id="activity" class="col-md-6">
                 <g:render template="/activity/activityFeed" model="[activities: activities, activityOffset: activityOffset,
                                                                      activityMax: activityMax, user: profile.user, username: username]"/>
                 <div id="olderContent">
                 </div>
             </div>
-            <div id="spacer" class="col-md-2">&nbsp;</div>
             <g:render template="sidebar-right" model="[projects: mostPopularProjects]"/>
         </div>
     </div>
