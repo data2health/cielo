@@ -201,7 +201,7 @@ class ProjectController {
                 projects        = projectService.getMyProjects(user, max, offset)
             }
             else {
-                numberOfPages   = projectService.getNumberOfPagesForPublicProjects(user, max)
+                numberOfPages   = projectService.getNumberOfPagesForPublicProjects(max)
                 projects        = projectService.getPublicProjects(offset, max)
             }
         }
@@ -422,5 +422,37 @@ class ProjectController {
         }
 
         render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def getFilteredProjects() {
+        List<Project> projects
+        int max     = projectService.DEFAULT_MAX
+        int offset  = projectService.DEFAULT_OFFSET
+        int numberOfPages = 1
+        int totalNumberOfResults
+        boolean isMyProjects = Boolean.valueOf(params.myProjects)
+
+        if (params.max)     max     = Integer.valueOf(params.max)
+
+        if (isMyProjects) {
+            Object principal = springSecurityService.principal
+            UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+            if (user) {
+                projects = (List<Project>) projectService.retrieveFilteredProjectsFromDB(user, params.filterTerm)
+            }
+        } else {
+            projects = (List<Project>) projectService.retrieveFilteredProjectsFromDB(null, params.filterTerm)
+        }
+
+        if (projects.size() > 0) {
+            totalNumberOfResults = projects.size()
+            numberOfPages = Math.ceil(totalNumberOfResults / max).toInteger().intValue()
+        }
+
+        def newRowsHTML = projectService.renderTableRows([projects: (projects.size() > max ? projects.getAt([0..max - 1]) : projects),
+                                                          usersProject: isMyProjects])
+        render([html: newRowsHTML, pagesCount: numberOfPages] as JSON)
     }
 }

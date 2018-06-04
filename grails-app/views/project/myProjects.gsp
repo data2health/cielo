@@ -54,41 +54,16 @@
                         function () {
                             $.get("${createLink(controller: "project", action: "projectsTableRows")}", {offset: offsetVal, myProjects: true}, function (data) {
                                 replaceProjectTableContent(data);
+                                //if the number of projects currently visible is zero, call change on options; page 1
+                                //is already selected
+                                 if ($('#projectTableBody tr').length === 0) {
+                                     $('#paging-options').change();
+                                 }
                             });
                         }
                     );
                 }
             }
         });
-    }
-
-    function onPageSelection() {
-        var offsetVal = parseInt($('#paging-options').val()) - 1;
-        $.get("${createLink(controller: "project", action: "projectsTableRows")}", {offset: offsetVal, myProjects: true}, function (data) {
-            replaceProjectTableContent(data);
-        });
-    }
-
-    function onNextPage() {
-        var offsetVal = $('#paging-options').val();
-        $('#paging-options').val((parseInt(offsetVal) + 1 ));
-        $('#paging-options').trigger("change");
-    }
-
-    function onPreviousPage() {
-        var offsetVal = $('#paging-options').val();
-        $('#paging-options').val((parseInt(offsetVal) - 1 ));
-        $('#paging-options').trigger("change");
-    }
-
-    function onFirstPage() {
-        $('#paging-options').val(1);
-        $('#paging-options').trigger("change");
-    }
-
-    function onLastPage() {
-        var lastPage = $('#paging-options').find('option').length;
-        $('#paging-options').val(lastPage);
-        $('#paging-options').trigger("change");
     }
 </script>

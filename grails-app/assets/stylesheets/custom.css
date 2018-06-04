@@ -793,3 +793,27 @@ ul.list-group.list-group-flush {
 .dropdown-menu {
     margin: 0;
 }
+
+.project-search {
+    float: right;
+    position: relative;
+    right: 2em;
+    top: -1.75em;
+    color: slategrey;
+}
+
+#projectSearchClear {
+    color: grey;
+    position: relative;
+    right: 20px;
+    top: 1px;
+    z-index: 1000;
+    display: none;
+}
+
+#projectSearch {
+    min-height: 0;
+    max-height: 2em;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
