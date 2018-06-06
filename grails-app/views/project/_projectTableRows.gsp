@@ -12,20 +12,18 @@
             </g:else>
         </td>
         <td>
-            <button id="softwareLicenseButton" onclick="showSoftwareLicense(${project.license.id}, '${project.license.label}')"
-                    class="btn btn-link" style="padding: 0; margin: 0; margin-left: -2px;">
-                ${project.license.label}
-            </button>
-        </td>
-        <td>
-            <g:if test="${project.shared}">
-                <i id="sharedIcon" class="fas fa-lock-open"></i>
+            <g:if test="${project.annotations.size() > 0}">
+                ${project.annotations.label.join(', ')}
             </g:if>
             <g:else>
-                <i id="sharedIcon" class="fas fa-lock"></i>
+                <em>No annotations</em>
             </g:else>
-            <g:projectVisibility value="${project.shared}"/>
         </td>
+        <g:if test="${!usersProject}">
+            <td>
+                ${project.projectOwner.fullName}
+            </td>
+        </g:if>
         <td>
             <g:if test="${project.teams}">
                 <g:set var="numberOfTeams" value="${project.teams?.size()}"/>
@@ -45,7 +43,13 @@
             </g:else>
         </td>
         <td>
-            <g:dateDiff date="${project.dateCreated}"/>
+            <g:if test="${project.shared}">
+                <i id="sharedIcon" class="fas fa-lock-open"></i>
+            </g:if>
+            <g:else>
+                <i id="sharedIcon" class="fas fa-lock"></i>
+            </g:else>
+            <g:projectVisibility value="${project.shared}"/>
         </td>
         <td>
             <g:dateDiff date="${project.lastChanged?: project.lastUpdated}"/>

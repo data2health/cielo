@@ -6,7 +6,6 @@ import edu.wustl.cielo.enums.FileUploadType
 import grails.gorm.transactions.ReadOnly
 import grails.gorm.transactions.Transactional
 import grails.plugin.cache.Cacheable
-import grails.plugin.springsecurity.annotation.Secured
 import grails.util.Environment
 import groovy.util.logging.Slf4j
 import grails.web.mapping.LinkGenerator
@@ -15,6 +14,7 @@ import org.springframework.validation.ObjectError
 import com.thedeanda.lorem.Lorem
 import com.thedeanda.lorem.LoremIpsum
 import javax.servlet.http.Part
+import groovy.sql.Sql
 
 @Transactional
 @Slf4j
@@ -37,6 +37,7 @@ class ProjectService {
     def messageSource
     def springSecurityService
     def cloudService
+    def dataSource
 
     /**
      * Main call used in bootstrap to generated project data
@@ -318,7 +319,6 @@ class ProjectService {
      * @return a list of projects
      */
     @ReadOnly
-    @Secured("IS_AUTHENTICATED_ANONYMOUSLY")
     @Cacheable("most_viewed_projects")
     List<Object> getMostViewedProjects(int maxNumberOfProjects, boolean sharedOnly = false) {
         return Project.withCriteria() {
@@ -664,7 +664,7 @@ class ProjectService {
         if (!offset || offset <= 0) offset  = DEFAULT_OFFSET
         if (!max || max <= 0)       max     = DEFAULT_MAX
 
-        return Project.findAllWhere([shared: true], [offset: offset * max, max: max, sort: 'id', order: 'asc'])
+        return Project.findAllWhere([shared: true], [offset: offset * max, max: max, sort: 'dateCreated', order: 'desc'])
     }
 
     /**
@@ -1063,5 +1063,160 @@ class ProjectService {
         }
 
         return isOwnerOrContributor
+    }
+
+    /**
+     * Retrieve a filtered list of projects from the db
+     * @param user the user to filter on or null for public projects
+     * @param filterTerm the term to search for
+     * @param offset the offset for results
+     * @param max the max number of results to return
+     *
+     * @return a resultset of projects
+     */
+    @ReadOnly
+    @Cacheable("filtered_projects")
+    List<Project> retrieveFilteredProjectsFromDB(UserAccount user, String filterTerm, int offset, int max) {
+        Sql sql = new Sql(dataSource)
+        StringBuffer whereClause = new StringBuffer(' where ')
+        List params = []
+
+        if (user) {
+            whereClause << ' project.project_owner_id=?'
+            params.add(user.id)
+        } else {
+            whereClause << ' project.shared = true  -- for public projects'
+        }
+
+        whereClause << """
+                AND (
+                        lower(t.name) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(project.name) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(project.description) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(teamMembers.members) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(pa.annotations) like ${"'%" + filterTerm + "%'"}
+                )
+        """
+
+        String query = """
+                SELECT 
+                    project.id,
+                    project.date_created
+                FROM project
+                    LEFT JOIN project_team AS pt ON pt.project_teams_id=id
+                    LEFT JOIN team AS t ON t.id=pt.team_id
+                    LEFT JOIN team_user_account AS tuac ON tuac.team_members_id=t.id
+                    LEFT JOIN user_account AS uac ON uac.id=t.administrator_id 
+                    LEFT JOIN profile AS admin_pub_profile ON admin_pub_profile.user_id=project.project_owner_id
+                    LEFT JOIN (
+                        SELECT
+                            team.id AS t_id,
+                            string_agg(profile.first_name || ' ' || profile.lASt_name, ', ') AS members
+                        FROM team     
+                            LEFT JOIN team_user_account AS tuac ON tuac.team_members_id=team.id
+                            LEFT JOIN profile ON profile.user_id=tuac.user_account_id
+                        GROUP BY team.id
+                        ORDER BY team.id
+                    ) AS teamMembers ON teamMembers.t_id=pt.team_id
+                    LEFT JOIN (
+                        SELECT
+                            string_agg(annotatiON.label, ', ') AS annotatiONs,
+                            project_annotatiON.project_annotatiONs_id AS id
+                        FROM project_annotatiON
+                        LEFT JOIN annotatiON ON annotatiON.id=project_annotatiON.annotatiON_id
+                        GROUP BY project_annotatiON.project_annotatiONs_id
+                    ) AS pa ON pa.id=project.id
+                ${whereClause.toString()}
+                GROUP BY project.id
+                ORDER BY project.date_created DESC
+                OFFSET ? LIMIT ?
+                """
+
+        params.add(offset)
+        params.add(max)
+
+        return sql.rows(query, params).collect { Project.findById(Long.valueOf(it.id)) }
+    }
+
+    /**
+     * Retrieve the total count of projects with given filter
+     *
+     * @param user the user if searching myprojects, null otherwise
+     * @param filterTerm the term to search for in the projects table
+     * @param max number of items per page
+     *
+     * @return the number of total projects that match search criteria
+     */
+    @ReadOnly
+    @Cacheable("filtered_projects_count")
+    int countFilteredProjectsPages(UserAccount user, String filterTerm, int max) {
+        Sql sql = new Sql(dataSource)
+        StringBuffer whereClause = new StringBuffer(' where ')
+        List params = []
+        int numberOfCountedItems
+
+        if (user) {
+            whereClause << ' project.project_owner_id=?'
+            params.add(user.id)
+        } else {
+            whereClause << ' project.shared = true  -- for public projects'
+        }
+
+        whereClause << """
+                AND (
+                        lower(t.name) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(project.name) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(project.description) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(teamMembers.members) like ${"'%" + filterTerm + "%'"}
+                    OR
+                        lower(pa.annotations) like ${"'%" + filterTerm + "%'"}
+                )
+        """
+
+        String query = """
+                SELECT DISTINCT
+                    project.id
+                FROM project
+                    LEFT JOIN project_team AS pt ON pt.project_teams_id=id
+                    LEFT JOIN team AS t ON t.id=pt.team_id
+                    LEFT JOIN team_user_account AS tuac ON tuac.team_members_id=t.id
+                    LEFT JOIN user_account AS uac ON uac.id=t.administrator_id 
+                    LEFT JOIN profile AS admin_pub_profile ON admin_pub_profile.user_id=project.project_owner_id
+                    LEFT JOIN (
+                        SELECT
+                            team.id AS t_id,
+                            string_agg(profile.first_name || ' ' || profile.lASt_name, ', ') AS members
+                        FROM team     
+                            LEFT JOIN team_user_account AS tuac ON tuac.team_members_id=team.id
+                            LEFT JOIN profile ON profile.user_id=tuac.user_account_id
+                        GROUP BY team.id
+                        ORDER BY team.id
+                    ) AS teamMembers ON teamMembers.t_id=pt.team_id
+                    LEFT JOIN (
+                        SELECT
+                            string_agg(annotatiON.label, ', ') AS annotatiONs,
+                            project_annotatiON.project_annotatiONs_id AS id
+                        FROM project_annotatiON
+                        LEFT JOIN annotatiON ON annotatiON.id=project_annotatiON.annotatiON_id
+                        GROUP BY project_annotatiON.project_annotatiONs_id
+                    ) AS pa ON pa.id=project.id
+                ${whereClause.toString()}
+                """
+
+        numberOfCountedItems = sql.rows(query, params).size()
+
+        if (numberOfCountedItems == 0 || numberOfCountedItems <= max) return 1
+        else return Math.ceil(numberOfCountedItems / max).toInteger().intValue()
     }
 }

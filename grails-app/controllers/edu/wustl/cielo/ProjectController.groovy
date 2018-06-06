@@ -183,34 +183,6 @@ class ProjectController {
     }
 
     @Secured('isAuthenticated()')
-    def projectsTableRows() {
-        Object principal = springSecurityService.principal
-        UserAccount user = principal ? UserAccount.get(principal.id) : null
-        List<Project> projects
-        int max     = -1
-        int offset  = -1
-        int numberOfPages = 0
-        boolean isMyProjects = Boolean.valueOf(params.myProjects)
-
-        if (user) {
-            if (params.max)     max     = Integer.valueOf(params.max)
-            if (params.offset)  offset  = Integer.valueOf(params.offset)
-
-            if (isMyProjects) {
-                numberOfPages   = projectService.getNumberOfPagesForMyProjects(user, max)
-                projects        = projectService.getMyProjects(user, max, offset)
-            }
-            else {
-                numberOfPages   = projectService.getNumberOfPagesForPublicProjects(user, max)
-                projects        = projectService.getPublicProjects(offset, max)
-            }
-        }
-
-        def newRowsHTML = projectService.renderTableRows([projects: projects, usersProject: isMyProjects])
-        render([html: newRowsHTML, pagesCount: numberOfPages] as JSON)
-    }
-
-    @Secured('isAuthenticated()')
     def publicProjectsList() {
         int max     = -1
         int offset  = -1
@@ -422,5 +394,31 @@ class ProjectController {
         }
 
         render([success: succeeded] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def getFilteredProjects() {
+        List<Project> projects
+        int max     = params.max    ? Integer.valueOf(params.max)    : projectService.DEFAULT_MAX
+        int offset  = params.offset ? Integer.valueOf(params.offset) : projectService.DEFAULT_OFFSET
+        int numberOfPages       = 1
+        boolean isMyProjects    = Boolean.valueOf(params.myProjects)
+
+        if (isMyProjects) {
+            Object principal = springSecurityService.principal
+            UserAccount user = principal ? UserAccount.get(principal.id) : null
+
+            if (user) {
+                projects        = projectService.retrieveFilteredProjectsFromDB(user, params.filterTerm, (offset * max), max)
+                numberOfPages   = projectService.countFilteredProjectsPages(user, params.filterTerm, max)
+            }
+        } else {
+            projects        = projectService.retrieveFilteredProjectsFromDB(null, params.filterTerm, (offset * max), max)
+            numberOfPages   = projectService.countFilteredProjectsPages(null, params.filterTerm, max)
+        }
+
+        def newRowsHTML = projectService.renderTableRows([projects: projects,
+                                                          usersProject: isMyProjects])
+        render([html: newRowsHTML, pagesCount: numberOfPages] as JSON)
     }
 }

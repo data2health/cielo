@@ -125,12 +125,10 @@ a.dropdown-toggle {
 .card.activity-post {
     margin-left: 0;
     border: 0.05em solid #cacaca;
-    border-left-width: .25em;
-    border-left-color: #21a0c9;
     background-color: white;
     border-radius: 4px;
     max-width: 100%;
-    margin-bottom: 0.25em;
+    margin-bottom: 0.5em;
 }
 
 .activity-post .card-header {
@@ -792,4 +790,33 @@ ul.list-group.list-group-flush {
 
 .dropdown-menu {
     margin: 0;
+}
+
+.project-search {
+    float: right;
+    position: relative;
+    right: 2em;
+    top: -1.75em;
+    color: slategrey;
+}
+
+#projectSearchClear {
+    color: grey;
+    position: relative;
+    right: 20px;
+    top: 1px;
+    z-index: 1000;
+    display: none;
+}
+
+#projectSearch {
+    min-height: 0;
+    max-height: 2em;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#search-icon {
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
 }

@@ -254,6 +254,33 @@ $( function() {
             }
         });
     });
+
+    $('#projectSearch').keypress( function(event) {
+        if ( event.which == 13 ) {
+            event.preventDefault();
+
+            var filterText = $('#projectSearch').val();
+            var isMyProjects;
+
+            if ($('#projectsTable th').text().indexOf('Owner') === -1) {
+                isMyProjects = true;
+            } else {
+                isMyProjects = false;
+            }
+
+            $.get("/project/filtered/list", {myProjects: isMyProjects, filterTerm: filterText}, function (data) {
+                replaceProjectTableContent(data);
+            });
+        }
+    });
+
+    $('#projectSearch').on('keyup', function (event) {
+        if ($('#projectSearch').val().length !== 0){
+            $('#projectSearchClear').css('display', 'block');
+        } else {
+            $('#projectSearchClear').css('display', 'none');
+        }
+    })
 });
 
 function getAttributes(element) {
@@ -782,20 +809,63 @@ function replaceProjectTableContent(data) {
 
     //fix the number of pages
     if (currentPageCount !== data.pagesCount) {
-        if (data.pagesCount > currentPageCount) {
-            $('#paging-options option').last().after('<option value="' + data.pagesCount +'">' + data.pagesCount + '</option>');
-        } else {
-            $('#paging-options option').last().remove();
-            $('#paging-options').change();
+        //rebuild the paging options
+        $('#paging-options option').remove();
+
+        for (var index = 1; index <= data.pagesCount; index++) {
+            $('#paging-options').append('<option value="' + index +'">' + index + '</option>');
         }
+
         $('#ofPages').text('of ' + data.pagesCount);
     }
+
+    //remove old rows
+    $('#projectTableBody').find('tr').remove();
 
     //replace rows
     $('#projectTableBody').html(data.html);
 
     //disable/enable buttons as necessary
     updateToolbarButtons();
+}
+
+function onNextPage() {
+    if ($('#right-table-toolbar i').first().attr('class').indexOf('fa-disabled') === -1) {
+        var offsetVal = $('#paging-options').val();
+        $('#paging-options').val((parseInt(offsetVal) + 1 ));
+        $('#paging-options').trigger("change");
+    }
+}
+
+function onPreviousPage() {
+    if ($('#left-table-toolbar i').first().attr('class').indexOf('fa-disabled') === -1) {
+        var offsetVal = $('#paging-options').val();
+        $('#paging-options').val((parseInt(offsetVal) - 1 ));
+        $('#paging-options').trigger("change");
+    }
+}
+
+function onFirstPage() {
+    if ($('#left-table-toolbar i').first().attr('class').indexOf('fa-disabled') === -1) {
+        $('#paging-options').val(1);
+        $('#paging-options').trigger("change");
+    }
+}
+
+function onLastPage() {
+    if ($('#right-table-toolbar i').first().attr('class').indexOf('fa-disabled') === -1) {
+        var lastPage = $('#paging-options').find('option').length;
+        $('#paging-options').val(lastPage);
+        $('#paging-options').trigger("change");
+    }
+}
+
+function onPageSelection(isMyProjects) {
+    var offsetVal  = parseInt($('#paging-options').val()) - 1;
+    var filterText = $('#projectSearch').val();
+    $.get("/project/filtered/list", {offset: offsetVal, myProjects: isMyProjects, filterTerm: filterText}, function (data) {
+        replaceProjectTableContent(data);
+    });
 }
 
 function updateToolbarButtons() {
@@ -831,4 +901,15 @@ function updateToolbarButtons() {
             $(this).removeClass('fa-disabled');
         });
     }
+}
+
+function clearProjectSearch() {
+    $('#projectSearch').val("");
+    $('#projectSearch').keyup();
+
+    //now trigger enter
+    var e = $.Event("keypress");
+    e.which = 13;
+    e.keyCode = 13;
+    $('#projectSearch').trigger(e)
 }
