@@ -409,7 +409,7 @@ class UserAccountService {
         boolean successful
 
         //the user selected Other, we need to create a new institution based on the input from user
-        if (!profile.institution && institutionFName && institutionSName) {
+        if (!profile.institution.id && institutionFName && institutionSName) {
             Institution newInstitute = new Institution(fullName: institutionFName, shortName: institutionSName)
             if (!newInstitute.save())  {
                 newInstitute.errors.allErrors.each { ObjectError err ->

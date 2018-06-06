@@ -14,6 +14,7 @@ class RegistrationControllerSpec extends Specification implements ControllerUnit
 
     LinkGenerator grailsLinkGenerator
     PageRenderer groovyPageRenderer
+    UserAccountService userAccountService
 
     def setup() {
         mockDomain(RegistrationCode)
@@ -26,7 +27,8 @@ class RegistrationControllerSpec extends Specification implements ControllerUnit
 
         mockDomains(UserAccount, Profile, RegistrationEmail)
         controller.institutionService   = new InstitutionService()
-        controller.userAccountService   = new UserAccountService()
+        userAccountService              = new UserAccountService()
+        controller.userAccountService   = userAccountService
         controller.emailService         = new EmailService()
         controller.registrationService  = new RegistrationService()
         controller.groovyPageRenderer   = groovyPageRenderer
@@ -89,10 +91,5 @@ class RegistrationControllerSpec extends Specification implements ControllerUnit
         then:
             results.emailAddress
             RegistrationEmail.list().size() == 1
-    }
-
-    void "test saveNewUser"() {
-        //TODO: Make this test valid
-        true == true
     }
 }
