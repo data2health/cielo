@@ -44,7 +44,7 @@ class RegistrationController {
         bindData(user, params)
         bindData(profile, params)
 
-        if (!profile.institution) {
+        if (!profile.institution.id) {
             //user selected other
             institutionFName = params.institutionFName
             institutionSName = params.institutionSName
