@@ -245,7 +245,10 @@ $( function() {
                         } else {
                             $.post("/activity/post", {title: title, message: message}, function(data) {
                                 if (data.success) {
-                                    $('.activity-feed #activity').load("/activity/getActivities");
+                                    $.get("/activity/getActivities", function (data) {
+                                        $('.activity-feed #activity').html(data);
+                                        $('<div id="olderContent"></div>').insertAfter( $('#nextPage') );
+                                    });
                                 }
                             });
                         }
