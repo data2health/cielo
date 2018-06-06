@@ -608,41 +608,6 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
     }
 
-    void "test projectsTableRows"() {
-        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
-        springSecurityService.metaClass.principal = [id: user.id]
-        controller.springSecurityService = springSecurityService
-
-        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
-                url: "http://www.rerlicense.com").save()
-        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
-                description: "some description")
-
-        projectService.metaClass.getNumberOfPagesForMyProjects = { UserAccount userAccount, int max ->
-            return 1
-        }
-
-        projectService.metaClass.getMyProjects = { UserAccount userAccount, int max, int offset ->
-            return [project]
-        }
-
-        projectService.metaClass.renderTableRows = { Map model ->
-            return "<p>some data</p>"
-        }
-
-        controller.projectService = projectService
-
-        when:
-            params.myProjects = true
-            params.max  = 5
-            params.offset = 0
-            controller.projectsTableRows()
-
-        then:
-            response.json.html == "<p>some data</p>"
-            response.json.pagesCount == 1
-    }
-
     void "test getBundles"() {
         UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
         SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
@@ -665,5 +630,42 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
         then:
             response.status == 200
+    }
+
+    void "test getFilteredProjects"() {
+
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        springSecurityService.metaClass.principal = [id: user.id]
+        controller.springSecurityService = springSecurityService
+
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description")
+
+
+        projectService.metaClass.retrieveFilteredProjectsFromDB = { UserAccount userAccount, String filterText, int offset, int max ->
+            return [project]
+        }
+
+        projectService.metaClass.countFilteredProjectsPages = { UserAccount userAccount, String filterText, int max ->
+            return 1
+        }
+
+        projectService.metaClass.renderTableRows = { Map model ->
+            return "<p>some data</p>"
+        }
+
+        controller.projectService = projectService
+
+        when:
+            params.myProjects = true
+            params.max  = 5
+            params.offset = 0
+            controller.getFilteredProjects()
+
+        then:
+            response.json.html == "<p>some data</p>"
+            response.json.pagesCount == 1
     }
 }

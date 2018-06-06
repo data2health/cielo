@@ -305,4 +305,56 @@ class ProjectServiceIntegrationSpec extends Specification {
         then: "the top two returned should match the top two projects in list"
             mostPopular.collect { it.projectId } == Project.executeQuery("select distinct p from Project p order by views desc, dateCreated desc",[max: 2]).collect { it.id }
     }
+
+    void "test retrieveFilteredProjectsFromDB"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        List<Project> projects
+
+        when:
+            projects = projectService.retrieveFilteredProjectsFromDB(user,"", 0, 5)
+
+        then:
+            projects
+            projects.size() == 1
+
+        when:
+            projects.clear()
+            projects = projectService.retrieveFilteredProjectsFromDB(user,"Project2", 0, 5)
+
+        then:
+            projects.size() == 0
+    }
+
+    void "test countFilteredProjectsPages"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        int countedProjectPages
+
+        when:
+            countedProjectPages = projectService.countFilteredProjectsPages(user,"", 5)
+
+        then:
+            countedProjectPages == 1
+
+        when:
+            countedProjectPages = projectService.countFilteredProjectsPages(user,"Jupiter", 5)
+
+        then:
+            countedProjectPages == 1 //returns 1 even if no results
+
+        when:
+            new Project(projectOwner: user, name: "Second", license: softwareLicense,
+                    description: "something").save()
+            countedProjectPages = projectService.countFilteredProjectsPages(user,"", 1)
+
+        then:
+            countedProjectPages == 2
+    }
 }
