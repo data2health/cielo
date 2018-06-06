@@ -159,7 +159,10 @@
             success : function () {
                 if (window.location.href.indexOf('/project/myList') !== -1) {
                     var offsetVal = parseInt($('#paging-options').val()) - 1;
-                    $.get("${createLink(controller: "project", action: "projectsTableRows")}", {offset: offsetVal, myProjects: true}, function (data) {
+                    var filterText = $('#projectSearch').val();
+
+                    $.get("${createLink(controller: "project", action: "getFilteredProjects")}",
+                        {offset: offsetVal, myProjects: true, filterTerm: filterText}, function (data) {
                         replaceProjectTableContent(data);
                     });
                 }

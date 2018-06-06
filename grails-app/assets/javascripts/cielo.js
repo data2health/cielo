@@ -861,8 +861,9 @@ function onLastPage() {
 }
 
 function onPageSelection(isMyProjects) {
-    var offsetVal = parseInt($('#paging-options').val()) - 1;
-    $.get("/project/table/list", {offset: offsetVal, myProjects: isMyProjects}, function (data) {
+    var offsetVal  = parseInt($('#paging-options').val()) - 1;
+    var filterText = $('#projectSearch').val();
+    $.get("/project/filtered/list", {offset: offsetVal, myProjects: isMyProjects, filterTerm: filterText}, function (data) {
         replaceProjectTableContent(data);
     });
 }

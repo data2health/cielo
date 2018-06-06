@@ -34,7 +34,6 @@
 
 <script type="application/javascript">
     function deleteProject(projectId, projectName) {
-        var offsetVal = parseInt($('#paging-options').val()) - 1;
         bootbox.confirm({
             title: "Delete Project?",
             message: "Do you really want to delete <em style='font-weight: 300;color: #149dcc;'>" + projectName + "</em> ? This cannot be undone. <p>&nbsp;<p>*Please note that any data and code will also be deleted.",
@@ -52,7 +51,11 @@
                 if (result === true) {
                     $.post("${createLink(controller: "project", action: "deleteProject")}", {'id': projectId},
                         function () {
-                            $.get("${createLink(controller: "project", action: "projectsTableRows")}", {offset: offsetVal, myProjects: true}, function (data) {
+                            var offsetVal = parseInt($('#paging-options').val()) - 1;
+                            var filterText = $('#projectSearch').val();
+
+                            $.get("${createLink(controller: "project", action: "getFilteredProjects")}",
+                                {offset: offsetVal, myProjects: true, filterTerm: filterText}, function (data) {
                                 replaceProjectTableContent(data);
                                 //if the number of projects currently visible is zero, call change on options; page 1
                                 //is already selected
