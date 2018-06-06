@@ -47,11 +47,7 @@ class ActivityService {
                     if (activityTypeEnum) {
                         saveActivity(event, domainClass, activityTypeEnum)
 
-                        //force invalidation of project cache for most viewed projects ... name or description could
-                        //have changed
-                        if (domainObject.class.simpleName == "Project") {
-                            grailsCacheManager.getCache("most_viewed_projects").clear()
-                        }
+                        invalidateNecessaryCaches(activityTypeEnum)
                     }
                 }
             }
@@ -73,6 +69,8 @@ class ActivityService {
             //if it's not null then we care about this activity
             if (activityTypeEnum) {
                 saveActivity(event, domainClass, activityTypeEnum)
+
+                invalidateNecessaryCaches(activityTypeEnum)
             }
         }
     }
@@ -84,9 +82,15 @@ class ActivityService {
      */
     @Subscriber
     void logActivityForDelete(PostDeleteEvent event) {
-        //TODO: Figure out if we need this, if we do add code to handle this.
+
         if (Environment.current != Environment.TEST) {
-            log.info("Subscriber to delete event")
+            String domainClass = event.getEntityAccess().entity.class.simpleName
+            ActivityTypeEnum activityTypeEnum = getDeleteActivityTypeEnum(domainClass)
+
+            if (activityTypeEnum) {
+                invalidateNecessaryCaches(activityTypeEnum)
+            }
+
         }
     }
 
@@ -217,7 +221,8 @@ class ActivityService {
      * Get the activity type
      *
      * @param className simple class name of affected domain object
-     * @return
+
+     * @return activity type enum instance
      */
     private static ActivityTypeEnum getNewActivityTypeEnum(String className) {
         ActivityTypeEnum activityType
@@ -244,6 +249,34 @@ class ActivityService {
     }
 
     /**
+     * Get activity enum for deletes
+     *
+     * @param domainClass the domain class of the entity being deleted
+     *
+     * @return activity type enum instance
+     */
+    private static ActivityTypeEnum getDeleteActivityTypeEnum(String domainClass) {
+        ActivityTypeEnum activityType
+
+        switch (domainClass) {
+            case "Team":
+                activityType = ActivityTypeEnum.ACTIVITY_DELETE_TEAM
+                break
+            case "Project":
+                activityType = ActivityTypeEnum.ACTIVITY_DELETE_PROJECT
+                break
+            case "Data":
+                activityType = ActivityTypeEnum.ACTIVITY_DELETE_DATA
+                break
+            case "Code":
+                activityType = ActivityTypeEnum.ACTIVITY_DELETE_CODE
+                break
+        }
+
+        return activityType
+    }
+
+    /**
      * Log the activity
      *
      * @param event the abstract event
@@ -261,7 +294,8 @@ class ActivityService {
             user = UserAccount.findByUsername("admin")
         }
 
-        if (user) {
+        //don't log an activity for
+        if (user && (activityTypeEnum != ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_VIEWS)) {
             boolean logActivity = true
             String eventText = generateEventBody(event.getEntityAccess(), user, domainClass, activityTypeEnum, entityId)
             Activity activity = Activity.findByActivityInitiatorUserNameAndEventTextAndEventType(user.username, eventText, activityTypeEnum)
@@ -292,8 +326,6 @@ class ActivityService {
                 }
             } else log.info("Activity already exists")
 
-        } else {
-            log.error("Activity could not be logged because there was an error finding the user")
         }
     }
 
@@ -387,6 +419,7 @@ class ActivityService {
                 if (property == "description") activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_DESCRIPTION
                 if (property == "metadatas") activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_METADATAS
                 if (property == "status") activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_STATUS
+                if (property == "views") activityTypeEnum  = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_VIEWS
                 break
             case "Profile":
                 if (property == "emailAddress") activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_USER_EMAIL_ADDRESS
@@ -534,5 +567,28 @@ class ActivityService {
      */
     TreeSet<UserAccount> getUsersWhoLikedComment(Long activityId) {
         return Activity.findById(activityId)?.likedByUsers
+    }
+
+    /**
+     * Invalidate caches pertinent to the data that changed
+     *
+     * @param activityTypeEnum the activity type
+     */
+    private static void invalidateNecessaryCaches(ActivityTypeEnum activityTypeEnum) {
+        if (activityTypeEnum == ActivityTypeEnum.ACTIVITY_NEW_PROJECT ||
+            activityTypeEnum == ActivityTypeEnum.ACTIVITY_DELETE_PROJECT) {
+            grailsCacheManager.getCache("most_viewed_projects").clear()
+            grailsCacheManager.getCache("filtered_projects_count").clear()
+            grailsCacheManager.getCache("filtered_projects").clear()
+        } else if (activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_VIEWS) {
+            grailsCacheManager.getCache("most_viewed_projects").clear()
+        } else if (activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_NAME ||
+                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_DESCRIPTION ||
+                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_ANNOTATIONS ||
+                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_SHARED ||
+                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS) {
+            grailsCacheManager.getCache("filtered_projects_count").clear()
+            grailsCacheManager.getCache("filtered_projects").clear()
+        }
     }
 }
