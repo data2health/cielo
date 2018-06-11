@@ -16,7 +16,8 @@
                         <span style="font-weight:100; opacity: 0.8;">|&nbsp;</span>
                         <span id="save_button" class="fa-disabled" onclick="updateUser();">
                             <i class="far fa-save"></i>
-                            <span style="font-size: 0.75em; cursor: not-allowed;">Save</span></span>&nbsp;
+                            <span style="font-size: 0.75em; cursor: not-allowed;">Save</span>
+                        </span>&nbsp;
                         <span style="font-weight:100; opacity: 0.8;">|&nbsp;</span>
                         <span id="cancel_button" class="fa-disabled" onclick="cancelEditUser();">
                             <i class="fas fa-ban"></i>
@@ -184,13 +185,14 @@
                     </div>
                 </div>
             </div>
-            </div>
         </div>
     </div>
 </section>
 
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/usersFeatureDiv" model="[users: user.connections, title: 'Connections']"/>
+<g:render template="userProjects" model="[projects: projects, isUsersOwnPage: userCanEdit,
+                                          contribtuteTo: user.getProjectsIContributeTo()]"/>
 <g:render template="/templates/contactUsSection"/>
 <g:render template="/templates/footerlncludes"/>
 

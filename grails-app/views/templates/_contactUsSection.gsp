@@ -38,7 +38,7 @@
                     </sec:ifNotLoggedIn>
 
                     <div class="form-group">
-                        <label class="form-control-label mbr-fonts-style display-7" for="name-form1-f">Subject</label>
+                        <label class="form-control-label mbr-fonts-style display-7" for="subject-form1-f">Subject</label>
                         <input type="text" class="form-control" name="subject" data-form-field="Subject" required="" id="subject-form1-f">
                     </div>
                     <div class="form-group" data-for="message">

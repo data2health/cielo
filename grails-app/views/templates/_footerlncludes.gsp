@@ -27,7 +27,7 @@
                 <h5 class="pb-3">
                     Links
                 </h5>
-                <p class="mbr-text"><a href="https://ctsa.ncats.nih.gov/cd2h/home">CD2H</a><br></a>
+                <p class="mbr-text"><a href="https://ctsa.ncats.nih.gov/cd2h/home">CD2H</a><br>
                     <br>
                 </p>
             </div>

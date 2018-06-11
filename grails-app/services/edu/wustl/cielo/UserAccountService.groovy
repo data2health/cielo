@@ -575,4 +575,14 @@ class UserAccountService {
         return user.followers
     }
 
+    /**
+     * Get current list of projects owned by user
+     *
+     * @param userAccount the user to retrieve list for
+     *
+     * @return list of projects or null if none
+     */
+    List<Project> getProjectsUserOwns(UserAccount userAccount) {
+        return Project.findAllByProjectOwner(userAccount)
+    }
 }

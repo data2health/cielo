@@ -8,19 +8,6 @@ import spock.lang.Specification
 @Rollback
 class TeamIntegrationSpec extends Specification {
 
-    void cleanup() {
-        Team.list().each {
-            it.delete()
-        }
-
-        UserAccount.list().each {
-            Profile.findByUser(it)?.delete()
-            RegistrationCode.findByUserAccount(it)?.delete()
-            UserAccountUserRole.findAllByUserAccount(it)?.each { it.delete() }
-            it.delete()
-        }
-    }
-
     void "test saving"() {
         int numberOfMemebers = 5
         Team team
@@ -71,5 +58,45 @@ class TeamIntegrationSpec extends Specification {
 
         then: "assert toString returns team name"
             assert returnVal == team.name
+    }
+
+    void "test listAllProjectsThatHaveThisTeamAssigned"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+        SoftwareLicense   softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Project project2 = new Project(projectOwner: user, name: "Project2", license: softwareLicense,
+                description: "some description").save()
+        Project project3 = new Project(projectOwner: user, name: "Project3", license: softwareLicense,
+                description: "some description").save()
+        List<Project> projects
+
+        when:
+            projects = team.listAllProjectsThatHaveThisTeamAssigned()
+
+        then:
+            !projects
+            projects.size() == 0
+
+        when:
+            project.addToTeams(team)
+            projects = team.listAllProjectsThatHaveThisTeamAssigned()
+
+        then:
+            projects
+            projects.contains(project)
+            projects.size() == 1
+
+        when:
+            project3.addToTeams(team)
+            projects = team.listAllProjectsThatHaveThisTeamAssigned()
+
+        then:
+            projects
+            projects.contains(project)
+            projects.contains(project3)
+            projects.size() == 2
     }
 }
