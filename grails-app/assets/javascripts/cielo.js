@@ -66,12 +66,16 @@ $( function() {
     sessionStorage.setItem("autoloadCount", 1);
 
     //custom data attributes will show on mouseenter and mouseleave
-    $('.date-time').hover(
+    $('.date-time').click(
         function() {
-            $(this).html($(this).attr('data-date'));
-        },
-        function() {
-            $(this).html($(this).attr('data-diff'));
+            var dataDiff = $(this).attr('data-diff');
+            var currentHtml = $(this).html();
+
+            if (currentHtml === dataDiff){
+                $(this).html($(this).attr('data-date'));
+            } else {
+                $(this).html($(this).attr('data-diff'));
+            }
         }
     );
 
@@ -500,12 +504,16 @@ function getOlderActivity(offset, max) {
         $(this).insertBefore($("#olderContent")).hide().show('fast', function() {
             window.doneLoading = true;
             $('[data-toggle="tooltip"]').tooltip('update');
-            $('.date-time').hover(
+            $('.date-time').click(
                 function() {
-                    $(this).html($(this).attr('data-date'));
-                },
-                function() {
-                    $(this).html($(this).attr('data-diff'));
+                    var dataDiff = $(this).attr('data-diff');
+                    var currentHtml = $(this).html();
+
+                    if (currentHtml === dataDiff){
+                        $(this).html($(this).attr('data-date'));
+                    } else {
+                        $(this).html($(this).attr('data-diff'));
+                    }
                 }
             );
         });

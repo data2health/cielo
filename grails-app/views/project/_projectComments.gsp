@@ -3,7 +3,7 @@
     <div id="project_comments_${project.id}" class="card activity-post col-md-4">
     <h6 class="card-header">
         <g:getUserProfilePic user="${comment.commenter}" sticker="${true}" showLink="${true}">
-            &nbsp;${comment.commenter.username}
+            &nbsp;${comment.commenter.fullName}
         </g:getUserProfilePic>
         <span class="date-time">
             <g:formatDateWithTimezone date="${comment.dateCreated}"/>

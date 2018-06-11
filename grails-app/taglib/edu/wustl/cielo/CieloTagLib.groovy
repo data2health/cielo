@@ -95,12 +95,12 @@ class CieloTagLib {
             imgClass << imageSizes.get(DEFAULT_IMG_SIZE)
         }
 
-        if (attrs.showLink) profilePicHtml << """<a href="${userLink}">"""
+        if (attrs.showLink) profilePicHtml << """<a href="${userLink}" style="display: inline-block;">"""
 
         if (user) {
             if (attrs.sticker) {
-                profilePicHtml << """<div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border" style="border: 1px solid #a9a7a785; width: ${sizeOfStickerContainer + 2}px; border-radius: 50%;">"""
-                profilePicHtml << """<div id="image-background" style="border: 2px solid #ffffff; border-radius: 50%; width: ${sizeOfStickerContainer}px; height: ${sizeOfStickerContainer}px; background-color:  white; ">"""
+                profilePicHtml << """<div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border_${user.id}" style="border: 1px solid #a9a7a785; width: ${sizeOfStickerContainer + 2}px; border-radius: 50%;">"""
+                profilePicHtml << """<div id="image-background_${user.id}" style="border: 2px solid #ffffff; border-radius: 50%; width: ${sizeOfStickerContainer}px; height: ${sizeOfStickerContainer}px; background-color:  white; ">"""
 
                 if (user.profile?.picture) {
                     profilePicHtml << """<img src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
@@ -119,13 +119,13 @@ class CieloTagLib {
             profilePicHtml << """<img ${tooltip.toString()} src="/assets/default_profile.png" class="${imgClass}">"""
         }
 
+        if (attrs.sticker) {
+            profilePicHtml << """</div></div></div>"""
+        }
+
         if (attrs.showLink) profilePicHtml << "</a>"
 
-        if (attrs.sticker) {
-            profilePicHtml << """</div></div>${body()}</div>"""
-        } else { profilePicHtml << body() }
-
-        out << profilePicHtml.toString()
+        out << profilePicHtml.toString() << body()
     }
     /**
      * Generate the html ESCAPED code for user profile pic in either sticker or non-sticker format. Image is read from the DB,
@@ -176,12 +176,12 @@ class CieloTagLib {
             imgClass << imageSizes.get(DEFAULT_IMG_SIZE)
         }
 
-        if (attrs.showLink) profilePicHtml << """<a href="${userLink}">"""
+        if (attrs.showLink) profilePicHtml << """<a href="${userLink}" style="display: inline-block;">"""
 
         if (user) {
             if (attrs.sticker) {
-                profilePicHtml << """<div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border" style="border: 1px solid #a9a7a785; width: ${sizeOfStickerContainer + 2}px; border-radius: 50%;">"""
-                profilePicHtml << """<div id="image-background" style="border: 2px solid #ffffff; border-radius: 50%; width: ${sizeOfStickerContainer}px; height: ${sizeOfStickerContainer}px; background-color:  white; ">"""
+                profilePicHtml << """<div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border_${user.id}" style="border: 1px solid #a9a7a785; width: ${sizeOfStickerContainer + 2}px; border-radius: 50%;">"""
+                profilePicHtml << """<div id="image-background_${user.id}" style="border: 2px solid #ffffff; border-radius: 50%; width: ${sizeOfStickerContainer}px; height: ${sizeOfStickerContainer}px; background-color:  white; ">"""
 
                 if (user.profile?.picture) {
                     profilePicHtml << """<img src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
