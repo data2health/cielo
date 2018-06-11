@@ -68,4 +68,25 @@ class UserAccount implements Serializable, Comparable {
 
         return listOfFollowers
     }
+
+    List<Team> getListOfTeamsIBelongTo() {
+        List<Team> teams = []
+
+        Team.list().each { team ->
+            if (team.members.contains(this)) teams.add(team)
+        }
+
+        return teams
+    }
+
+    List<Project> getProjectsIContributeTo() {
+        List<Project> matches = []
+
+        getListOfTeamsIBelongTo().each { team ->
+            List<Project> subList = team.listAllProjectsThatHaveThisTeamAssigned()
+
+            if (subList) matches.addAll(subList)
+        }
+        return matches
+    }
 }

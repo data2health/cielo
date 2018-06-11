@@ -21,4 +21,17 @@ class Team {
     String toString() {
         return name
     }
+
+    List<Project> listAllProjectsThatHaveThisTeamAssigned() {
+        List<Project> matches = []
+
+        Project.list().each { project ->
+            if (project.teams.size() > 0) {
+                if (project.isTeamAssignedToProject(this)) {
+                    matches.add(project)
+                }
+            }
+        }
+        return matches
+    }
 }

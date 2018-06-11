@@ -47,4 +47,13 @@ class Project {
         description(nullable: false, blank: false, maxSize: 255)
         lastChanged(nullable: true)
     }
+
+    List<Team> getTeams() {
+        return teams
+    }
+
+    boolean isTeamAssignedToProject(Team team) {
+        if (teams.contains(team)) return true
+        else return false
+    }
 }

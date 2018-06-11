@@ -12,12 +12,14 @@ class UserController {
     @Secured('isAuthenticated()')
     def view() {
         Object principal = springSecurityService?.principal
-        UserAccount user = principal ? UserAccount.get(principal.id) : null
+        UserAccount loggedInUser = principal ? UserAccount.get(principal.id) : null
+        UserAccount user = params.id ? UserAccount.findById(Long.valueOf(params.id)) : null
 
-        return [user: (params.id ? UserAccount.findById(Long.valueOf(params.id)) : null),
+        return [user: user,
+                projects: userAccountService.getProjectsUserOwns(user),
                 institutes: Institution.list(),
                 annotations: Annotation.list(),
-                loggedInUser: user]
+                loggedInUser: loggedInUser]
     }
 
     /**

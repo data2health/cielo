@@ -38,6 +38,7 @@ class ProjectService {
     def springSecurityService
     def cloudService
     def dataSource
+    def teamService
 
     /**
      * Main call used in bootstrap to generated project data
@@ -639,9 +640,13 @@ class ProjectService {
                     if (data.blobId) blobIdList.add(data.blobId)
                 }
 
+                //remove the project from the user
+                user.projects.remove(project)
+                user.save()
+
                 project.delete(failOnError: true)
 
-                //no error so now need to delete all the uploaded files
+                //no error so now need ƒto delete all the uploaded files
                 blobIdList.each { blobId ->
                     cloudService.deleteFile(blobId)
                 }

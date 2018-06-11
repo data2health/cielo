@@ -21,6 +21,9 @@ class UserControllerSpec extends Specification implements ControllerUnitTest<Use
     }
 
     void "test view"() {
+
+        controller.userAccountService = userAccountService
+
         when:"attempting to get user with no user id param"
             def returnVal = controller.view()
 
