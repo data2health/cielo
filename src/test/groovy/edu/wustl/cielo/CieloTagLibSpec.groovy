@@ -1,5 +1,6 @@
 package edu.wustl.cielo
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.testing.gorm.DomainUnitTest
 import grails.testing.web.taglib.TagLibUnitTest
@@ -8,10 +9,12 @@ import spock.lang.Specification
 class CieloTagLibSpec extends Specification implements TagLibUnitTest<CieloTagLib>, DomainUnitTest<UserAccount> {
 
     SpringSecurityService springSecurityService
+    ProjectService projectService
 
     void setup() {
         mockDomain(Profile)
         springSecurityService = new SpringSecurityService()
+        projectService = new ProjectService()
     }
 
     void "test rawOutput"() {
@@ -258,5 +261,133 @@ class CieloTagLibSpec extends Specification implements TagLibUnitTest<CieloTagLi
 
         then:
             result != null
+    }
+
+    void "test userContributesToTeam"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+
+        springSecurityService.metaClass.principal = [id: user2.id]
+        tagLib.springSecurityService = springSecurityService
+
+        when:
+            def result = tagLib.userContributesToTeam([team: null]) { true }
+
+        then:
+            !result
+
+        when:
+            result = tagLib.userContributesToTeam([team: team]) { true }
+
+        then:
+            !result
+
+        when:
+            team.members.add(user2)
+            team.save()
+            result = tagLib.userContributesToTeam([team: team]) { true }
+
+        then:
+            result
+    }
+
+    void "test doesUserOwnOrContributeToTeam"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+
+        springSecurityService.metaClass.principal = [id: user2.id]
+        tagLib.springSecurityService = springSecurityService
+
+        when:
+            def result = tagLib.doesUserOwnOrContributeToTeam([team: team])
+
+        then:
+            result
+
+        when:
+            team.members.add(user2)
+            team.save()
+            result = tagLib.doesUserOwnOrContributeToTeam([team: team])
+
+        then:
+            result
+
+        when:
+            springSecurityService.metaClass.principal = [id: user.id]
+            tagLib.springSecurityService = springSecurityService
+            result = tagLib.doesUserOwnOrContributeToTeam([team: team])
+
+        then:
+            result
+    }
+
+    void "test doesUserOwnProject"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Ricky's Project", license: softwareLicense,
+                description: "some description")
+
+        springSecurityService.metaClass.principal = [id: user2.id]
+        tagLib.springSecurityService = springSecurityService
+
+        when:
+            def result = tagLib.doesUserOwnProject([project: null])
+
+        then:
+            !Boolean.valueOf(result.toString())
+
+        when:
+            result = tagLib.doesUserOwnProject([project: project])
+
+        then:
+            Boolean.valueOf(result.toString())
+    }
+
+    void "test getProjectsForTeam"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Ricky's 2nd Project", license: softwareLicense,
+                description: "some description", shared: true)
+        Project project2 = new Project(projectOwner: user, name: "Ricky's 3rd Project", license: softwareLicense,
+                description: "some description")
+        Team team   = new Team(administrator: user, name: "The Avengers").save()
+
+        projectService.metaClass.getListOfProjectsTeamContributesTo = { Team projectTeam ->
+            def listOfProjects = []
+            if (project.teams.contains(projectTeam))  listOfProjects.add(project)
+            if (project2.teams.contains(projectTeam)) listOfProjects.add(project2)
+
+            return listOfProjects
+        }
+
+        tagLib.projectService = projectService
+
+        when:
+            def results = tagLib.getProjectsForTeam([team: team])
+
+        then:
+            results == "<em>None yet</em>"
+
+        when:
+            project.teams.add(team)
+            project.save()
+            results = tagLib.getProjectsForTeam([team: team])
+
+        then:
+            results.indexOf("<a class='btn btn-link' href='/project/${project.id}' style='padding: 0; margin:0'>${project.name}</a>") != -1
+
+        when:
+            project2.teams.add(team)
+            project2.save()
+            results = tagLib.getProjectsForTeam([team: team])
+
+        then:
+            results.indexOf("<a class='btn btn-link' href='/project/${project.id}' style='padding: 0; margin:0'>${project.name}</a>") != -1
+            results.indexOf("*****") != -1 //since one of the projects is not shared
     }
 }
