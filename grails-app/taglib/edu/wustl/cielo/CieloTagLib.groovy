@@ -9,16 +9,17 @@ import grails.web.mapping.LinkGenerator
 class CieloTagLib {
     static defaultEncodeAs  = [taglib:'html'] //html escapes characters
     static encodeAsForTags  = [rawOutput: [taglib:'raw'], getUserProfilePic: [taglib: 'raw'], dateDiff: [taglib: 'raw'],
-                               userOwnsProject: [taglib: 'raw'], userOwnsTeam: [taglib: 'raw'],userCanMakeChangesToProject: [taglib: 'raw'],
+                               userOwnsProject: [taglib: 'raw'], userContributesToTeam: [taglib: 'raw'],
+                               userOwnsTeam: [taglib: 'raw'], userCanMakeChangesToProject: [taglib: 'raw'],
                                loggedInUserCanMakeChangesToUser: [taglib: 'raw'], getSoftwareLicenseOptions: [taglib: 'raw'],
-                               customTimeZoneSelect: [taglib: 'raw']] //, otherTagName: [taglib:'none']]
-    static String DEFAULT_IMG_SIZE  = 'medium'
-    static int DEFAULT_STICKER_SIZE = 52 // 48 + 4 px
-    static Map imageSizes   = ['xs': '-xs', 'small': '-sm', 'medium': '-md', 'large': '-lg', 'x-large': '-x-lg',
-                               'xx-large': '-xx-lg', 'xxx-large': '-xxx-lg', 'huge': '-huge']
+                               customTimeZoneSelect: [taglib: 'raw'], //, otherTagName: [taglib:'none']]
+                               doesUserContributeToTeam: [taglib: 'raw'],
+                               getProjectsForTeam: [taglib: 'raw'],
+                               doesUserOwnProject: [taglib: 'raw']]
 
     LinkGenerator grailsLinkGenerator
     def springSecurityService
+    def projectService
 
     /**
      * Use if the output needs not be html encoded. This is true when the text already has html
@@ -57,7 +58,7 @@ class CieloTagLib {
         StringBuffer profilePicHtml = new StringBuffer("")
         StringBuffer imgClass       = new StringBuffer("activity-profile-pic")
         StringBuffer tooltip        = new StringBuffer("")
-        int sizeOfStickerContainer  = DEFAULT_STICKER_SIZE
+        int sizeOfStickerContainer  = Constants.DEFAULT_STICKER_SIZE
         String divId = ""
         String styles = ""
         String tooltipOffset = ""
@@ -81,29 +82,29 @@ class CieloTagLib {
         }
 
         if (attrs.tooltipOffset) {
-            tooltipOffset = "offset=\"${attrs.tooltipOffset}\""
+            tooltipOffset = "data-offset=\"${attrs.tooltipOffset}\""
         }
 
         if (attrs.tooltipText) {
-            tooltip << "data-toggle=\"tooltip\" data-html=\"true\" title=\"${attrs.tooltipText}\" data-placement=\"top\" ${tooltipOffset}"
+            tooltip << "data-toggle=\"tooltip\" data-html=\"true\" data-title=\"${attrs.tooltipText}\" data-placement=\"bottom\" ${tooltipOffset}"
         }
 
         if (attrs.imageSize) {
-            imgClass << (imageSizes.get(attrs.imageSize)?: imageSizes.get(DEFAULT_IMG_SIZE))
-            sizeOfStickerContainer = imageSizes.get(attrs.imageSize) ? getStickerSize(attrs.imageSize) : getStickerSize(DEFAULT_IMG_SIZE)
+            imgClass << (Constants.IMAGE_SIZES.get(attrs.imageSize)?: Constants.IMAGE_SIZES.get(Constants.DEFAULT_IMG_SIZE))
+            sizeOfStickerContainer = Constants.IMAGE_SIZES.get(attrs.imageSize) ? getStickerSize(attrs.imageSize) : getStickerSize(Constants.DEFAULT_IMG_SIZE)
         } else {
-            imgClass << imageSizes.get(DEFAULT_IMG_SIZE)
+            imgClass << Constants.IMAGE_SIZES.get(Constants.DEFAULT_IMG_SIZE)
         }
 
         if (attrs.showLink) profilePicHtml << """<a href="${userLink}" style="display: inline-block;">"""
 
         if (user) {
             if (attrs.sticker) {
-                profilePicHtml << """<div ${divId} ${tooltip.toString()} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border_${user.id}" style="border: 1px solid #a9a7a785; width: ${sizeOfStickerContainer + 2}px; border-radius: 50%;">"""
+                profilePicHtml << """<div ${divId} class="row" style="align-items: center; padding-right: 1em; padding-left: 1em; ${styles}"><div id="image-sticker-border_${user.id}" style="border: 1px solid #a9a7a785; width: ${sizeOfStickerContainer + 2}px; border-radius: 50%;">"""
                 profilePicHtml << """<div id="image-background_${user.id}" style="border: 2px solid #ffffff; border-radius: 50%; width: ${sizeOfStickerContainer}px; height: ${sizeOfStickerContainer}px; background-color:  white; ">"""
 
                 if (user.profile?.picture) {
-                    profilePicHtml << """<img src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
+                    profilePicHtml << """<img ${tooltip.toString()} src="data:image/${user?.profile?.picture?.fileExtension};base64,${user?.profile?.picture?.fileContents.encodeBase64().toString()}" class="${imgClass}">"""
                 } else {
                     profilePicHtml << """<img src="/assets/default_profile.png" class="${imgClass}">"""
                 }
@@ -138,7 +139,7 @@ class CieloTagLib {
         StringBuffer profilePicHtml = new StringBuffer("")
         StringBuffer imgClass       = new StringBuffer("activity-profile-pic")
         StringBuffer tooltip        = new StringBuffer("")
-        int sizeOfStickerContainer  = DEFAULT_STICKER_SIZE
+        int sizeOfStickerContainer  = Constants.DEFAULT_STICKER_SIZE
         String divId = ""
         String styles = ""
         String tooltipOffset = ""
@@ -170,10 +171,10 @@ class CieloTagLib {
         }
 
         if (attrs.imageSize) {
-            imgClass << (imageSizes.get(attrs.imageSize)?: imageSizes.get(DEFAULT_IMG_SIZE))
-            sizeOfStickerContainer = imageSizes.get(attrs.imageSize) ? getStickerSize(attrs.imageSize) : getStickerSize(DEFAULT_IMG_SIZE)
+            imgClass << (Constants.IMAGE_SIZES.get(attrs.imageSize)?: Constants.IMAGE_SIZES.get(Constants.DEFAULT_IMG_SIZE))
+            sizeOfStickerContainer = Constants.IMAGE_SIZES.get(attrs.imageSize) ? getStickerSize(attrs.imageSize) : getStickerSize(Constants.DEFAULT_IMG_SIZE)
         } else {
-            imgClass << imageSizes.get(DEFAULT_IMG_SIZE)
+            imgClass << Constants.IMAGE_SIZES.get(Constants.DEFAULT_IMG_SIZE)
         }
 
         if (attrs.showLink) profilePicHtml << """<a href="${userLink}" style="display: inline-block;">"""
@@ -300,12 +301,15 @@ class CieloTagLib {
             def principal    = springSecurityService?.principal
             UserAccount user = UserAccount.get(principal?.id)
 
-            if (user && attrs.project.projectOwner == user) {
+            if (user && attrs.project?.projectOwner == user) {
                 out << body()
             }
         }
     }
 
+    /**
+     * return whether user owns team
+     */
     def userOwnsTeam = { attrs, body ->
         if (attrs.team) {
             def principal    = springSecurityService?.principal
@@ -314,6 +318,43 @@ class CieloTagLib {
             if (user && ((Team)attrs.team).administrator.equals(user)) {
                 out << body()
             }
+        }
+    }
+
+    /**
+     * return whether user contributes to team
+     */
+    def userContributesToTeam = { attrs, body ->
+        if (attrs.team) {
+            def principal    = springSecurityService?.principal
+            UserAccount user = UserAccount.get(principal?.id)
+
+            if (((Team)attrs.team).members.contains(user)) {
+                out << body()
+            }
+        }
+    }
+
+    /**
+     * return true if the user contributes to the team
+     */
+    def doesUserOwnOrContributeToTeam = { attr ->
+        if (userOwnsTeam(team: attr.team) { "yes" }.toString() == "yes" ||
+            userContributesToTeam(team: attr.team) { "yes" }.toString() == "yes") {
+            out << true
+        } else {
+            out << false
+        }
+    }
+
+    /**
+     * return true if the user owns the project
+     */
+    def doesUserOwnProject = { attr ->
+        if (userOwnsProject(project: attr.project) { "yes" }.toString() == "yes") {
+            out << true
+        } else {
+            out << false
         }
     }
 
@@ -410,6 +451,25 @@ class CieloTagLib {
     }
 
     /**
+     * Get list of projects the team contributes to
+     */
+    def getProjectsForTeam = { attr ->
+        List<Project> projectNames = []
+
+        projectService.getListOfProjectsTeamContributesTo(attr.team).each {
+            if (Boolean.valueOf(g.doesUserOwnProject(project: it).toString()) ||
+                    Boolean.valueOf(g.doesUserOwnOrContributeToTeam(team: attr.team).toString()) ||
+                    it.shared) {
+                String link = g.createLink(controller: "project", action: "view", params: [id: it.id])
+                projectNames.add( "<a class='btn btn-link' href='" + link + "' style='padding: 0; margin:0'>" + it.name + "</a>")
+            } else { projectNames.add("******")}
+        }
+
+        if (projectNames.size() == 0) out << "<em>None yet</em>"
+        else out << projectNames.join(', ')
+    }
+
+    /**
      * Get the size of the sticker that surrounds the image
      *
      * @param imageSize the imageSize attr value in the g tag (getUserProfilePic)
@@ -417,11 +477,11 @@ class CieloTagLib {
      * @return the size in int's of the sticker
      */
     private int getStickerSize(String imageSize) {
-        int size = DEFAULT_STICKER_SIZE
+        int size = Constants.DEFAULT_STICKER_SIZE
 
         switch(imageSize) {
             case 'medium':
-                size = DEFAULT_STICKER_SIZE
+                size = Constants.DEFAULT_STICKER_SIZE
                 break
             case 'xs':
                 size = (24 + 2)

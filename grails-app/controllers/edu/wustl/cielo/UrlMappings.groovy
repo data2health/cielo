@@ -76,10 +76,13 @@ class UrlMappings {
         //Team
         "/team/members"(controller:"team", action: "getTeamMembers")
         "/team/membersStrip"(controller:"team", action: "teamMembersSnippet")
+        "/user/team/membersStrip"(controller:"team", action: "userTeamMembersSnippet")
         "/team/deleteTeam"(controller: "team", action: "deleteTeam")
         "/team/newTeam"(controller: "team", action: "newTeamForm")
         "/team/$id"(controller: "team", action: "view")
         "/team/updateMembers"(controller: "team", action: "updateTeamUsers")
+        "/teams/view"(controller: "team", action: "teams")
+        "/teams/filtered/list"(controller: "team", action: "teamTableRows")
 
         //code
         "/code/$id"(controller: "code", action: "view")

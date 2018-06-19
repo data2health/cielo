@@ -53,7 +53,6 @@ class Project {
     }
 
     boolean isTeamAssignedToProject(Team team) {
-        if (teams.contains(team)) return true
-        else return false
+        return teams.find { it == team } ? true : false
     }
 }

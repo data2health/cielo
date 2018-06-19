@@ -66,25 +66,12 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="li-spacer d-block d-md-none">&nbsp;</li>
-                    <li class="dropdown pull-right d-block d-md-none">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <li class="li-spacer">&nbsp;</li>
+                    <li>
+                        <a href="${createLink(controller: "team", action: "teams")}">
                             <i class="fa fa-users"></i>
                             Teams
                         </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a role="link" href="#">
-                                    My Teams
-                                </a>
-                            </li>
-                            <li>
-                                <a role="link" href="#">
-                                    <i class="fa fa-plus"></i>
-                                    New Team
-                                </a>
-                            </li>
-                        </ul>
                     </li>
                     <li class="li-spacer">&nbsp;</li>
 

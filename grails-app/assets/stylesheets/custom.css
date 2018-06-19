@@ -827,3 +827,37 @@ ul.list-group.list-group-flush {
     margin: 0;
     color: white;
 }
+
+.project-link-dark {
+    padding:0;
+    margin: 0;
+    color: #3a3a3a;
+}
+
+.team_header_image {
+    background-image: url("../images/astronomy-blue-bright-340901.jpg");
+    background-size: cover;
+    min-height: 324px;
+    border-top: 12px solid #333333;
+}
+
+.team-header-container-bottom {
+    height: 2em;
+    background: white repeating-linear-gradient(0deg, #222, #333 5px, #333 5px, #333 5px);
+}
+
+#searchInput {
+    min-height: 0;
+    max-height: 2em;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.searchClear {
+    color: grey;
+    position: relative;
+    right: 20px;
+    top: 1px;
+    z-index: 1000;
+    display: none;
+}

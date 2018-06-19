@@ -21,17 +21,8 @@ import groovy.sql.Sql
 class ProjectService {
 
     //Following used to allot the number of objects to add to a project
-    static int numberOfTeamsPerProject = 1
-    static int numberOfCodesPerProject = 2
-    static int numberOfDatasPerProject = 3
-    static int numberOfPublicationsPerProject   = 1
-    static int numberOfAnnotationsPerProject    = 2
-    static int numberOfCommentsPerProject       = 3
-    static Lorem lorem                          = LoremIpsum.getInstance()
     static LinkGenerator grailsLinkGenerator
-    static int DEFAULT_MAX      = 5
-    static int DEFAULT_OFFSET   = 0
-
+    static Lorem lorem  = LoremIpsum.getInstance()
     def groovyPageRenderer
     def activityService
     def messageSource
@@ -71,7 +62,7 @@ class ProjectService {
                         def teams = Team.findAllWhere(administrator: user)
                         if (teams) {
                             ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS
-                            numberOfTeamsPerProject.times {
+                            Constants.TEAMS_PER_PROJECT.times {
                                 int randomId
                                 while (randomId <= 0 || (project?.teams?.id?.contains(randomId))) {
                                     randomId = new Random().nextInt(teams.size())
@@ -110,8 +101,8 @@ class ProjectService {
     private void bootstrapCodesToProject(Project project, String username) {
         if (project) {
             /* Code for this project */
-            log.info("\tCreating ${numberOfCodesPerProject} codes for bundle ${project.name}...")
-            numberOfCodesPerProject.times {
+            log.info("\tCreating ${Constants.CODES_PER_PROJECT} codes for bundle ${project.name}...")
+            Constants.CODES_PER_PROJECT.times {
                 Code code = new Code(
                         name: username + '-code-' + it,
                         description: lorem.getParagraphs(5,8).substring(0, 254),
@@ -152,8 +143,8 @@ class ProjectService {
         UserAccount user = principal ? UserAccount.get(principal?.id) : UserAccount.findByUsername("admin")
 
         if (project) {
-            log.info("\t\tCreating ${numberOfAnnotationsPerProject} annotations for ${project.name}...\n")
-            numberOfAnnotationsPerProject.times {
+            log.info("\t\tCreating ${Constants.ANNOTATIONS_PER_PROJECT} annotations for ${project.name}...\n")
+            Constants.ANNOTATIONS_PER_PROJECT.times {
                 Annotation annotation = (annotations?.get(new Random().nextInt(annotations?.size())))
                 project.addToAnnotations(annotation)
                 ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_ANNOTATIONS
@@ -176,8 +167,8 @@ class ProjectService {
     private void bootstrapDatasForProject(Project project, String username) {
         /* Data for this bundle */
         if (project) {
-            log.info("\tCreating ${numberOfDatasPerProject} data for bundle ${project.name}...")
-            numberOfDatasPerProject.times {
+            log.info("\tCreating ${Constants.DATAS_PER_PROJECT} data for bundle ${project.name}...")
+            Constants.DATAS_PER_PROJECT.times {
                 Data data = new Data(
                         name: username + '-data-' + it,
                         description: lorem.getParagraphs(2,5),
@@ -216,8 +207,8 @@ class ProjectService {
     private void bootstrapPublicationsForProject(Project project, String username) {
         /* Publications for this bundle */
         if (project) {
-            log.info("\tCreating ${numberOfPublicationsPerProject} publications for bundle ${project.name}...")
-            numberOfPublicationsPerProject.times {
+            log.info("\tCreating ${Constants.PUBLICATIONS_PER_PROJECT} publications for bundle ${project.name}...")
+            Constants.PUBLICATIONS_PER_PROJECT.times {
                 def publication = new Publication(label: username + '-publication-' + it,
                         url: "http://www.${RandomStringUtils.random(5, true, true)}.org",
                         issn: RandomStringUtils.random(5, true, true),
@@ -259,10 +250,10 @@ class ProjectService {
     private void boostrapCommentsForProject(Project project) {
         /* Comments for this bundle */
         if (project) {
-            log.info("\tCreating ${numberOfCommentsPerProject} comments for bundle ${project.name}...")
+            log.info("\tCreating ${Constants.COMMENTS_PER_PROJECT} comments for bundle ${project.name}...")
             List<UserAccount> users = UserAccount.list()
 
-            numberOfCommentsPerProject.times {
+            Constants.COMMENTS_PER_PROJECT.times {
                 UserAccount user = users?.get(new Random().nextInt(users?.size()))
                 Comment comment = new Comment(
                         text: lorem.getParagraphs(2,5),
@@ -447,7 +438,7 @@ class ProjectService {
      */
     boolean saveProjectBasicChanges(Long projectId, String newProjectName, String description, List<Long> tags,
                                     Long softwareLicenseId, boolean shared) {
-        boolean succeeded
+        boolean succeeded = false
         Project project = Project.findById(projectId)
 
         if (project) {
@@ -476,11 +467,11 @@ class ProjectService {
                     project.description = description
                 }
 
-                if (softwareLicenseId) {
+                if (softwareLicenseId != project.license.id) {
                     project.license = SoftwareLicense.findById(softwareLicenseId)
                 }
 
-                project.shared      = shared
+                if (project.shared != shared)       project.shared = shared
                 project.lastChanged = new Date()
 
                 //now save the project
@@ -494,7 +485,7 @@ class ProjectService {
                     succeeded = true
                 }
             }
-            else succeeded == true //no changes were necessary but no failure so set to true
+            else succeeded = true //no changes were necessary but no failure so set to true
         }
 
         return succeeded
@@ -592,8 +583,8 @@ class ProjectService {
      * @return list of projects the user owns
      */
     List<Project> getMyProjects(UserAccount user, int max, int offset) {
-        if (max == -1)      max     = DEFAULT_MAX
-        if (offset == -1)   offset  = DEFAULT_OFFSET
+        if (max == -1)      max     = Constants.DEFAULT_MAX
+        if (offset == -1)   offset  = Constants.DEFAULT_OFFSET
 
         return Project.findAllByProjectOwner(user, [offset: offset * max, max: max, sort: 'dateCreated', order: 'desc'])
     }
@@ -607,7 +598,7 @@ class ProjectService {
      * @return the number of pages of my projects per max per page
      */
     int getNumberOfPagesForMyProjects(UserAccount user, int max) {
-        if (!max || max <= 0) max = DEFAULT_MAX
+        if (!max || max <= 0) max = Constants.DEFAULT_MAX
 
         int numberOfProjects = Project.findAllByProjectOwner(user).size()
 
@@ -666,8 +657,8 @@ class ProjectService {
      * @return list of projects that are public
      */
     List<Project> getPublicProjects(int offset, int max) {
-        if (!offset || offset <= 0) offset  = DEFAULT_OFFSET
-        if (!max || max <= 0)       max     = DEFAULT_MAX
+        if (!offset || offset <= 0) offset  = Constants.DEFAULT_OFFSET
+        if (!max || max <= 0)       max     = Constants.DEFAULT_MAX
 
         return Project.findAllWhere([shared: true], [offset: offset * max, max: max, sort: 'dateCreated', order: 'desc'])
     }
@@ -680,7 +671,7 @@ class ProjectService {
      * @return number indicating how many pages are available
      */
     int getNumberOfPagesForPublicProjects(int max) {
-        if (!max || max <= 0) max = DEFAULT_MAX
+        if (!max || max <= 0) max = Constants.DEFAULT_MAX
 
         int numberOfProjects = Project.findAllByShared(true).size()
 
@@ -1095,17 +1086,17 @@ class ProjectService {
 
         whereClause << """
                 AND (
-                        lower(t.name) like ${"'%" + filterTerm + "%'"}
+                        lower(t.name) like lower(${"'%" + filterTerm + "%'"})
                     OR
-                        lower(project.name) like ${"'%" + filterTerm + "%'"}
+                        lower(project.name) like lower(${"'%" + filterTerm + "%'"})
                     OR
                         lower(project.description) like ${"'%" + filterTerm + "%'"}
                     OR
-                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like ${"'%" + filterTerm + "%'"}
+                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like lower(${"'%" + filterTerm + "%'"})
                     OR
-                        lower(teamMembers.members) like ${"'%" + filterTerm + "%'"}
+                        lower(teamMembers.members) like lower(${"'%" + filterTerm + "%'"})
                     OR
-                        lower(pa.annotations) like ${"'%" + filterTerm + "%'"}
+                        lower(pa.annotations) like lower(${"'%" + filterTerm + "%'"})
                 )
         """
 
@@ -1122,7 +1113,7 @@ class ProjectService {
                     LEFT JOIN (
                         SELECT
                             team.id AS t_id,
-                            string_agg(profile.first_name || ' ' || profile.lASt_name, ', ') AS members
+                            string_agg(profile.first_name || ' ' || profile.last_name, ', ') AS members
                         FROM team     
                             LEFT JOIN team_user_account AS tuac ON tuac.team_members_id=team.id
                             LEFT JOIN profile ON profile.user_id=tuac.user_account_id
@@ -1131,11 +1122,11 @@ class ProjectService {
                     ) AS teamMembers ON teamMembers.t_id=pt.team_id
                     LEFT JOIN (
                         SELECT
-                            string_agg(annotatiON.label, ', ') AS annotatiONs,
-                            project_annotatiON.project_annotatiONs_id AS id
-                        FROM project_annotatiON
-                        LEFT JOIN annotatiON ON annotatiON.id=project_annotatiON.annotatiON_id
-                        GROUP BY project_annotatiON.project_annotatiONs_id
+                            string_agg(annotation.label, ', ') AS annotations,
+                            project_annotation.project_annotations_id AS id
+                        FROM project_annotation
+                        LEFT JOIN annotation ON annotation.id=project_annotation.annotation_id
+                        GROUP BY project_annotation.project_annotations_id
                     ) AS pa ON pa.id=project.id
                 ${whereClause.toString()}
                 GROUP BY project.id
@@ -1175,17 +1166,17 @@ class ProjectService {
 
         whereClause << """
                 AND (
-                        lower(t.name) like ${"'%" + filterTerm + "%'"}
+                        lower(t.name) like lower(${"'%" + filterTerm + "%'"})
                     OR
-                        lower(project.name) like ${"'%" + filterTerm + "%'"}
+                        lower(project.name) like lower(${"'%" + filterTerm + "%'"})
                     OR
-                        lower(project.description) like ${"'%" + filterTerm + "%'"}
+                        lower(project.description) like lower(${"'%" + filterTerm + "%'"})
                     OR
-                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like ${"'%" + filterTerm + "%'"}
+                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like lower(${"'%" + filterTerm + "%'"})
                     OR
-                        lower(teamMembers.members) like ${"'%" + filterTerm + "%'"}
+                        lower(teamMembers.members) like lower(${"'%" + filterTerm + "%'"})
                     OR
-                        lower(pa.annotations) like ${"'%" + filterTerm + "%'"}
+                        lower(pa.annotations) like lower(${"'%" + filterTerm + "%'"})
                 )
         """
 
@@ -1201,7 +1192,7 @@ class ProjectService {
                     LEFT JOIN (
                         SELECT
                             team.id AS t_id,
-                            string_agg(profile.first_name || ' ' || profile.lASt_name, ', ') AS members
+                            string_agg(profile.first_name || ' ' || profile.last_name, ', ') AS members
                         FROM team     
                             LEFT JOIN team_user_account AS tuac ON tuac.team_members_id=team.id
                             LEFT JOIN profile ON profile.user_id=tuac.user_account_id
@@ -1210,11 +1201,11 @@ class ProjectService {
                     ) AS teamMembers ON teamMembers.t_id=pt.team_id
                     LEFT JOIN (
                         SELECT
-                            string_agg(annotatiON.label, ', ') AS annotatiONs,
-                            project_annotatiON.project_annotatiONs_id AS id
-                        FROM project_annotatiON
-                        LEFT JOIN annotatiON ON annotatiON.id=project_annotatiON.annotatiON_id
-                        GROUP BY project_annotatiON.project_annotatiONs_id
+                            string_agg(annotation.label, ', ') AS annotations,
+                            project_annotation.project_annotations_id AS id
+                        FROM project_annotation
+                        LEFT JOIN annotation ON annotation.id=project_annotation.annotation_id
+                        GROUP BY project_annotation.project_annotations_id
                     ) AS pa ON pa.id=project.id
                 ${whereClause.toString()}
                 """
@@ -1223,5 +1214,48 @@ class ProjectService {
 
         if (numberOfCountedItems == 0 || numberOfCountedItems <= max) return 1
         else return Math.ceil(numberOfCountedItems / max).toInteger().intValue()
+    }
+
+    /**
+     * retrieve the list of projects a team contributes to
+     *
+     * @param team the team to look at
+     *
+     * @return list of projects or empty list
+     */
+    List<Project> getListOfProjectsTeamContributesTo(Team team) {
+        List<Project> projects = []
+        List<Long> projectIds  = teamService.getIdsOfProjectsForTeam(team.id)
+
+        projectIds.each { id ->
+            projects.add(Project.findById(id))
+        }
+        return projects
+    }
+
+    /**
+     * Get list of projects that a user is associated to via teams
+     *
+     * @param user the user to look for
+     *
+     * @return set of projects or empty list
+     */
+    Set<Project> getProjectsUserContributesTo(UserAccount user) {
+        Set<Project> matches = []
+
+        //projects for teams a user is a member of
+        teamService.getListOfTeamsUserIsMemberOf(user).each { team ->
+            List<Project> subList = getListOfProjectsTeamContributesTo(team)
+
+            if (subList) matches.addAll(subList)
+        }
+
+        //projects for teams that a user owns
+        teamService.getListOfTeamsUserOwns(user).each { team ->
+            Set<Project> subList = getListOfProjectsTeamContributesTo(team)
+
+            if (subList) matches.addAll(subList)
+        }
+        return matches
     }
 }

@@ -1,7 +1,7 @@
 <div class="card">
-    <div class="card-header" id="headingOne" style="display: inline-flex; white-space: pre-wrap;">
+    <div class="card-header" id="heading_${team.id}" style="display: inline-flex; white-space: pre-wrap;">
         <h5 class="mb-0">
-            <button class="btn btn-link" data-toggle="collapse" style="padding: 0;" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            <button class="btn btn-link" data-toggle="collapse" style="padding: 0;" data-target="#collapse_${team.id}" aria-expanded="true" aria-controls="collapse_${team.id}">
                 ${team.name}&nbsp;
             </button>
         </h5>
@@ -24,7 +24,7 @@
         </g:userOwnsProject>
     </div>
 
-    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion" style="background-image: url('${assetPath(src: "connections.svg")}');
+    <div id="collapse_${team.id}" class="collapse show" aria-labelledby="heading_${team.id}" data-parent="#accordion" style="background-image: url('${assetPath(src: "connections.svg")}');
         background-size: cover;padding-bottom: 5em;">
         <div class="team-deck" style="margin-top: 3em;">
             <div class="team-member" style="text-align: center;">

@@ -83,11 +83,15 @@
                         <g:set var="loopCount" value="${1}"/>
                         <g:each in="${teamsManaged}" var="managedTeam">
                             <g:if test="${(loopCount % 2) == 0}">
-                                <li class="list-group-item even-list-item">${managedTeam.name}</li>
+                                <li class="list-group-item even-list-item">
                             </g:if>
                             <g:else>
-                                <li class="list-group-item">${managedTeam.name}</li>
+                                <li class="list-group-item">
                             </g:else>
+                                    <a href="${createLink(controller: "team", action: "view", params: [id: managedTeam.id])}">
+                                        ${managedTeam.name}
+                                    </a>
+                                </li>
                             <g:set var="loopCount" value="${loopCount+1}"/>
                         </g:each>
                     </g:if>
@@ -102,11 +106,15 @@
                         <g:set var="loopCount" value="${1}"/>
                         <g:each in="${contributeToTeams}" var="teamContributingTo">
                             <g:if test="${(loopCount % 2) == 0}">
-                                <li class="list-group-item even-list-item">${teamContributingTo.name}</li>
+                                <li class="list-group-item even-list-item">
                             </g:if>
                             <g:else>
-                                <li class="list-group-item">${teamContributingTo.name}</li>
+                                <li class="list-group-item">
                             </g:else>
+                                    <a href="${createLink(controller: "team", action: "view", params: [id: teamContributingTo.id])}">
+                                        ${teamContributingTo.name}
+                                    </a>
+                                </li>
                             <g:set var="loopCount" value="${loopCount+1}"/>
                         </g:each>
                     </g:if>
