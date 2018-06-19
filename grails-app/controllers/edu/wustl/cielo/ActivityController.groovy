@@ -5,16 +5,14 @@ import grails.plugin.springsecurity.annotation.Secured
 
 class ActivityController {
 
-    static int DEFAULT_COMMENT_COUNT = 2
-
     def activityService
     def springSecurityService
     def messageSource
 
     @Secured('isAuthenticated()')
     def getActivities() {
-        int max    = params.max     ? Integer.valueOf(params.max)       : activityService.DEFAULT_MAX
-        int offset = params.offset  ? Integer.valueOf(params.offset)    : activityService.DEFAULT_OFFSET
+        int max    = params.max     ? Integer.valueOf(params.max)       : Constants.DEFAULT_MAX
+        int offset = params.offset  ? Integer.valueOf(params.offset)    : Constants.DEFAULT_OFFSET
         int newOffset = offset + max
 
         Object principal = springSecurityService?.principal
@@ -49,7 +47,7 @@ class ActivityController {
 
         render (template: "/templates/comments",
                 model: [comments: Activity.findById(Long.valueOf(params.id))?.comments, activityId: params.id,
-                        numberOfComments: (params.commentCount ? Integer.valueOf(params.commentCount) : DEFAULT_COMMENT_COUNT)])
+                        numberOfComments: (params.commentCount ? Integer.valueOf(params.commentCount) : Constants.DEFAULT_COMMENT_COUNT)])
 
     }
 

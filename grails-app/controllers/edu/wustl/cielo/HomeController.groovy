@@ -29,7 +29,7 @@ class HomeController {
                 following: user.getConnections(),
                 activities: activityService.getActivities(),
                 mostPopularProjects: projectService.getMostViewedProjects(3, true),
-                activityOffset: activityService.DEFAULT_MAX, activityMax: activityService.DEFAULT_MAX,
+                activityOffset: Constants.DEFAULT_MAX, activityMax: Constants.DEFAULT_MAX,
                 showMoreActivitiesButton: activityService.areThereMoreActivitiesToRetrieve(10, 10)
         ]
     }
