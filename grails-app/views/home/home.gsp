@@ -27,7 +27,7 @@
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/addActivity"/>
 <g:render template="/templates/contactUsSection"/>
-<g:render template="/templates/footerlncludes"/>
+<g:render template="/templates/footerIncludes"/>
 
 <script type="application/javascript">
     $(function () {

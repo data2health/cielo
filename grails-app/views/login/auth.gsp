@@ -67,4 +67,4 @@
 </section>
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/contactUsSection"/>
-<g:render template="/templates/footerlncludes"/>
+<g:render template="/templates/footerIncludes"/>
