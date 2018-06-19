@@ -117,7 +117,7 @@ class ProjectController {
                 }
             }
             if (params.licenseId)   softwareLicenseId  = Long.valueOf(params.licenseId)
-            if (params.shared)      shared = Integer.valueOf(params.shared) ?: false
+            if (params.shared)      shared = Boolean.valueOf(params.shared)
 
             succeeded = projectService.saveProjectBasicChanges(projectId, newName, description, tags,
                     softwareLicenseId, shared)
@@ -399,8 +399,8 @@ class ProjectController {
     @Secured('isAuthenticated()')
     def getFilteredProjects() {
         List<Project> projects
-        int max     = params.max    ? Integer.valueOf(params.max)    : projectService.DEFAULT_MAX
-        int offset  = params.offset ? Integer.valueOf(params.offset) : projectService.DEFAULT_OFFSET
+        int max     = params.max    ? Integer.valueOf(params.max)    : Constants.DEFAULT_MAX
+        int offset  = params.offset ? Integer.valueOf(params.offset) : Constants.DEFAULT_OFFSET
         int numberOfPages       = 1
         boolean isMyProjects    = Boolean.valueOf(params.myProjects)
 

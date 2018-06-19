@@ -8,6 +8,8 @@ class UserController {
     def userAccountService
     def springSecurityService
     def messageSource
+    def projectService
+    def teamService
 
     @Secured('isAuthenticated()')
     def view() {
@@ -16,7 +18,10 @@ class UserController {
         UserAccount user = params.id ? UserAccount.findById(Long.valueOf(params.id)) : null
 
         return [user: user,
+                myTeams: teamService.getListOfTeamsUserOwns(user),
+                contributingTeams: teamService.getListOfTeamsUserIsMemberOf(user),
                 projects: userAccountService.getProjectsUserOwns(user),
+                projectsUserContributesTo: projectService.getProjectsUserContributesTo(user),
                 institutes: Institution.list(),
                 annotations: Annotation.list(),
                 loggedInUser: loggedInUser]
@@ -38,6 +43,7 @@ class UserController {
             if (user.id) {
                 if (user.profile) bindData(user.profile, params)
                 if (params.profilePic) {
+                    if (!user.profile.picture) user.profile.picture = new ProfilePic()
                     user.profile.picture.fileContents  = params.profilePic.bytes
                     user.profile.picture.fileExtension = params.profilePic.filename.tokenize('.')[1]
                 }
