@@ -212,7 +212,7 @@
 
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/contactUsSection"/>
-<g:render template="/templates/footerlncludes"/>
+<g:render template="/templates/footerIncludes"/>
 
 <script type="application/javascript">
     $( function() {
@@ -224,14 +224,6 @@
         } else if (showBundleTab === true) {
             $('.nav-tabs a[href="#bundles"]').tab('show');
         }
-
-        $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
-                $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (-25) + 'px');
-        });
-
-        $('[data-toggle="tooltip"]').on('hidden.bs.tooltip', function () {
-            $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (+25) + 'px');
-        });
 
         handleOnHoverForTeamMembers();
     });
@@ -585,14 +577,6 @@
 
         $.get(getUrl, {id: teamId}, function (data) {
             usersWindow.find('.bootbox-body').html(data);
-        });
-    }
-
-    function deleteTeam(teamId, projectId) {
-        $.post("${createLink(controller: "team", action: "deleteTeam")}", {projectId: projectId, teamId: teamId}, function (data) {
-            if (data.success === true) {
-                getProjectTeams(projectId);
-            }
         });
     }
 

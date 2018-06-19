@@ -10,15 +10,11 @@ import org.grails.datastore.mapping.engine.EntityAccess
 import org.springframework.validation.ObjectError
 import grails.events.annotation.*
 import org.grails.datastore.mapping.engine.event.*
-import org.grails.datastore.mapping.engine.event.AbstractPersistenceEvent
 import grails.util.Environment
 
 @Transactional
 @Slf4j
 class ActivityService {
-
-    static int DEFAULT_OFFSET   = 0
-    static int DEFAULT_MAX      = 5
 
     static def grailsCacheManager
     def springSecurityService
@@ -36,17 +32,23 @@ class ActivityService {
         if (Environment.current != Environment.TEST) {
             String domainClass = event.getEntityObject().class.simpleName
             ActivityTypeEnum activityTypeEnum
+            Set<String> props = []
             def domainObject = event.getEntityAccess().getEntity()
 
+            props.addAll(domainObject.listDirtyPropertyNames())
+
             domainObject.properties.each { property ->
-                if (domainObject.isDirty(property.key.toString())
-                        && (property.key.toString() != "version" && property.key.toString() != "lastUpdated")) {
-                    //need to see if we need to log the activity
-                    activityTypeEnum = getUpdateActivityType(domainObject, property.key.toString())
+                if (domainObject.isDirty(property.key.toString())) {
+                    props.add(property.key.toString())
+                }
+            }
+
+            props.each { property ->
+                if (property != "version" && (property != "lastUpdated" || property != "lastChanged")) {
+                    activityTypeEnum = getUpdateActivityType(domainObject, property)
 
                     if (activityTypeEnum) {
                         saveActivity(event, domainClass, activityTypeEnum)
-
                         invalidateNecessaryCaches(activityTypeEnum)
                     }
                 }
@@ -211,6 +213,9 @@ class ActivityService {
                 break
             case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_STATUS:
                 params = [entityAccess.getPropertyValue("status"), ((Project)entityAccess.getEntity()).getOriginalValue("status")]
+                break
+            case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS:
+                params = [user?.fullName, (grailsLinkGenerator.serverBaseURL?:"") + "/project/${entityId}", entityAccess.getPropertyValue("name")]
                 break
         }
 
@@ -420,6 +425,7 @@ class ActivityService {
                 if (property == "metadatas") activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_METADATAS
                 if (property == "status") activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_STATUS
                 if (property == "views") activityTypeEnum  = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_VIEWS
+                if (property == "teams") activityTypeEnum  = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS
                 break
             case "Profile":
                 if (property == "emailAddress") activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_USER_EMAIL_ADDRESS
@@ -439,7 +445,7 @@ class ActivityService {
     List<Activity> getActivities(){
 
         return Activity.executeQuery("select distinct a from Activity a order by dateCreated desc",
-                [max: DEFAULT_MAX, offset: DEFAULT_OFFSET])
+                [max: Constants.DEFAULT_MAX, offset: Constants.DEFAULT_OFFSET])
     }
 
     /**
@@ -586,9 +592,13 @@ class ActivityService {
                    activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_DESCRIPTION ||
                    activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_ANNOTATIONS ||
                    activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_SHARED ||
-                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS) {
+                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS ||
+                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_NEW_TEAM) {
             grailsCacheManager.getCache("filtered_projects_count").clear()
             grailsCacheManager.getCache("filtered_projects").clear()
+            grailsCacheManager.getCache("filtered_teams").clear()
+            grailsCacheManager.getCache("filtered_teams_count").clear()
+            grailsCacheManager.getCache("filtered_teams_project_ids").clear()
         }
     }
 }

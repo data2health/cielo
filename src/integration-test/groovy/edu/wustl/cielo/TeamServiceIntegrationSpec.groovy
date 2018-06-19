@@ -1,10 +1,11 @@
 package edu.wustl.cielo
 
 import grails.gorm.transactions.Transactional
+import grails.testing.gorm.DomainUnitTest
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
-class TeamServiceIntegrationSpec extends Specification {
+class TeamServiceIntegrationSpec extends Specification implements DomainUnitTest<Code> {
 
     @Autowired
     TeamService teamService
@@ -12,6 +13,8 @@ class TeamServiceIntegrationSpec extends Specification {
     def webRoot
 
     void setup() {
+        mockDomain(UserAccount)
+        teamService = new TeamService()
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
     }
 

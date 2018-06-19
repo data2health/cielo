@@ -34,6 +34,9 @@ $( function() {
     }).bind("ajaxComplete", function(event, xhr, ajaxOptions) {
         hideWaitDialog();
 
+        //reset the tooltips which by now could potentially be dead
+        $('[data-toggle="tooltip"]').tooltip();
+
         //session expired
         if (xhr.responseText === "Unauthorized") {
             bootbox.dialog({
@@ -286,6 +289,26 @@ $( function() {
             $('#projectSearchClear').css('display', 'block');
         } else {
             $('#projectSearchClear').css('display', 'none');
+        }
+    });
+
+    $('#searchInput').keypress( function(event) {
+        if ( event.which == 13 ) {
+            event.preventDefault();
+
+            var filterText = $('#searchInput').val();
+
+            $.get("/teams/filtered/list", {filterTerm: filterText}, function (data) {
+                replaceTeamTableContent(data);
+            });
+        }
+    });
+
+    $('#searchInput').on('keyup', function (event) {
+        if ($('#searchInput').val().length !== 0){
+            $('#teamSearchClear').css('display', 'block');
+        } else {
+            $('#teamSearchClear').css('display', 'none');
         }
     })
 });
@@ -597,7 +620,7 @@ function validateProfilePic(input) {
                 if (fsize > 1048576) //do something if file size more than 1 MB (1048576 bytes)
                 {
                     control.val("");
-                    alert("File too large. (" + fsize + "). Please limit uploads to files less than one MiB.");
+                    alert("File too large. (" + fsize + "). Please limit uploads to files less than one MB.");
                     return;
                 }
 
@@ -840,6 +863,31 @@ function replaceProjectTableContent(data) {
     updateToolbarButtons();
 }
 
+function replaceTeamTableContent(data) {
+    var currentPageCount = $('#paging-options').find('option').length;
+
+    //fix the number of pages
+    if (currentPageCount !== data.pagesCount) {
+        //rebuild the paging options
+        $('#paging-options option').remove();
+
+        for (var index = 1; index <= data.pagesCount; index++) {
+            $('#paging-options').append('<option value="' + index +'">' + index + '</option>');
+        }
+
+        $('#ofPages').text('of ' + data.pagesCount);
+    }
+
+    //remove old rows
+    $('#teamTableBody').find('tr').remove();
+
+    //replace rows
+    $('#teamTableBody').html(data.html);
+
+    //disable/enable buttons as necessary
+    updateToolbarButtons();
+}
+
 function onNextPage() {
     if ($('#right-table-toolbar i').first().attr('class').indexOf('fa-disabled') === -1) {
         var offsetVal = $('#paging-options').val();
@@ -923,4 +971,15 @@ function clearProjectSearch() {
     e.which = 13;
     e.keyCode = 13;
     $('#projectSearch').trigger(e)
+}
+
+function clearTeamSearch() {
+    $('#searchInput').val("");
+    $('#searchInput').keyup();
+
+    //now trigger enter
+    var e = $.Event("keypress");
+    e.which = 13;
+    e.keyCode = 13;
+    $('#searchInput').trigger(e)
 }

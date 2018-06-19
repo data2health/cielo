@@ -54,7 +54,9 @@
                     </form>
 
                 </div>
-                <g:getUserProfilePic id="currentProfilePic" style="margin-top: 1.8em;display: inline-block;" showLink="${true}" user="${user}" sticker="${true}" imageSize="xxx-large"/>
+                <g:getUserProfilePic id="currentProfilePic" style="margin-top: 1.8em;display: inline-block;"
+                                     showLink="${true}" user="${user}" sticker="${true}"
+                                     imageSize="xxx-large"/>
             </div>
             <div class="col-lg-9">
                 <div class="form-container">
@@ -191,10 +193,11 @@
 
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/usersFeatureDiv" model="[users: user.connections, title: 'Connections']"/>
+<g:render template="userTeams" model="[teams: myTeams, teamsIContributeTo: contributingTeams, isUsersOwnPage: userCanEdit]"/>
 <g:render template="userProjects" model="[projects: projects, isUsersOwnPage: userCanEdit,
-                                          contribtuteTo: user.getProjectsIContributeTo()]"/>
+                                          contributeTo: projectsUserContributesTo]"/>
 <g:render template="/templates/contactUsSection"/>
-<g:render template="/templates/footerlncludes"/>
+<g:render template="/templates/footerIncludes"/>
 
 <script type="application/javascript">
 
@@ -225,15 +228,8 @@
         if (currentProfilePicSrc.indexOf('/assets/default_profile.png') === -1) {
             window.imgSrc = currentProfilePicSrc;
         }
-
-        $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
-            $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (-50) + 'px');
-        });
-
-        $('[data-toggle="tooltip"]').on('hidden.bs.tooltip', function () {
-            $('.tooltip').css('top', parseInt($('.tooltip').css('top')) + (+50) + 'px');
-        });
     });
+
     function editUser() {
         //toggle button states
         $('#save_button').removeClass('fa-disabled');

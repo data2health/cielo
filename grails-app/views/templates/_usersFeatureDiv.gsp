@@ -7,15 +7,26 @@ background-position: left;">
                 ${title?:""}
             </span>
         </div>
-        <div class="col-md-12" style="display: inline-flex; overflow: scroll;">
-            <g:each in="${users}" var="user">
-                <g:getUserProfilePic style="padding-left: 5em;padding-right: 5em;padding-bottom: 2em;padding-top: 2em;" user="${user}"
-                                     sticker="${true}"
-                                     tooltipText="${user.profile.firstName} ${user.profile.lastName}${'<br><em>'}${user.username}${'</em>'}"
-                                     showLink="${true}"
-                                     imageSize="x-large"/>&nbsp;
+        <g:if test="${users}">
+            <div class="col-md-12" style="display: inline-flex; overflow: scroll;">
+                <g:each in="${users}" var="user">
+                    <div style="display: inline-block;">
+                    <g:getUserProfilePic style="padding-left: 5em;padding-right: 5em;padding-bottom: 2em;padding-top: 2em;" user="${user}"
+                                         sticker="${true}"
+                                         tooltipText="${user.profile.firstName} ${user.profile.lastName}${'<br><em>'}${user.username}${'</em>'}"
+                                         showLink="${true}"
+                                         imageSize="x-large"/>&nbsp;
+                    </div>
 
-            </g:each>
-        </div>
+                </g:each>
+            </div>
+        </g:if>
+        <g:else>
+            <div class="col-md-12">
+                <em style="font-weight: 600;">
+                    None Yet
+                </em>
+            </div>
+        </g:else>
     </div>
 </section>

@@ -1,18 +1,41 @@
-<section class="features1 cid-qHBWkob2I0" id="user_projects" style="background-color: #788492;
-color: white;">
-    <div class="container-fluid" style="text-align: center;padding-bottom: 4em;">
-        <div class="row" style="display: inline-block;">
-            <span style="z-index: 1;font-family: inherit; font-size: 2em; color: white;padding-bottom: 2em; margin-top:-2em;">
-                Projects
-            </span>
+<g:set var="background_color" value="#818992"/>
+<g:set var="color" value="white"/>
+<g:set var="projectLinkClass" value="project-link"/>
+<g:set var="projectSectionTopPadding" value="padding-top: 90px;"/>
+<g:set var="itemsPerColumn" value="${5}"/>
+
+<g:if test="${displayLightTheme != null}">
+    <g:if test="${displayLightTheme}">
+        <g:set var="background_color" value="white"/>
+        <g:set var="color" value="#3a3a3a"/>
+        <g:set var="projectLinkClass" value="project-link-dark"/>
+    </g:if>
+</g:if>
+
+<g:if test="${paddingTop != null}">
+    <g:set var="projectSectionTopPadding" value="padding-top: ${paddingTop};"/>
+</g:if>
+    <section class="features1 cid-qHBWkob2I0" id="user_projects" style="background-color: ${background_color};
+color: ${color};${projectSectionTopPadding}">
+        <div class="container-fluid" style="text-align: center;padding-bottom: 4em;">
+            <div class="row" style="display: inline-block;">
+                <span style="z-index: 1;font-family: inherit; font-size: 2em; color: ${color};padding-bottom: 2em; margin-top:-2em;">
+                    Projects
+                </span>
+            </div>
         </div>
-    </div>
+
+    <g:set var="showContributionMessage" value="${true}"/>
+    <g:if test="${showContributionType != null}">
+        <g:set var="showContributionMessage" value="${showContributionType}"/>
+    </g:if>
+
     <g:set var="size" value="${projects.size()}"/>
     <g:set var="index" value="${0}"/>
-    <g:set var="contribtuteSize" value="${contribtuteTo.size()}"/>
+    <g:set var="contributeSize" value="${contributeTo.size()}"/>
     <g:set var="contributeIndex" value="${0}"/>
 
-    <g:if test="${(size == index) && (contribtuteSize == contributeIndex)}">
+    <g:if test="${(size == index) && (contributeSize == contributeIndex)}">
     <div class="container-fluid" style="text-align: center;">
         <div class="row" style="margin-bottom: 3em; display: inline-block;">
         <em>None yet</em>
@@ -20,107 +43,81 @@ color: white;">
     <g:else>
     <div class="container-fluid" style="padding-left: 5em;">
         <div class="row" style="margin-bottom: 3em;">
-    </g:else>
-            <g:while test="${(index + 5) < size}">
-                <div class="col-sm-auto">
-                <g:each in="${projects.getAt([index..(index+5)])}" var="project">
-                    <span>
-                        <g:if test="${project?.shared}">
-                            <i class="fas fa-lock-open"></i>
-                        </g:if>
-                        <g:else>
-                            <i class="fas fa-lock"></i>
-                        </g:else>
-                    </span>
-                    <span>
-                         <g:if test="${isUsersOwnPage || project?.shared}">
-                            <a class="btn btn-link project-link" href="${createLink(controller: "project", action: "view", id: project.id)}">${project?.name}</a> (Owner)
-                        </g:if>
-                        <g:else>
-                            ************
-                        </g:else>
-                    </span>
-                    <br>
-                </g:each>
-                </div>
-                <div class="col-sm-auto">
-                    &nbsp;
-                </div>
-                <g:set var="index" value="${index+5}"/>
-            </g:while>
-
-            <g:if test="${index < size}">
-                <div class="col-sm-auto">
-                <g:each in="${projects.getAt([index..(size-1)])}" var="project">
-                    <span>
-                        <g:if test="${project?.shared}">
-                            <i class="fas fa-lock-open"></i>
-                        </g:if>
-                        <g:else>
-                            <i class="fas fa-lock"></i>
-                        </g:else>
-                        <span>
-                        <g:if test="${isUsersOwnPage || project?.shared}">
-                            <a class="btn btn-link project-link" href="${createLink(controller: "project", action: "view", id: project.id)}">${project.name}</a> (Owner)
-                        </g:if>
-                        <g:else>
-                            ************
-                        </g:else>
-                        </span><br>
-                    </span>
-                </g:each>
-                </div>
+        <g:each in="${projects}" var="project">
+        <g:if test="${index == 0}">
+                <div class="col-sm-auto" style="padding-top: 1em;">
             </g:if>
-            <g:while test="${(contributeIndex + 5) < contribtuteSize}">
-                <div class="col-sm-auto">
-                  <g:each in="${contribtuteTo.getAt([contributeIndex..(contributeIndex+5)])}" var="project">
-                      <span>
-                          <g:if test="${project?.shared}">
-                              <i class="fas fa-lock-open"></i>
-                          </g:if>
-                          <g:else>
-                              <i class="fas fa-lock"></i>
-                          </g:else>
-                      </span>
-                      <span>
-                          <g:if test="${isUsersOwnPage || project?.shared}">
-                              <a class="btn btn-link project-link" href="${createLink(controller: "project", action: "view", id: project.id)}">${project.name}</a> (Contributor)
-                          </g:if>
-                          <g:else>
-                              ************
-                          </g:else>
-                      </span>
-                      <br>
-                  </g:each>
-              </div>
-                <div class="col-sm-auto">
-                    &nbsp;
-                </div>
-                <g:set var="contributeIndex" value="${contributeIndex+5}"/>
-            </g:while>
-            <g:if test="${contributeIndex < contribtuteSize}">
-              <div class="col-sm-auto">
-                  <g:each in="${contribtuteTo.getAt([contributeIndex..(contribtuteSize-1)])}" var="project">
-                      <span>
-                          <g:if test="${project?.shared}">
-                              <i class="fas fa-lock-open"></i>
-                          </g:if>
-                          <g:else>
-                              <i class="fas fa-lock"></i>
-                          </g:else>
-                          <span>
-                          <g:if test="${isUsersOwnPage || project?.shared}">
-                              <a class="btn btn-link project-link" href="${createLink(controller: "project", action: "view", id: project.id)}">${project.name}</a> (Contributor)
-                          </g:if>
-                          <g:else>
-                              ************
-                          </g:else>
-                          </span>
-                          <br>
-                      </span>
-                  </g:each>
-              </div>
-          </g:if>
+            <g:else>
+                <g:if test="${index == itemsPerColumn}">
+                    <g:set var="index" value="${0}"/>
+                    </div>
+                    <div class="col-sm-auto">
+                        &nbsp;
+                    </div>
+                    <div class="col-sm-auto" style="padding-top: 1em;">
+                </g:if>
+            </g:else>
+            <span>
+                <g:if test="${project?.shared}">
+                    <i class="fas fa-lock-open"></i>
+                </g:if>
+                <g:else>
+                    <i class="fas fa-lock"></i>
+                </g:else>
+                <g:if test="${isUsersOwnPage || project?.shared || isTeamContributor}">
+                    <a class="btn btn-link ${projectLinkClass}" href="${createLink(controller: "project", action: "view", id: project.id)}">${project?.name}</a>
+                    <g:if test="${showContributionMessage}">
+                        (Owner)
+                    </g:if>
+                </g:if>
+                <g:else>
+                    ************
+                </g:else>
+            </span>
+            <br>
+            <g:set var="index" value="${index + 1}"/>
+        </g:each>
+
+        <g:each in="${contributeTo}" var="project">
+            <g:if test="${index == 0}">
+                <div class="col-sm-auto" style="padding-top: 1em;">
+            </g:if>
+            <g:else>
+                <g:if test="${index == itemsPerColumn}">
+                    <g:set var="index" value="${0}"/>
+                    </div>
+                    <div class="col-sm-auto">
+                        &nbsp;
+                    </div>
+                    <div class="col-sm-auto" style="padding-top: 1em;">
+                </g:if>
+            </g:else>
+            <span>
+                <g:if test="${project?.shared}">
+                    <i class="fas fa-lock-open"></i>
+                </g:if>
+                <g:else>
+                    <i class="fas fa-lock"></i>
+                </g:else>
+                <g:if test="${isUsersOwnPage || project?.shared || isTeamContributor}">
+                    <a class="btn btn-link ${projectLinkClass}" href="${createLink(controller: "project", action: "view", id: project.id)}">${project?.name}</a>
+                    <g:if test="${showContributionMessage}">
+                        (Owner)
+                    </g:if>
+                </g:if>
+                <g:else>
+                    ************
+                </g:else>
+            </span>
+            <br>
+            <g:set var="index" value="${index + 1}"/>
+        </g:each>
+
+        <g:if test="${index != itemsPerColumn && index != 0}">
+            </div>
+        </g:if>
+    </g:else>
+            </div>
         </div>
     </div>
 </section>

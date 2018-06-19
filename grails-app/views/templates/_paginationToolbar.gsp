@@ -5,7 +5,7 @@
         </div>
         <div id="center-table-toolbar" style="width: 33%; text-align: center;">
             <select class="custom-select" id="paging-options" style="width: 3.5em;"
-                    onchange="${onChangeCallback + '('+ isUsersProjects +');'}">
+                    onchange='${onChangeCallback + "("+ (isUsersProjects?:false) +");"}'>
                 <g:set var="count" value="${1}"/>
                 <g:each in="${1..pages}">
                     <option value="${count}">${count}</option>

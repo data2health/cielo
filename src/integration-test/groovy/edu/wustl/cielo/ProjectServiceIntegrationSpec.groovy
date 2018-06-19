@@ -14,6 +14,8 @@ class ProjectServiceIntegrationSpec extends Specification {
     @Autowired
     ProjectService projectService
 
+    TeamService teamService
+
     @Autowired
     SessionFactory sessionFactory
 
@@ -21,6 +23,7 @@ class ProjectServiceIntegrationSpec extends Specification {
     def assetResourceLocator
 
     def setup() {
+        teamService = new TeamService()
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
         cleanup()
     }
@@ -356,5 +359,74 @@ class ProjectServiceIntegrationSpec extends Specification {
 
         then:
             countedProjectPages == 2
+    }
+
+    void "test getListOfProjectsTeamContributesTo"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+
+        teamService.metaClass.getIdsOfProjectsForTeam = { Long teamId ->
+            if (project.teams.collect{ it.id }.contains(teamId)) return [project.id]
+        }
+
+        projectService.teamService = teamService
+
+        when:
+            def results = projectService.getListOfProjectsTeamContributesTo(team)
+
+        then:
+            !results
+
+        when:
+            project.teams.add(team)
+            project.save()
+            results = projectService.getListOfProjectsTeamContributesTo(team)
+
+        then:
+            results
+
+    }
+
+    void "test getProjectsUserContributesTo"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+
+        teamService.metaClass.getIdsOfProjectsForTeam = { Long teamId ->
+            if (project.teams.collect{ it.id }.contains(teamId)) return [project.id]
+        }
+
+        teamService.metaClass.getListOfTeamsUserIsMemberOf = {UserAccount userAccount ->
+            []
+        }
+
+        teamService.metaClass.getListOfTeamsUserOwns = {UserAccount userAccount1 ->
+            [team]
+        }
+
+        projectService.teamService = teamService
+
+        when:
+            def results = projectService.getProjectsUserContributesTo(user2)
+
+        then:
+            !results
+
+        when:
+            team.members.add(user2)
+            team.save()
+            project.teams.add(team)
+            results = projectService.getProjectsUserContributesTo(user2)
+
+        then:
+            results
     }
 }

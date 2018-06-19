@@ -15,6 +15,8 @@ class UserAccountService {
 
     def springSecurityService
     def assetResourceLocator
+    def teamService
+    def projectService
     static Lorem lorem = LoremIpsum.getInstance()
 
     /**
@@ -584,5 +586,23 @@ class UserAccountService {
      */
     List<Project> getProjectsUserOwns(UserAccount userAccount) {
         return Project.findAllByProjectOwner(userAccount)
+    }
+
+    /**
+     * Retrieve the projects that a user contributes to
+     *
+     * @param user the user we will use to filter on
+     *
+     * @return list of projects or empty list
+     */
+    List<Project> getProjectsUserContributesTo(UserAccount user) {
+        List<Project> matches = []
+
+        teamService.getListOfTeamsUserIsMemberOf(user).each { team ->
+            List<Project> subList = projectService.getListOfProjectsTeamContributesTo(team)
+
+            if (subList) matches.addAll(subList)
+        }
+        return matches
     }
 }

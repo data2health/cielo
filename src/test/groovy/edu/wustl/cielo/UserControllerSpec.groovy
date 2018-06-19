@@ -9,19 +9,33 @@ class UserControllerSpec extends Specification implements ControllerUnitTest<Use
 
     UserAccountService userAccountService
     SpringSecurityService springSecurityService
+    TeamService teamService
+    ProjectService projectService
 
     void setup() {
         mockDomains(Institution, Profile)
+
         messageSource.addMessage('user.failed.update', Locale.getDefault(), "Failed to update user")
         messageSource.addMessage('user.failed.follow', Locale.getDefault(), "Failed to follow user")
         messageSource.addMessage('user.failed.un-follow', Locale.getDefault(), "Failed to un-follow user")
 
         userAccountService = new UserAccountService()
         springSecurityService = new SpringSecurityService()
+        teamService = new TeamService()
+        projectService = new ProjectService()
     }
 
     void "test view"() {
+        teamService.metaClass.getListOfTeamsUserOwns = { UserAccount user ->
+            []
+        }
+        
+        projectService.metaClass.getProjectsUserContributesTo = { UserAccount user ->
+            []
+        }
 
+        controller.projectService = projectService
+        controller.teamService = teamService
         controller.userAccountService = userAccountService
 
         when:"attempting to get user with no user id param"

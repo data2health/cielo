@@ -103,9 +103,96 @@ class TeamServiceSpec extends Specification implements ServiceUnitTest<TeamServi
         project.teams.add(team)
 
         when:
-            def result = service.deleteTeam(team.id, project.id)
+            def result = service.deleteTeam(team.id)
 
         then:
             result
+    }
+
+    void "test listTeams"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+
+        when:
+            def results = service.listTeams(0, 5)
+
+        then:
+            results.size() == 1
+
+        when:
+            Team team1 = new Team(name: "Team2", administrator: user).save()
+            results = service.listTeams(0, 5)
+
+        then:
+            results.size() == 2
+            results.contains(team)
+            results.contains(team1)
+    }
+
+
+    void "test getNumberOfTeamPages"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+        Team team1 = new Team(name: "Team2", administrator: user).save()
+
+        when:
+            def results = service.getNumberOfTeamPages(2)
+
+        then:
+            results == 1
+
+        when:
+            results = service.getNumberOfTeamPages(1)
+
+        then:
+            results == 2
+    }
+
+    void "test getListOfTeamsUserIsMemberOf"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+        Team team1 = new Team(name: "Team2", administrator: user).save()
+
+        when:
+            def results = service.getListOfTeamsUserIsMemberOf(user2)
+
+        then:
+            results.size() == 0
+
+        when:
+            team.members.add(user2)
+            team.save()
+            results = service.getListOfTeamsUserIsMemberOf(user2)
+
+        then:
+            results.size() == 1
+
+        when:
+            team1.members.add(user2)
+            team1.save()
+            results = service.getListOfTeamsUserIsMemberOf(user2)
+
+        then:
+            results.size() == 2
+    }
+
+    void "test getListOfTeamsUserOwns"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user2 =  new UserAccount(username: "someuser2", password: "somePassword").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+        Team team1 = new Team(name: "Team2", administrator: user).save()
+
+        when:
+            def results = service.getListOfTeamsUserOwns(user2)
+
+        then:
+            results.size() == 0
+
+        when:
+            results = service.getListOfTeamsUserOwns(user)
+
+        then:
+            results.size() == 2
     }
 }

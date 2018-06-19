@@ -38,4 +38,27 @@ class ProjectSpec extends Specification implements DomainUnitTest<Project> {
         then: "saves correctly"
             project.save()
     }
+
+    void "test isTeamAssignedToProject"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        Team team = new Team(name: "Team1", administrator: user).save()
+
+        when:
+            def result = project.isTeamAssignedToProject(team)
+
+        then:
+            !result
+
+        when:
+            project.teams.add(team)
+            project.save()
+            result = project.isTeamAssignedToProject(team)
+
+        then:
+            result
+    }
 }

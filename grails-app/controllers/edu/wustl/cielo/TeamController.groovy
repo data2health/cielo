@@ -7,6 +7,7 @@ class TeamController {
     def teamService
     def springSecurityService
     def messageSource
+    def projectService
 
     @Secured('isAuthenticated()')
     def getTeamMembers() {
@@ -16,7 +17,7 @@ class TeamController {
 
         if (params.id) {
             Long teamId = Long.valueOf(params.id)
-            users = teamService.getTeamMembers(teamId)
+            users       = teamService.getTeamMembers(teamId)
         }
         render(template: "/templates/addUsersDialogContent", model: [follow: users, users: UserAccount.list() - user])
     }
@@ -25,9 +26,9 @@ class TeamController {
     def updateTeamUsers() {
         Map messages = [:]
         boolean succeeded
-        Long teamId = params.id ? Long.valueOf(params.id) : -1L
-        List<Long> userIds = []
-        UserAccount user = springSecurityService.principal ? UserAccount.get(springSecurityService.principal.id) : null
+        Long teamId         = params.id ? Long.valueOf(params.id) : -1L
+        List<Long> userIds  = []
+        UserAccount user    = springSecurityService.principal ? UserAccount.get(springSecurityService.principal.id) : null
 
         if (user) {
             if (teamId) {
@@ -60,16 +61,26 @@ class TeamController {
     }
 
     @Secured('isAuthenticated()')
+    def userTeamMembersSnippet() {
+        Long teamId    = params.teamId      ? Long.valueOf(params.teamId)       : -1L
+
+        if (teamId != -1L) {
+            render(template: "userTeam", model: [team: Team.findById(teamId)])
+        }
+    }
+
+    @Secured('isAuthenticated()')
     def deleteTeam() {
         boolean succeeded
-        Long teamId    = params.teamId      ? Long.valueOf(params.teamId)       : -1L
-        Long projectId = params.projectId   ? Long.valueOf(params.projectId)    : -1L
+        Map messages    = [:]
+        Long teamId     = params.teamId      ? Long.valueOf(params.teamId)       : -1L
 
-        if (teamId && projectId) {
-            succeeded = teamService.deleteTeam(teamId, projectId)
+        if (teamId) {
+            succeeded = teamService.deleteTeam(teamId)
         }
 
-        render([success: succeeded] as JSON)
+        if (!succeeded) messages.danger = messageSource.getMessage("team.delete.failed", null, Locale.getDefault())
+        render([success: succeeded, messages: messages] as JSON)
     }
 
     @Secured('isAuthenticated()')
@@ -83,22 +94,46 @@ class TeamController {
 
     @Secured('isAuthenticated()')
     def view() {
-        Long teamId = params.id ? Long.valueOf(params.id) : -1L
-        Team team = Team.findById(teamId)
+        Long teamId         = params.id ? Long.valueOf(params.id) : -1L
+        Team team           = Team.findById(teamId)
+        Object principal    = springSecurityService?.principal
+        UserAccount user    = principal ? UserAccount.get(principal.id) : null
 
         if (team) {
-            Project project
-            Project.list().each {
-                if (it.teams.contains(team)) project = it
-            }
-
-            if (project) {
-                redirect(controller: "project", action: "view",  params: [id: project.id, teams: true])
-            } else redirect(url: request.getHeader("referer"))
+            return [team: team,
+                    projectsContributeTo: projectService.getListOfProjectsTeamContributesTo(team),
+                    userProfile: user.profile]
         } else {
             flash.danger = messageSource.getMessage('team.doesNotExist', null, 'Team has been deleted',
                     request.locale)
             redirect(url: request.getHeader("referer"))
         }
+    }
+
+    @Secured('isAuthenticated()')
+    def teams() {
+        Object principal    = springSecurityService?.principal
+        UserAccount user    = principal ? UserAccount.get(principal.id) : null
+        int max             = params.max ?      Integer.valueOf(params.max).intValue()      : Constants.DEFAULT_MAX
+        int pageOffset      = params.offset ?   Integer.valueOf(params.offset).intValue()   : Constants.DEFAULT_OFFSET
+        String filterText   = params.filterTerm ?: ""
+
+        return [teams: teamService.getFilteredTeamsFromDB((pageOffset * max), max, filterText),
+                offset: (pageOffset * max),
+                numberOfPages: teamService.countFilteredTeams(filterText, max),
+                max: max,
+                userProfile: user.profile]
+    }
+
+    @Secured('isAuthenticated()')
+    def teamTableRows() {
+        int max             = params.max ?      Integer.valueOf(params.max).intValue()      : Constants.DEFAULT_MAX
+        int pageOffset      = params.offset ?   Integer.valueOf(params.offset).intValue()   : Constants.DEFAULT_OFFSET
+        String filterText   = params.filterTerm ? params.filterTerm : ""
+        int numberOfPages   = teamService.countFilteredTeams(filterText, max)
+        List<Team> teams    = teamService.getFilteredTeamsFromDB((pageOffset * max), max, filterText)
+
+        def newRowsHTML = teamService.renderTableRows([teams: teams])
+        render([html: newRowsHTML, pagesCount: numberOfPages] as JSON)
     }
 }
