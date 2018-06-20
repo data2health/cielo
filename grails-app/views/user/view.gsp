@@ -197,7 +197,7 @@
 <g:render template="userProjects" model="[projects: projects, isUsersOwnPage: userCanEdit,
                                           contributeTo: projectsUserContributesTo]"/>
 <g:render template="/templates/contactUsSection"/>
-<g:render template="/templates/footerIncludes"/>
+<g:render template="/templates/pageFooterIncludes"/>
 
 <script type="application/javascript">
 
