@@ -29,4 +29,4 @@
 </section>
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/contactUsSection"/>
-<g:render template="/templates/pageFooterIncludes"/>
+<g:render template="/templates/footerIncludes"/>
