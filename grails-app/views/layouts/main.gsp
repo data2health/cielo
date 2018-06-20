@@ -17,5 +17,5 @@
 </div>
 <!-- All Javascript at the bottom of the page for faster page loading -->
 
-<g:render template="/templates/footerIncludes"/>
+<g:render template="/templates/pageFooterIncludes"/>
 

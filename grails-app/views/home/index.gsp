@@ -22,4 +22,4 @@
 <g:render template="/templates/faqs"/>
 <g:render template="/templates/scrollToTop"/>
 <g:render template="/templates/contactUsSection"/>
-<g:render template="/templates/footerIncludes"/>
+<g:render template="/templates/pageFooterIncludes"/>
