@@ -19,8 +19,8 @@
                 <th scope="col">Name</th>
                 <th scope="col">Description</th>
                 <th scope="col">Created</th>
-                <th scope="col">Url</th>
-                <th scope="col"></th>
+                <th scope="col">&nbsp;</th>
+                <th scope="col">&nbsp;</th>
             </tr>
             </thead>
             <tbody id="codeRows">

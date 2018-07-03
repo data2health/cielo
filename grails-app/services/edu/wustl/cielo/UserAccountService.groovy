@@ -605,4 +605,13 @@ class UserAccountService {
         }
         return matches
     }
+
+    /**
+     * Get the logged in user
+     *
+     * @return a user instance or null
+     */
+    UserAccount getLoggedInUser() {
+      return UserAccount.findById(springSecurityService.principal?.id)
+    }
 }

@@ -298,4 +298,15 @@ class UserAccountServiceIntegrationSpec extends Specification {
             !projects
             projects.size() == 0
     }
+
+    void "test getLoggedInUser"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        userAccountService.springSecurityService = [principal: user]
+
+        when:
+            UserAccount loggedInUser = userAccountService.getLoggedInUser()
+
+        then:
+            loggedInUser == user
+    }
 }

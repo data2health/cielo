@@ -11,10 +11,12 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
 
     ProjectService projectService
     SpringSecurityService springSecurityService
+    CloudService cloudService
 
     void setup() {
         projectService = new ProjectService()
         springSecurityService = new SpringSecurityService()
+        cloudService = new CloudService()
         mockDomains(Profile, UserAccount, UserAccountUserRole)
 
         messageSource.addMessage('project.creation.succeeded', Locale.getDefault(), "hello")
@@ -667,5 +669,31 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         then:
             response.json.html == "<p>some data</p>"
             response.json.pagesCount == 1
+    }
+
+    void "test downloadFile"() {
+        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
+        user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        cloudService.metaClass.downloadFile = { Long projectId, String fileName, String gitCommitHash ->
+            if (projectId == -1L) return null
+            else "this is a sample".bytes
+        }
+
+        controller.cloudService = cloudService
+
+        when:
+            response.reset()
+            params.id = project.id
+            params.name = "some name"
+            params.hash = "some hash"
+            controller.downloadFile()
+
+        then:
+            response.text == "this is a sample"
     }
 }

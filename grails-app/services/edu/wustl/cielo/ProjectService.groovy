@@ -635,13 +635,18 @@ class ProjectService {
                 user.projects.remove(project)
                 user.save()
 
-                project.delete(failOnError: true)
 
-                //no error so now need ƒto delete all the uploaded files
+                //no error so now need to delete all the uploaded files
                 blobIdList.each { blobId ->
                     cloudService.deleteFile(blobId)
                 }
-                return true
+
+                //delete the git repo on both local and remote for the given project
+                if (cloudService.deleteRepo(projectId)) {
+                    project.delete(failOnError: true)
+                    return true
+                } else return false
+
             } catch (Exception e) {
                 project.errors.allErrors.each { ObjectError error ->
                     log.error(error.toString())
@@ -785,8 +790,8 @@ class ProjectService {
             if (externalFileLink) {
                 fileURL = new URI(externalFileLink).toURL()
             } else {
-                Map results = cloudService.uploadFile("${project.id}_${filename}", type, filePart)
-                fileURL  = new URI(results.url).toURL()
+                Map results = cloudService.uploadFile(projectId, filename, filePart)
+                fileURL  = results.url
                 blobId   = results.blobId
             }
 
@@ -797,6 +802,15 @@ class ProjectService {
                     data.url    = fileURL
                     data.blobId = blobId
                     data.description = description
+
+                    int revision    = 0 //the default
+
+                    if (projectAlreadyHasBundleWithSameName(project.id, FileUploadType.DATA, filename)) {
+                        revision = nextRevisionForBundle(project.id, FileUploadType.DATA, filename)
+                    }
+
+                    data.revision = revision
+
                     if (blobId) data.repository = "GCS"
                     else data.repository = "EXTERNAL"
                     if (!data.save()) {
@@ -814,6 +828,15 @@ class ProjectService {
                     code.url    = fileURL
                     code.blobId = blobId
                     code.description = description
+
+                    int revision    = 0 //the default
+
+                    if (projectAlreadyHasBundleWithSameName(project.id, FileUploadType.CODE, filename)) {
+                        revision = nextRevisionForBundle(project.id, FileUploadType.CODE, filename)
+                    }
+
+                    code.revision = revision
+
                     if (blobId) code.repository = "GCS"
                     else code.repository = "EXTERNAL"
                     if (!code.save()) {
@@ -904,30 +927,46 @@ class ProjectService {
 
         //use the project id as part of the name of the file to keep unique
         if (dataUpload) {
+            int revision    = 0 //the default
+
+            if (projectAlreadyHasBundleWithSameName(project.id, FileUploadType.CODE, codeUpload.filename)) {
+                revision = nextRevisionForBundle(project.id, FileUploadType.CODE, codeUpload.filename)
+            }
+
             if (dataUpload.part) {
-                Map results = cloudService.uploadFile("${project.id}_${dataUpload.filename}", dataUpload.type, dataUpload.part)
+                Map results = cloudService.uploadFile(project.id, dataUpload.filename, dataUpload.part)
                 String dataURL  = results.url
                 BlobId blobId   = results.blobId
 
                 if (dataURL) {
-                    project.addToDatas(new Data(url: dataURL, blobId: blobId, name: dataUpload.filename, description: dataUpload.description, repository: "gcs"))
+                    project.addToDatas(new Data(url: dataURL, blobId: blobId, name: dataUpload.filename,
+                            description: dataUpload.description, repository: "gcs", revision: revision))
                 }
             } else {
-                project.addToDatas(new Data(url: dataUpload.url, blobId: null, name: dataUpload.filename, description: dataUpload.description, repository: "external"))
+                project.addToDatas(new Data(url: dataUpload.url, blobId: null, name: dataUpload.filename,
+                        description: dataUpload.description, repository: "external", revision: revision))
             }
         }
 
         if (codeUpload) {
+            int revision    = 0 //the default
+
+            if (projectAlreadyHasBundleWithSameName(project.id, FileUploadType.CODE, codeUpload.filename)) {
+                revision = nextRevisionForBundle(project.id, FileUploadType.CODE, codeUpload.filename)
+            }
+
             if (codeUpload.part) {
-                Map results     = cloudService.uploadFile("${project.id}_${codeUpload.filename}", codeUpload.type, codeUpload.part)
+                Map results     = cloudService.uploadFile(project.id, codeUpload.filename, codeUpload.part)
                 String codeURL  = results.url
                 BlobId blobId   = results.blobId
 
                 if (codeURL) {
-                    project.addToCodes(new Code(url: codeURL, blobId: blobId, name: codeUpload.filename, description: codeUpload.description, repository: "gcs"))
+                    project.addToCodes(new Code(url: codeURL, blobId: blobId, name: codeUpload.filename,
+                            description: codeUpload.description, repository: "gcs", revision: revision))
                 }
             } else {
-                project.addToCodes(new Code(url: codeUpload.url, blobId: null, name: codeUpload.filename, description: codeUpload.description, repository: "external"))
+                project.addToCodes(new Code(url: codeUpload.url, blobId: null, name: codeUpload.filename,
+                        description: codeUpload.description, repository: "external", revision: revision))
             }
         }
 
@@ -1257,5 +1296,59 @@ class ProjectService {
             if (subList) matches.addAll(subList)
         }
         return matches
+    }
+
+    /**
+     * Check whether the project has the uploaded file already saved
+     *
+     * @param projectId the id of the project to look at
+     * @param type the type of upload
+     * @param filename the file name of the file we want to save
+     *
+     * @return true if the file was found, false otherwise
+     */
+    boolean projectAlreadyHasBundleWithSameName(Long projectId, FileUploadType type, String filename) {
+        boolean found = false
+        Project project = Project.findById(projectId)
+
+        if (project) {
+            switch(type) {
+                case FileUploadType.CODE:
+                    found = project.codes.findAll { it.name == filename }?.size() > 0
+                    break
+                case FileUploadType.DATA:
+                    found = project.datas.findAll { it.name == filename }?.size() > 0
+                    break
+            }
+        }
+        return found
+    }
+
+    /**
+     * Return the revision of the bundle to be saved
+     *
+     * @param projectId the project that we are looking at
+     * @param type the type of bundle
+     * @param bundleName the name of the bundle we intend to save
+     *
+     * @return revision based on the existing file in the DB or 0 if none were found and this is the first one
+     */
+    int nextRevisionForBundle(Long projectId, FileUploadType type, String bundleName) {
+        int revision = 0
+        Project project = Project.findById(projectId)
+
+        if (project) {
+            switch(type) {
+                case FileUploadType.CODE:
+                    List<Code> codeList = project.codes.findAll { it.name == bundleName }.sort { a,b -> b.revision <=> a.revision }
+                    if (codeList.size() > 0) revision = codeList[0].revision + 1
+                    break
+                case FileUploadType.DATA:
+                    List<Code> dataList = project.datas.findAll { it.name == bundleName }.sort { a,b -> b.revision <=> a.revision }
+                    if (dataList.size() > 0) revision = dataList[0].revision + 1
+                    break
+            }
+        }
+        return revision
     }
 }
