@@ -134,6 +134,9 @@ dataSource:
     password: postgres
     url: jdbc:postgresql://127.0.0.1:5432/cielo
 
+GCS:
+  MOUNT_ROOT_DIR: '${GCS_MOUNT_ROOT}'
+
 environments:
     development:
         GCS:

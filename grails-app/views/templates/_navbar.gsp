@@ -92,6 +92,13 @@
                                         style="font-weight: 400;padding: 0;padding-bottom: 0.2em;color: #149dcc !important;padding-left: 1em;margin: 0;"
                                         type="button" class="btn btn-link"><span class="menu-button-text">Terms of Use</span></button>
                             </li>
+                            <li><hr style="width: 100%;"></li>
+                            <li>
+                                <span style="font-weight: 400;padding: 0;padding-bottom: 0.2em;color: #149dcc !important;
+                                        padding-left: 1em;margin: 0; font-size: 1em;">
+                                    <em>version <g:meta name="info.app.version"/></em>
+                                </span>
+                            </li>
                         </ul>
                     </li>
                     <li class="li-spacer d-block d-md-none">&nbsp;</li>

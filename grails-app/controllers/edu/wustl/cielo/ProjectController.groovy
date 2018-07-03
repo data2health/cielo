@@ -10,6 +10,7 @@ class ProjectController {
     ProjectService projectService
     def springSecurityService
     def messageSource
+    def cloudService
 
     static allowedMethods = [save: "POST"]
 
@@ -420,5 +421,23 @@ class ProjectController {
         def newRowsHTML = projectService.renderTableRows([projects: projects,
                                                           usersProject: isMyProjects])
         render([html: newRowsHTML, pagesCount: numberOfPages] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def downloadFile() {
+        Long projectId          = params.id ? Long.valueOf(params.id) : -1L
+        String fileName         = params.name
+        String gitCommitHash    = params.hash
+
+        response.setContentType("APPLICATION/OCTET-STREAM")
+        response.setHeader("Content-Disposition",
+                "Attachment;Filename=\"${fileName}\"")
+
+        byte[] fileContents = cloudService.downloadFile(projectId, fileName, gitCommitHash)
+        OutputStream outputStream = response.outputStream
+
+        outputStream.bytes = fileContents
+        outputStream.flush()
+        outputStream.close()
     }
 }

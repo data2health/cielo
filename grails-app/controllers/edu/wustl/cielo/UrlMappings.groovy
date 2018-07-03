@@ -58,6 +58,7 @@ class UrlMappings {
         "/project/removeBundle"(controller: "project", action: "removeBundleFromProject")
         "/project/bundles/list"(controller: "project", action: "getBundles")
         "/project/filtered/list"(controller: "project", action: "getFilteredProjects")
+        "/project/$id/downloadFile/$hash/$name"(controller: "project", action: "downloadFile")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")

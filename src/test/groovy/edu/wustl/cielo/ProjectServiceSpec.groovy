@@ -20,6 +20,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
     ActivityService activityService
     SpringSecurityService springSecurityService
     UserAccountService userAccountService
+    CloudService cloudService
 
     def setup() {
         mockDomains(UserRole, Institution, Profile, Annotation, SoftwareLicense, RegistrationCode, UserAccountUserRole)
@@ -28,6 +29,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         grailsLinkGenerator = Mock()
         activityService = Mock()
         springSecurityService = Mock()
+        cloudService = new CloudService()
         pageRenderer = new PageRenderer()
 
         service.grailsLinkGenerator = grailsLinkGenerator
@@ -728,6 +730,12 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         springSecurityService.metaClass.principal = [id: user.id]
         service.springSecurityService = springSecurityService
 
+        cloudService.metaClass.deleteRepo = { Long projectId ->
+            return true
+        }
+
+        service.cloudService = cloudService
+
         when:
             int results = service.getNumberOfPagesForPublicProjects(5)
 
@@ -939,5 +947,51 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
 
         then:
             returnVal == "You want the public projects"
+    }
+
+    void "test projectAlreadyHaseBundleWithSameName"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        when:
+            boolean result = service.projectAlreadyHasBundleWithSameName(project.id, FileUploadType.DATA, "filename.txt")
+
+        then:
+            !result
+
+        when:
+            Data data = new Data(name: "filename.txt", description: "Some description", repository: "repo", project: project).save()
+            project.datas.add(data)
+            project.save()
+            result = service.projectAlreadyHasBundleWithSameName(project.id, FileUploadType.DATA, "filename.txt")
+
+        then:
+            result
+    }
+
+    void "test nextRevisionForBundle"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+
+        when:
+            int revision = service.nextRevisionForBundle(project.id, FileUploadType.DATA, "filename.txt")
+
+        then:
+            revision == 0
+
+        when:
+            Data data = new Data(name: "filename.txt", description: "Some description", repository: "repo", project: project).save()
+            project.datas.add(data)
+            project.save()
+            revision = service.nextRevisionForBundle(project.id, FileUploadType.DATA, "filename.txt")
+
+        then:
+            revision == 1
     }
 }

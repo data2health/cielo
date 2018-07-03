@@ -23,4 +23,8 @@ class Constants {
     public static final int PUBLICATIONS_PER_PROJECT    = 1
     public static final int ANNOTATIONS_PER_PROJECT     = 2
     public static final int COMMENTS_PER_PROJECT        = 3
+
+    //For GCS
+    public static final String REPO_SUBDIR              = 'repos'
+    public static final String REPO_MASTER              = 'master'
 }
