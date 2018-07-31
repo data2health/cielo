@@ -388,6 +388,5 @@ class CieloTagLibSpec extends Specification implements TagLibUnitTest<CieloTagLi
 
         then:
             results.indexOf("<a class='btn btn-link' href='/project/${project.id}' style='padding: 0; margin:0'>${project.name}</a>") != -1
-            results.indexOf("*****") != -1 //since one of the projects is not shared
     }
 }

@@ -7,7 +7,7 @@ import grails.testing.web.controllers.ControllerUnitTest
 import grails.web.mapping.LinkGenerator
 import org.grails.gsp.GroovyPagesTemplateEngine
 import spock.lang.Specification
-import grails.web.mapping.ResponseRedirector
+import grails.plugin.springsecurity.acl.AclSid
 
 class RegistrationControllerSpec extends Specification implements ControllerUnitTest<RegistrationController>,
         DomainUnitTest<Institution> {
@@ -17,7 +17,7 @@ class RegistrationControllerSpec extends Specification implements ControllerUnit
     UserAccountService userAccountService
 
     def setup() {
-        mockDomain(RegistrationCode)
+        mockDomains(RegistrationCode, AclSid)
         grailsLinkGenerator = Mock()
         groovyPageRenderer  = new PageRenderer(new GroovyPagesTemplateEngine())
 

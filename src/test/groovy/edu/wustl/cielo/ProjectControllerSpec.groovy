@@ -1,23 +1,52 @@
 package edu.wustl.cielo
 
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.acl.AclClass
+import grails.plugin.springsecurity.acl.AclService
+import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DomainUnitTest
 import grails.testing.web.controllers.ControllerUnitTest
 import edu.wustl.cielo.enums.FileUploadType
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.security.acls.model.AclCache
+
 import javax.servlet.http.Part
+import grails.plugin.springsecurity.acl.AclObjectIdentity
+import grails.plugin.springsecurity.acl.AclEntry
 import spock.lang.*
 
 class ProjectControllerSpec extends Specification implements ControllerUnitTest<ProjectController>, DomainUnitTest<Project> {
 
+    def assetResourceLocator
     ProjectService projectService
     SpringSecurityService springSecurityService
     CloudService cloudService
+    AclService aclService
+    AclCache aclCache
+    CustomAclService customAclService
+    UserAccountService userAccountService
+    final static String assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
 
     void setup() {
         projectService = new ProjectService()
         springSecurityService = new SpringSecurityService()
         cloudService = new CloudService()
-        mockDomains(Profile, UserAccount, UserAccountUserRole)
+        customAclService = new CustomAclService()
+        userAccountService = new UserAccountService()
+        userAccountService.springSecurityService = springSecurityService
+        mockDomains(Profile, UserAccount, UserAccountUserRole, AclObjectIdentity, AclEntry, AclClass, AclSid, RegistrationCode)
+
+        assetResourceLocator = [findAssetForURI: { String URI ->
+            new ByteArrayResource(new File(assetsRoot + "/images/${URI}").bytes)
+        }]
+
+        aclService = new AclService()
+        aclCache = Mock()
+        aclService.aclCache = aclCache
+        customAclService.aclService = aclService
+        projectService.customAclService = customAclService
+        controller.projectService = projectService
+        userAccountService.assetResourceLocator = assetResourceLocator
 
         messageSource.addMessage('project.creation.succeeded', Locale.getDefault(), "hello")
         messageSource.addMessage('project.creation.failed', Locale.getDefault(), "hello")
@@ -61,8 +90,10 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
      }
 
     void "test view"() {
-        UserAccount user =  new UserAccount(username: "someuser", password: "somePassword").save()
-        user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user =  userAccountService.bootstrapCreateOrGetAdminAccount()
+        customAclService.bootstrapAcls()
+        userAccountService.bootstrapUserRoles()
+        userAccountService.bootstrapAddSuperUserRoleToUser(user)
         controller.springSecurityService = springSecurityService
         controller.springSecurityService.metaClass.principal = [id: user.id]
         SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
@@ -74,12 +105,26 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
             null
         }
 
+        projectService.userAccountService = userAccountService
+        userAccountService.bootstrapUserRoles()
+        userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
+        projectService.userAccountService.springSecurityService.metaClass.principal = [id: user.id]
+        projectService.customAclService = customAclService
         controller.projectService = projectService
 
         given:
             params.id = project.id
 
         when:
+            controller.view()
+
+        then:
+            response.status == 302 //user does not have access to view the project
+
+        when:
+            response.reset()
+            controller.projectService.customAclService.setupBasePermissionsForProject(project)
+            params.id = project.id
             controller.view()
 
         then:
@@ -645,12 +690,11 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
         Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
                 description: "some description")
 
-
-        projectService.metaClass.retrieveFilteredProjectsFromDB = { UserAccount userAccount, String filterText, int offset, int max ->
+        projectService.metaClass.retrieveFilteredProjectsFromDB = { UserAccount userAccount, boolean filterOnSharedOnly, String filterText, int offset, int max ->
             return [project]
         }
 
-        projectService.metaClass.countFilteredProjectsPages = { UserAccount userAccount, String filterText, int max ->
+        projectService.metaClass.countFilteredProjectsPages = { UserAccount userAccount, boolean filterOnShared, String filterText, int max ->
             return 1
         }
 
