@@ -1,5 +1,5 @@
 <g:render template="/templates/headerIncludes"/>
-<g:render template="/templates/navbar" model="[profile: userProfile, user: userProfile?.user]"/>
+<g:render template="/templates/navbar"/>
 
 <div>
     <div style="margin: 1.65em">

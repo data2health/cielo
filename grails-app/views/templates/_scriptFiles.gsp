@@ -1,6 +1,5 @@
 <asset:javascript src="jquery/jquery.min.js"/>
-<asset:javascript src="popper/popper.min.js"/>
-<asset:javascript src="bootstrap-all.js"/>
+<asset:javascript src="bootstrap/bootstrap.bundle.min.js"/> %{--contains popper--}%
 <asset:javascript src="smoothscroll/smooth-scroll.js"/>
 <asset:javascript src="tether/tether.min.js"/>
 <asset:javascript src="dropdown/script.min.js"/>

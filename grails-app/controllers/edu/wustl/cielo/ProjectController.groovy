@@ -3,6 +3,7 @@ package edu.wustl.cielo
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import edu.wustl.cielo.enums.FileUploadType
+import org.springframework.security.access.AccessDeniedException
 import javax.servlet.http.Part
 
 class ProjectController {
@@ -35,17 +36,31 @@ class ProjectController {
     def view() {
         Object principal    = springSecurityService.principal
         UserAccount user    = principal ? UserAccount.get(principal.id) : null
-        Project project     = Project.findById(Long.valueOf(params.id))
-        boolean showTeams   = params.teams ? Boolean.valueOf(params.teams) : false
-        boolean showBundles = params.bundles ? Boolean.valueOf(params.bundles) : false
+        Project project
+        boolean showTeams
+        boolean showBundles
 
-        projectService.incrementViewsCounter(project)
+        try {
+            project = projectService.getProject(Long.valueOf(params.id))
+        } catch (AccessDeniedException ade) {
+            log.error(ade.message)
+        }
 
-        return [userProfile: user.profile,
-                annotations: Annotation.list(),
-                project: project,
-                showTeams: showTeams,
-                showBundles: showBundles]
+        if (!project) {
+            redirect(controller: "errors", action: "denied")
+        } else {
+            showTeams   = params.teams ? Boolean.valueOf(params.teams) : false
+            showBundles = params.bundles ? Boolean.valueOf(params.bundles) : false
+
+            projectService.incrementViewsCounter(project)
+
+            return [userProfile: user.profile,
+                    annotations: Annotation.list(),
+                    project: project,
+                    usersAccess: projectService.getListOfUsersAccess(project),
+                    showTeams: showTeams,
+                    showBundles: showBundles]
+        }
     }
 
     @Secured('isAuthenticated()')
@@ -118,7 +133,7 @@ class ProjectController {
                 }
             }
             if (params.licenseId)   softwareLicenseId  = Long.valueOf(params.licenseId)
-            if (params.shared)      shared = Boolean.valueOf(params.shared)
+            if (params.shared)      shared = Integer.valueOf(params.shared) ==  1
 
             succeeded = projectService.saveProjectBasicChanges(projectId, newName, description, tags,
                     softwareLicenseId, shared)
@@ -400,8 +415,8 @@ class ProjectController {
     @Secured('isAuthenticated()')
     def getFilteredProjects() {
         List<Project> projects
-        int max     = params.max    ? Integer.valueOf(params.max)    : Constants.DEFAULT_MAX
-        int offset  = params.offset ? Integer.valueOf(params.offset) : Constants.DEFAULT_OFFSET
+        int max     = params.max && params.max != "NaN"   ? Integer.valueOf(params.max)    : Constants.DEFAULT_MAX
+        int offset  = params.offset && params.offset != "NaN" ? Integer.valueOf(params.offset) : Constants.DEFAULT_OFFSET
         int numberOfPages       = 1
         boolean isMyProjects    = Boolean.valueOf(params.myProjects)
 
@@ -410,12 +425,12 @@ class ProjectController {
             UserAccount user = principal ? UserAccount.get(principal.id) : null
 
             if (user) {
-                projects        = projectService.retrieveFilteredProjectsFromDB(user, params.filterTerm, (offset * max), max)
-                numberOfPages   = projectService.countFilteredProjectsPages(user, params.filterTerm, max)
+                projects        = projectService.retrieveFilteredProjectsFromDB(user, isMyProjects, params.filterTerm, (offset * max), max)
+                numberOfPages   = projectService.countFilteredProjectsPages(user, isMyProjects, params.filterTerm, max)
             }
         } else {
-            projects        = projectService.retrieveFilteredProjectsFromDB(null, params.filterTerm, (offset * max), max)
-            numberOfPages   = projectService.countFilteredProjectsPages(null, params.filterTerm, max)
+            projects        = projectService.retrieveFilteredProjectsFromDB(null, isMyProjects, params.filterTerm, (offset * max), max)
+            numberOfPages   = projectService.countFilteredProjectsPages(null, isMyProjects, params.filterTerm, max)
         }
 
         def newRowsHTML = projectService.renderTableRows([projects: projects,
@@ -439,5 +454,138 @@ class ProjectController {
         outputStream.bytes = fileContents
         outputStream.flush()
         outputStream.close()
+    }
+
+    @Secured('isAuthenticated()')
+    def projectsList() {
+        List<Project> projects
+        int max     = params.max    ? Integer.valueOf(params.max)    : Constants.DEFAULT_MAX
+        int offset  = params.offset ? Integer.valueOf(params.offset) : Constants.DEFAULT_OFFSET
+        int pages
+        boolean isMyProjects    = Boolean.valueOf(params.myProjects)
+        String filterOn         = params.filterTerm ?: ""
+
+        projects        = projectService.retrieveFilteredProjectsFromDB(null, false, filterOn,
+                            (offset * max), max)
+        pages           = projectService.countFilteredProjectsPages(null, false, filterOn, max)
+
+        return [projects: projects, numberOfPages: pages, pageOffset: offset, isUserProjects: isMyProjects]
+    }
+
+    @Secured('permitAll')
+    def getAccessRequestDialogContent() {
+        render(template: "projectAccessRequest")
+    }
+
+    @Secured('isAuthenticated()')
+    def requestAccessToProject() {
+        boolean succeeded   = false
+        Object principal    = springSecurityService.principal
+        UserAccount user    = principal ? UserAccount.get(principal.id) : null
+        int permissionMask  = Integer.valueOf(params.mask)
+        Long projectId      = Long.valueOf(params.id)
+        Map messages = [:]
+
+        if ( user ) {
+            succeeded = projectService.requestAccessToProject(projectId, user, permissionMask)
+        }
+
+        if (!succeeded) messages.danger = messageSource.getMessage("project.permission.request.failed", null, Locale.getDefault())
+        else messages.success = messageSource.getMessage("project.permission.request.succeeded", null, Locale.getDefault())
+
+        render([success: succeeded, messages: messages] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def grantAccessToProject() {
+        boolean succeeded       = false
+        Long accessRequestId    = Long.valueOf(params.id)
+        Map messages            = [:]
+
+        if ( accessRequestId ) {
+            succeeded = projectService.grantPermissionToProject(accessRequestId)
+        }
+
+        if (!succeeded) messages.danger = messageSource.getMessage("project.permission.granting.failed", null, Locale.getDefault())
+        else messages.success = messageSource.getMessage("project.permission.granting.succeeded", null, Locale.getDefault())
+
+        render([success: succeeded, messages: messages] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def denyAccessToProject() {
+        boolean succeeded       = false
+        Long accessRequestId    = Long.valueOf(params.id)
+        Long userId             = springSecurityService.principal?.id ?: -1
+        Map messages            = [:]
+
+        if ( accessRequestId ) {
+            succeeded = projectService.denyAccessRequest(accessRequestId, userId)
+        }
+
+        if (!succeeded) messages.danger = messageSource.getMessage("project.permission.deny.access.failed", null, Locale.getDefault())
+        else messages.success = messageSource.getMessage("project.permission.deny.access.succeeded", null, Locale.getDefault())
+
+        render([success: succeeded, messages: messages] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def revokeAccessToProject() {
+        boolean succeeded   = false
+        Object principal    = springSecurityService.principal
+        UserAccount user    = principal ? UserAccount.get(principal.id) : null
+        Long projectId      = Long.valueOf(params.projectId)
+        Long userId         = Long.valueOf(params.userId)
+        ArrayList<Integer> masks     = []
+        Map messages        = [:]
+
+        if (params."masks[]") {
+            if (params."masks[]".class.simpleName == "String") masks.add(Integer.valueOf(params."masks[]"))
+            else {
+                params."masks[]".each { stringId ->
+                    masks.add(Integer.valueOf(stringId))
+                }
+            }
+
+            if (masks.size() > 0 && userId && projectId && user) {
+                succeeded = projectService.revokeAccessToProject(projectId, userId, masks, user)
+            }
+        }
+
+        if (!succeeded) messages.danger = messageSource.getMessage("project.permission.revoke.failed", null, Locale.getDefault())
+        else messages.success = messageSource.getMessage("project.permission.revoke.succeeded", null, Locale.getDefault())
+
+        render([success: succeeded, messages: messages] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def acknowledgeAccessRequestResult() {
+        boolean succeeded       = false
+        Long accessRequestId    = Long.valueOf(params.id)
+        Object principal    = springSecurityService.principal
+        UserAccount user    = principal ? UserAccount.get(principal.id) : null
+        Map messages        = [:]
+
+        if (user) {
+            succeeded = projectService.acknowledgeAccessRequestStatus(accessRequestId, user)
+        }
+
+        if (!succeeded) messages.danger = messageSource.getMessage("project.permission.acknowledge.failed", null, Locale.getDefault())
+        else messages.success = messageSource.getMessage("project.permission.acknowledge.succeeded", null, Locale.getDefault())
+
+        render([success: succeeded, messages: messages] as JSON)
+    }
+
+    @Secured('isAuthenticated()')
+    def renderIndividualUserAccess() {
+        Long projectId  = Long.valueOf(params.projectId)
+        Long userId     = Long.valueOf(params.userId)
+        LinkedHashMap userObject =  projectService.getListOfUserAccess(projectId, userId)
+
+        if (userObject) {
+            render(template: "userAccessIndividual", model: [userObject: userObject, projectId: projectId])
+        } else {
+            render("")
+        }
     }
 }

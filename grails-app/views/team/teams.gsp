@@ -1,5 +1,5 @@
 <g:render template="/templates/headerIncludes"/>
-<g:render template="/templates/navbar" model="[profile: userProfile, user: userProfile.user]"/>
+<g:render template="/templates/navbar"/>
 
 <section class="features1" style="height: 5em;">
     &nbsp;
@@ -31,6 +31,11 @@
 <g:render template="/templates/pageFooterIncludes"/>
 
 <script type="application/javascript">
+    $( function() {
+        $('#activityMenuUnderline, #projectMenuUnderline').hide().removeClass('d-lg-block').removeClass('d-none');
+        $('#teamsMenuUnderline').addClass('d-lg-block').addClass('d-none').show();
+    });
+
     function onTeamPageSelection(ignoreMe) {
         var offsetVal  = parseInt($('#paging-options').val()) - 1;
         var filterText = $('#searchInput').val();

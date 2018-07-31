@@ -1,6 +1,6 @@
 <%@ page import="edu.wustl.cielo.UserAccount" %>
 <g:render template="/templates/headerIncludes"/>
-<g:render template="/templates/navbar" model="[user: profile.user]"/>
+<g:render template="/templates/navbar"/>
 
 <section class="mbr-fullscreen" style="background-color: #eaeaea;">
     <div class="container-fluid activity-feed">
@@ -35,6 +35,9 @@
         window.addEventListener('scroll', function (event) {
             handleInfiniteScroll(event);
         }, false);
+
+        $('#teamsMenuUnderline, #projectMenuUnderline, #messagesMenuUnderline').hide().removeClass('d-lg-block').removeClass('d-none');
+        $('#activityMenuUnderline').addClass('d-lg-block').addClass('d-none').show();
     });
 
     function showUserDialog() {

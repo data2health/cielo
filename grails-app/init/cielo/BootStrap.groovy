@@ -4,6 +4,7 @@ import edu.wustl.cielo.Annotation
 import edu.wustl.cielo.SoftwareLicense
 import edu.wustl.cielo.UserAccount
 import edu.wustl.cielo.EmailSenderJob
+import grails.plugin.springsecurity.acl.AclSid
 import groovy.util.logging.Slf4j
 
 @Slf4j
@@ -15,6 +16,7 @@ class BootStrap {
     def softwareLicenseService
     def teamService
     def projectService
+    def customAclService
 
     def webRoot
 
@@ -38,6 +40,8 @@ class BootStrap {
 
         //always bootstrap licenses
         if (SoftwareLicense.count() == 0) softwareLicenseService.bootstrapLicenses(new File(webRoot + grailsApplication.config.software.licenses.path))
+
+        if (AclSid.count() == 0) customAclService.bootstrapAcls()
 
         environments {
             development {

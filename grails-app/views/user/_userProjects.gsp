@@ -64,15 +64,10 @@ color: ${color};${projectSectionTopPadding}">
                 <g:else>
                     <i class="fas fa-lock"></i>
                 </g:else>
-                <g:if test="${isUsersOwnPage || project?.shared || isTeamContributor}">
                     <a class="btn btn-link ${projectLinkClass}" href="${createLink(controller: "project", action: "view", id: project.id)}">${project?.name}</a>
                     <g:if test="${showContributionMessage}">
                         (Owner)
                     </g:if>
-                </g:if>
-                <g:else>
-                    ************
-                </g:else>
             </span>
             <br>
             <g:set var="index" value="${index + 1}"/>
@@ -99,15 +94,10 @@ color: ${color};${projectSectionTopPadding}">
                 <g:else>
                     <i class="fas fa-lock"></i>
                 </g:else>
-                <g:if test="${isUsersOwnPage || project?.shared || isTeamContributor}">
                     <a class="btn btn-link ${projectLinkClass}" href="${createLink(controller: "project", action: "view", id: project.id)}">${project?.name}</a>
                     <g:if test="${showContributionMessage}">
                         (Owner)
                     </g:if>
-                </g:if>
-                <g:else>
-                    ************
-                </g:else>
             </span>
             <br>
             <g:set var="index" value="${index + 1}"/>

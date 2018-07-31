@@ -11,7 +11,7 @@ class EmailSenderJob {
 
     static triggers = {
         //every 5 minutes check for new emails to send
-        cron name: 'cronTrigger', startDelay: 300000, cronExpression: '0 0/5 * 1/1 * ? *'
+        cron name: 'emailSenderTrigger', startDelay: 300000, cronExpression: '0 0/5 * 1/1 * ? *'
     }
 
     /**

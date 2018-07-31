@@ -1,5 +1,5 @@
 <g:render template="/templates/headerIncludes"/>
-<g:render template="/templates/navbar" model="[profile: userProfile, user: userProfile.user]"/>
+<g:render template="/templates/navbar"/>
 
 <g:set var="isTeamOwner" value="${false}"/>
 <g:userOwnsTeam team="${team}">

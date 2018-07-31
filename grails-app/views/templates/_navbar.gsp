@@ -1,3 +1,10 @@
+<%@ page import="edu.wustl.cielo.UserAccount" %>
+<g:loggedInUser var="currentUser"/>
+<g:set var="loggedInUser" value="${currentUser as UserAccount}"/>
+
+<g:messagesCount var="currentMessagesCount"/>
+<g:set var="messagesCount" value="${currentMessagesCount as int}"/>
+
 <section class="menu cid-qHAUKIofDN" once="menu" id="menu1-3">
     <sec:ifLoggedIn>
         <nav class="navbar navbar-expand beta-menu navbar-dropdown align-items-center navbar-fixed-top navbar-toggleable-sm">
@@ -32,6 +39,19 @@
                             <i class="fas fa-bullhorn"></i>
                             Activity
                         </a>
+                        <div id="activityMenuUnderline" class="menu-item-underline" style="display: none;">&nbsp;</div>
+                    </li>
+                    <li class="li-spacer d-block d-md-none">&nbsp;</li>
+                    <li>
+                        &nbsp;<a href="${createLink(controller: "accessRequest", action: "list")}" style="padding: 1em;
+                                 padding-right: 0;">
+                            <i class="fas fa-envelope"></i>
+                            Messages
+                        </a>
+                        <g:if test="${messagesCount > 0}">
+                            &nbsp;<span id="messagesBadge" class="badge badge-danger" style="border-radius: 50%;">${messagesCount}</span>
+                        </g:if>
+                        <div id="messagesMenuUnderline" class="menu-item-underline" style="display: none; margin-left: 2.5em;">&nbsp;</div>
                     </li>
                     <li class="li-spacer d-block d-md-none">&nbsp;</li>
                     <li class="d-block d-md-none">
@@ -41,30 +61,12 @@
                         </span>
                     </li>
                     <li class="li-spacer">&nbsp;</li>
-                    <li class="dropdown pull-right">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="false" aria-expanded="false">
+                    <li>
+                        <a role="link" href="${createLink(controller: 'project', action: 'projectsList')}">
                             <i class="fa fa-cube"></i>
                             Projects
                         </a>
-                        <ul class="dropdown-menu arrow_box">
-                            <li>
-                                <a role="link" href="${createLink(controller: 'project', action: 'myProjects')}">
-                                    My Projects
-                                </a>
-                            </li>
-                            <li>
-                                <a role="link" href="${createLink(controller: 'project', action: 'publicProjectsList')}">
-                                    Public Projects
-                                </a>
-                            </li>
-                            <li>
-                                <button type="button" class="btn btn-link" onclick="showNewProjectWizard();"
-                                        style="padding: 0;color: #149dcc;font-weight: 400; margin: 0;margin-left: 1em;">
-                                    <i class="fa fa-plus"></i>
-                                    <span class="menu-button-text">New Project</span>
-                                </button>
-                            </li>
-                        </ul>
+                        <div id="projectMenuUnderline" class="menu-item-underline" style="display: none;">&nbsp;</div>
                     </li>
                     <li class="li-spacer">&nbsp;</li>
                     <li>
@@ -72,6 +74,7 @@
                             <i class="fa fa-users"></i>
                             Teams
                         </a>
+                        <div id="teamsMenuUnderline" class="menu-item-underline" style="display: none">&nbsp;</div>
                     </li>
                     <li class="li-spacer">&nbsp;</li>
 
@@ -113,7 +116,7 @@
                             </a>
                         <ul class="dropdown-menu arrow_box" style="margin-left: 1em;">
                             <li class="menu-with-icon">
-                                <a role="link" href="${createLink(controller: 'user', action: 'view', params: [id: user.id])}">
+                                <a role="link" href="${createLink(controller: 'user', action: 'view', params: [id: loggedInUser.id])}">
                                     &nbsp;&nbsp;&nbsp;<span class="oi oi-cog"></span>
                                     Account
                                 </a>

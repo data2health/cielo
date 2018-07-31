@@ -10,7 +10,7 @@ grails.plugin.springsecurity.userLookup.usernameIgnoreCase = true
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/',               access: ['permitAll']],
-	[pattern: '/error',          access: ['permitAll']],
+	[pattern: '/errors/**',          access: ['permitAll']],
 	[pattern: '/login/auth',      access: ['permitAll']],
 	[pattern: '/shutdown',       access: ['isAuthenticated()']],
 	[pattern: '/assets/**',      access: ['isAuthenticated()']],
@@ -18,7 +18,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/**/css/**',      access: ['permitAll']],
 	[pattern: '/**/images/**',   access: ['permitAll']],
 	[pattern: '/templates/**', access: ['permitAll']],
-	[pattern: '/**/favicon.ico', access: ['permitAll']],
+	[pattern: '/favicon.ico', access: ['permitAll']],
 	[pattern: '/**/cielo_icon.png', access: ['permitAll']],
 	[pattern: '/verification', access: ['permitAll']]
 ]
@@ -28,7 +28,7 @@ grails.plugin.springsecurity.filterChain.chainMap = [
 	[pattern: '/**/js/**',       filters: 'none'],
 	[pattern: '/**/css/**',      filters: 'none'],
 	[pattern: '/**/images/**',   filters: 'none'],
-	[pattern: '/**/favicon.ico', filters: 'none'],
+	[pattern: '/favicon.ico', filters: 'none'],
 	[pattern: '/**',             filters: 'JOINED_FILTERS']
 ]
 

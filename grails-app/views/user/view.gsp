@@ -1,5 +1,5 @@
 <g:render template="/templates/headerIncludes"/>
-<g:render template="/templates/navbar" model="[profile: user.profile, user: loggedInUser]"/>
+<g:render template="/templates/navbar"/>
 <g:set var="userCanEdit" value="${false}"/>
 <section class="mbr-section" style="margin-top: 4.5em; background-color: white;">
     <g:loggedInUserCanMakeChangesToUser user="${user}">
@@ -228,6 +228,8 @@
         if (currentProfilePicSrc.indexOf('/assets/default_profile.png') === -1) {
             window.imgSrc = currentProfilePicSrc;
         }
+
+        $('#activityMenuUnderline, #teamsMenuUnderline, #activityMenuUnderline').hide().removeClass('d-lg-block').removeClass('d-none');
     });
 
     function editUser() {
