@@ -3,9 +3,15 @@ package edu.wustl.cielo
 import edu.wustl.cielo.enums.FileUploadType
 import edu.wustl.cielo.enums.ProjectStatusEnum
 import grails.gsp.PageRenderer
+import grails.plugin.springsecurity.acl.AclClass
+import grails.plugin.springsecurity.acl.AclService
+import grails.plugin.springsecurity.acl.AclSid
+import grails.plugin.springsecurity.acl.AclObjectIdentity
+import grails.plugin.springsecurity.acl.AclEntry
 import grails.testing.services.ServiceUnitTest
 import grails.web.mapping.LinkGenerator
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.security.acls.model.AclCache
 import spock.lang.Specification
 import grails.testing.gorm.DomainUnitTest
 import grails.plugin.springsecurity.SpringSecurityService
@@ -21,9 +27,13 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
     SpringSecurityService springSecurityService
     UserAccountService userAccountService
     CloudService cloudService
+    AclService aclService
+    AclCache aclCache
+    CustomAclService customAclService
 
     def setup() {
-        mockDomains(UserRole, Institution, Profile, Annotation, SoftwareLicense, RegistrationCode, UserAccountUserRole)
+        mockDomains(UserRole, Institution, Profile, Annotation, SoftwareLicense, RegistrationCode, UserAccountUserRole,
+                AclClass, AclSid, AclObjectIdentity, AclEntry)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
         assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
         grailsLinkGenerator = Mock()
@@ -31,7 +41,13 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         springSecurityService = Mock()
         cloudService = new CloudService()
         pageRenderer = new PageRenderer()
+        customAclService = new CustomAclService()
+        aclService = new AclService()
+        aclCache = Mock()
+        aclService.aclCache = aclCache
+        customAclService.aclService = aclService
 
+        service.customAclService = customAclService
         service.grailsLinkGenerator = grailsLinkGenerator
         service.activityService = activityService
 
@@ -716,8 +732,11 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
 
     void "test deleteProject"() {
         Project project
-        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user = userAccountService.bootstrapCreateOrGetAdminAccount()
+        userAccountService.bootstrapUserRoles()
+        userAccountService.bootstrapAddSuperUserRoleToUser(user)
         UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        customAclService.bootstrapAcls()
         SoftwareLicense softwareLicense
         softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                 url: "http://www.rerlicense.com").save()
@@ -725,6 +744,9 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
                 description: "some description").save()
         Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
                 description: "some description", shared: true).save()
+        new AclClass(className: Project.name).save()
+        customAclService.setupBasePermissionsForProject(project)
+        customAclService.setupBasePermissionsForProject(project1)
 
         springSecurityService = new SpringSecurityService()
         springSecurityService.metaClass.principal = [id: user.id]
@@ -745,8 +767,10 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         when:
             Project project2 = new Project(projectOwner: user, name: "Project2", license: softwareLicense,
                 description: "some description", shared: true).save()
+            customAclService.setupBasePermissionsForProject(project2)
             Project project3 = new Project(projectOwner: user, name: "Project3", license: softwareLicense,
                 description: "some description", shared: true).save()
+            customAclService.setupBasePermissionsForProject(project3)
             boolean returnVal = service.deleteProject(user, project3.id)
 
         then:
@@ -763,13 +787,15 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
 
         then:
             returnVal
-
     }
 
     void "test addTeamToProject"() {
         Project project
-        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user = userAccountService.bootstrapCreateOrGetAdminAccount()
+        userAccountService.bootstrapUserRoles()
+        userAccountService.bootstrapAddSuperUserRoleToUser(user)
         UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        customAclService.bootstrapAcls()
         SoftwareLicense softwareLicense
         softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                 url: "http://www.rerlicense.com").save()
@@ -778,9 +804,13 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
                 description: "some description", shared: true).save()
 
+        customAclService.setupBasePermissionsForProject(project)
+        customAclService.setupBasePermissionsForProject(project1)
+
         springSecurityService = new SpringSecurityService()
         springSecurityService.metaClass.principal = [id: user.id]
         service.springSecurityService = springSecurityService
+        customAclService.setupBasePermissionsForProject(project)
 
         when:
             service.addTeamToProject(user, project.id, "New Team", [user2.id])
@@ -810,12 +840,17 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
     }
 
     void "test saveNewProject"() {
-        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user = userAccountService.bootstrapCreateOrGetAdminAccount()
+        userAccountService.bootstrapUserRoles()
+        userAccountService.bootstrapAddSuperUserRoleToUser(user)
         UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        customAclService.bootstrapAcls()
         SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                 url: "http://www.rerlicense.com").save()
         Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
                 description: "some description")
+
+        customAclService.setupBasePermissionsForProject(project)
 
         when:
             service.saveNewProject(user, project, null, softwareLicense.id, "", null, -1L , null, null)
@@ -859,8 +894,11 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
 
     void "test removeTeam"() {
         Project project
-        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        UserAccount user = userAccountService.bootstrapCreateOrGetAdminAccount()
+        userAccountService.bootstrapUserRoles()
+        userAccountService.bootstrapAddSuperUserRoleToUser(user)
         UserAccount user2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+        customAclService.bootstrapAcls()
         SoftwareLicense softwareLicense
         softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                 url: "http://www.rerlicense.com").save()
@@ -869,6 +907,8 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         Project project1 = new Project(projectOwner: user2, name: "Project2", license: softwareLicense,
                 description: "some description", shared: true).save()
 
+        customAclService.setupBasePermissionsForProject(project)
+        customAclService.setupBasePermissionsForProject(project1)
         springSecurityService = new SpringSecurityService()
         springSecurityService.metaClass.principal = [id: user.id]
         service.springSecurityService = springSecurityService

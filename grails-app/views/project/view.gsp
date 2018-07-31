@@ -1,5 +1,5 @@
 <g:render template="/templates/headerIncludes"/>
-<g:render template="/templates/navbar" model="[profile: userProfile, user: userProfile.user]"/>
+<g:render template="/templates/navbar"/>
 
 <div>
     <div style="margin: 1.65em">
@@ -35,8 +35,8 @@
                         <div id="annotations-text">
                             <span id="annotation-labels">
                                 <g:set var="counter" value="${1}"/>
-                                <g:set var="annotationsCount" value="${project.annotations.size()}"/>
-                                <g:each in="${project.annotations}" var="annotation">
+                                <g:set var="annotationsCount" value="${project?.annotations?.size()}"/>
+                                <g:each in="${project?.annotations}" var="annotation">
                                     <g:if test="${counter != annotationsCount}">
                                         ${annotation.label},
                                     </g:if>
@@ -57,9 +57,9 @@
                     </div>
                     <div class="mbr-text pb-3 mbr-fonts-style display-6">
                         Managed by ${project?.projectOwner?.profile?.firstName} ${project?.projectOwner?.profile?.lastName}<br>
-                        <span>${project?.projectOwner?.profile?.institution.fullName}</span><br>
+                        <span>${project?.projectOwner?.profile?.institution?.fullName}</span><br>
                         <span style="font-size: 80%; font-style: oblique;">
-                            Last updated <g:dateDiff date="${project?.lastChanged?:project.lastUpdated}"/>
+                            Last updated <g:dateDiff date="${project?.lastChanged?:project?.lastUpdated}"/>
                         </span>
                         <span style="font-size: 80%; font-style: oblique;"></span>
                     </div>
@@ -94,11 +94,11 @@
                         <span id="description-section">
                             <span id="description-label" class="display-5" style="font-weight: 300;">
                                 <i class="fas fa-quote-left">&nbsp;</i>
-                                <span id="project-description-text">${project.description}</span>&nbsp;
+                                <span id="project-description-text">${project?.description}</span>&nbsp;
                                 <i class="fas fa-quote-right"></i>
                             </span>
                             <span id="project-description-input" style="display: none; font-size: 1.25em;">
-                                <textarea class="project-description-textarea" name="project-description" style="border-radius: 5px;white-space: nowrap;" rows="5">${project.description}</textarea>
+                                <textarea class="project-description-textarea" name="project-description" style="border-radius: 5px;white-space: nowrap;" rows="5">${project?.description}</textarea>
                             </span>
                         </span>
                     </div>
@@ -112,9 +112,9 @@
                         <div class="col-sm-3">License:</div>
                         <div class="col-sm-9">
                             <g:getSoftwareLicenseOptions/>
-                            <button id="softwareLicenseButton"onclick="showSoftwareLicense(${project.license.id}, '${project.license.label}')"
+                            <button id="softwareLicenseButton"onclick="showSoftwareLicense(${project?.license?.id}, '${project?.license?.label}')"
                                     class="btn btn-link" style="padding: 0; margin-left: -2px;">
-                                ${project.license.label}
+                                ${project?.license?.label}
                             </button>
                         </div>
                     </div>
@@ -128,19 +128,19 @@
                                 </select>
                             </span>
                             <span id="sharedSpan">
-                                <g:if test="${project.shared}">
+                                <g:if test="${project?.shared}">
                                     <i id="sharedIcon" class="fas fa-lock-open"></i>
                                 </g:if>
                                 <g:else>
                                     <i id="sharedIcon" class="fas fa-lock"></i>
                                 </g:else>
-                                <span id="sharedText"><g:projectVisibility value="${project.shared}"/></span>
+                                <span id="sharedText"><g:projectVisibility value="${project?.shared}"/></span>
                             </span>
                         </div>
                     </div>
                 </div>
                 <div class="col">
-                    <g:if test="${project.publications}">
+                    <g:if test="${project?.publications}">
                         <g:render template="publications" model="[project: project]"/>
                     </g:if>
                     <g:else>
@@ -150,6 +150,13 @@
                         </div>
                     </g:else>
                 </div>
+
+                <g:if test="${!project.shared}">
+                <div class="col-lg-12">
+                    <g:render template="userAccessDiv" model="[users: usersAccess, title: 'Individual User Access',
+                    projectId: project.id]"/>
+                </div>
+                </g:if>
             </div>
         </div>
         <g:render template="bundles" model="[project: project]"/>
@@ -164,6 +171,11 @@
         </div>
     </div>
 </div>
+
+<div class="container-fluid">
+
+</div>
+
 <div>
     <hr style="margin: 0;">
     <div class="container-fluid projects-comments-header">
@@ -172,7 +184,7 @@
 </div>
 
 <div id="comments-toolbar" class="container-fluid" style="background-color: rgb(129, 137, 146); padding-top: 0.2em;">
-    <span onclick="addProjectComment(${project.id})" style="color: white; padding-left: 1em;">
+    <span onclick="addProjectComment(${project?.id})" style="color: white; padding-left: 1em;">
         <i class="fa fa-plus"></i>
         <span>New Comment</span>
     </span>
@@ -184,18 +196,18 @@
     <div class="container-fluid">
         <div class="media-body" style="padding: 0;">
             <div id="project-comments-body" class="card p-3 col-lg-12">
-                <div class="comment-add-box" id="project_new_comment_box_${project.id}">
+                <div class="comment-add-box" id="project_new_comment_box_${project?.id}">
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"><g:getUserProfilePic/></span>
                         </div>
-                        <textarea class="form-control" id="project_comment_box_text_${project.id}"></textarea>
+                        <textarea class="form-control" id="project_comment_box_text_${project?.id}"></textarea>
                     </div>
-                    <input type="button" class="btn-danger add-comment-button cancel-comment-button" value="Cancel" onclick="cancelProjectComment(${project.id})">
-                    <input type="button" class="btn-primary add-comment-button" value="Post" onclick="postProjectComment(${project.id})">
+                    <input type="button" class="btn-danger add-comment-button cancel-comment-button" value="Cancel" onclick="cancelProjectComment(${project?.id})">
+                    <input type="button" class="btn-primary add-comment-button" value="Post" onclick="postProjectComment(${project?.id})">
                 </div>
                 <div id="project_comments">
-                    <g:if test="${project.comments}">
+                    <g:if test="${project?.comments}">
                         <g:render template="projectComments" model="[project: project, user: userProfile.user]"/>
                     </g:if>
                     <g:else>
@@ -260,7 +272,7 @@
 
         $.post("/project/likePost", {'id': commentId}, function (data) {
             if (data.success === true) {
-                getProjectComments(${project.id});
+                getProjectComments(${project?.id});
             }
         });
     }
@@ -271,7 +283,7 @@
 
         $.post("/project/removeLike", {'id': commentId}, function (data) {
             if (data.success === true) {
-                getProjectComments(${project.id});
+                getProjectComments(${project?.id});
             }
         });
     }
@@ -301,7 +313,7 @@
 
         $.post("/project/saveReply", {'reply': text, 'id': commentId}, function (data) {
             if (data.success === true) {
-                getProjectComments(${project.id});
+                getProjectComments(${project?.id});
             }
         });
     }
@@ -418,7 +430,7 @@
         var licenseID           = $('#licenses').val();
         var projectShared       = $('#sharedSelect').val();
 
-        $.post("/project/saveChanges", {'name': newProjectName, 'id': "${project.id}", 'tags': projectTags,
+        $.post("/project/saveChanges", {'name': newProjectName, 'id': "${project?.id}", 'tags': projectTags,
             'desc': description, 'licenseId': licenseID, 'shared': projectShared}, function (data) {
             if (data.success === true) {
                 var tagsLabel = "";
@@ -641,5 +653,118 @@
         $.post("${createLink(controller: 'project', action: 'removeBundleFromProject')}", {projectId: projectId, bundleId: bundleId, type: type}, function (data) {
             $('#' + type + 'Table #'+ type + 'Rows').load("${createLink(controller: "project", action: "getBundles")}", {projectId: projectId, bundleType: type});
         });
+    }
+
+    function toggleAccessControlButton(userId) {
+        var control = $('#removeAccessDiv_' + userId);
+        if (control.is(":visible")) {
+            $('#removeAccessDiv_' + userId).hide();
+        } else {
+            $('#removeAccessDiv_' + userId).show();
+        }
+    }
+
+    function showUserAccessDialog(projectId, userId, accessObj) {
+        var arrayOfValues = new Array();
+        arrayOfValues = stringToJavascriptArrayOfObject(accessObj);
+
+        var alertWindow = bootbox.dialog({
+            title: 'User Access',
+            className: 'scrollable-bootbox-alert',
+            message: ' ',
+            closeButton: false,
+            size: "medium",
+            buttons: {
+                cancel: {
+                    id: 'cancel',
+                    className: 'btn-red',
+                    label: 'Cancel',
+                    callback: function () {
+                        return true;
+                    }
+                },
+                ok: {
+                    id: 'saveButton',
+                    className: 'btn-secondary',
+                    label: 'Save',
+                    callback: function () {
+                        var revokableMasks = new Array();
+
+                        $('#accessForm').find('input:not(:checked)').each( function () {
+                           // console.log($(this).val());
+                            revokableMasks.push($(this).val());
+                        });
+
+                        revokeUserAccess(userId, revokableMasks, projectId);
+                        return true;
+                    }
+                }
+            }
+        });
+
+        alertWindow.init(function() {
+            var html = generateAccessForm(arrayOfValues);
+            alertWindow.find('.bootbox-body').html(html);
+        });
+
+    }
+
+    function revokeUserAccess(userId, accessObj, projectId) {
+        //actually post to server
+        $.post("${createLink(controller: "project", action: "revokeAccessToProject")}",
+            {projectId: projectId, userId: userId, masks: accessObj}, function (result) {
+           if (result.success) {
+
+               $.post("${createLink(controller: "project", action: "renderIndividualUserAccess")}", {projectId: projectId, userId: userId}, function (data) {
+                   console.log(data);
+                   $('#userAccessDiv_' + userId).replaceWith(data);
+               });
+           }
+        });
+    }
+
+    function stringToJavascriptArrayOfObject(stringObject) {
+        var lengthOfStr = stringObject.length;
+        var currentLength = 0;
+        var array = new Array();
+
+        while (currentLength < lengthOfStr - 1) {
+            var substring;
+            var object = new Object();
+            var leftBracket  = stringObject.indexOf("{", currentLength);
+            var rightBracket = stringObject.indexOf("}", currentLength);
+
+            substring = stringObject.substring(leftBracket + 1, rightBracket);
+
+            if (stringObject.charAt(rightBracket + 1) === ','){
+                currentLength = rightBracket + 2;
+            } else {
+                currentLength = rightBracket + 1;
+            }
+
+            var propSplit = substring.split(",");
+            for (var param in propSplit) {
+                var propKeyValSplit = propSplit[param].split("=");
+                object[propKeyValSplit[0].trim()] = propKeyValSplit[1];
+            }
+            array.push(object);
+        }
+        return array;
+    }
+
+    function generateAccessForm(accessObject) {
+
+        var html = "<div class='container'>" +
+            "<div class='row'><div class='col-lg-12'>Unselect the access you would like to revoke for the user</div><br>" +
+            "</div><div class='row'><div id='accessForm' class='col-lg-12'><br>";
+
+        for (var index in accessObject) {
+            html += "<div class='row'><input type='checkbox' value='" + accessObject[index].mask + "' name='" + accessObject[index].name + "' checked/><label for=''>"+ accessObject[index].name +"</label></div>"
+        }
+
+        html +=  "</div>" +
+            "</div></div>";
+
+        return html;
     }
 </script>

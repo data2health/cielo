@@ -157,12 +157,20 @@
             contentType: false,
             processData: false,
             success : function () {
-                if (window.location.href.indexOf('/project/myList') !== -1) {
+                if (window.location.href.indexOf('/project/viewProjects') !== -1) {
                     var offsetVal = parseInt($('#paging-options').val()) - 1;
                     var filterText = $('#projectSearch').val();
+                    var filterOnProjects    = $('input[name=projectType]:checked').val();
+                    var myProjects;
+
+                    if (filterOnProjects === 'all' ) {
+                        myProjects = false;
+                    } else {
+                        myProjects = true;
+                    }
 
                     $.get("${createLink(controller: "project", action: "getFilteredProjects")}",
-                        {offset: offsetVal, myProjects: true, filterTerm: filterText}, function (data) {
+                        {offset: offsetVal, myProjects: myProjects, filterTerm: filterText}, function (data) {
                         replaceProjectTableContent(data);
                     });
                 }

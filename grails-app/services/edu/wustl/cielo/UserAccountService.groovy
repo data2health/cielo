@@ -3,11 +3,19 @@ package edu.wustl.cielo
 import edu.wustl.cielo.enums.AccountStatusEnum
 import edu.wustl.cielo.enums.UserRolesEnum
 import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.acl.AclEntry
+import grails.plugin.springsecurity.acl.AclObjectIdentity
+import grails.plugin.springsecurity.acl.AclSid
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang.RandomStringUtils
+import org.springframework.security.access.annotation.Secured
+import org.springframework.security.acls.domain.BasePermission
 import org.springframework.validation.ObjectError
 import com.thedeanda.lorem.Lorem
 import com.thedeanda.lorem.LoremIpsum
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.AuthorityUtils
+import org.springframework.security.core.context.SecurityContextHolder as SCH
 
 @Transactional
 @Slf4j
@@ -17,6 +25,7 @@ class UserAccountService {
     def assetResourceLocator
     def teamService
     def projectService
+    def customAclService
     static Lorem lorem = LoremIpsum.getInstance()
 
     /**
@@ -393,6 +402,10 @@ class UserAccountService {
                 return false
             }
             log.info("Removed old registration token for ${userAccount.username}")
+
+            //now need to grant user access to all public projects
+            setupNewUserPermissions(userAccount)
+
             return true
         } else return false
     }
@@ -613,5 +626,65 @@ class UserAccountService {
      */
     UserAccount getLoggedInUser() {
       return UserAccount.findById(springSecurityService.principal?.id)
+    }
+
+    /**
+     * Add necessary permissions for users so that they can start looking at public projects
+     *
+     * @param userAccount the user that needs access
+     */
+    void setupNewUserPermissions(UserAccount userAccount) {
+        //create an SID for user
+        AclSid userAcl = AclSid.findBySid(userAccount.username)
+
+        //now iterate through all the projects and add access to it for user
+        Project.findAllByShared(true).each { Project project ->
+            String projectClassName = Project.class.name
+            AclSid aclSid           = AclSid.findBySid(project.projectOwner.username)
+            AclObjectIdentity aclObjectIdentity = customAclService.getOrCreateObjectIdentity(project.id, projectClassName, aclSid)
+            customAclService.grantPermission(aclObjectIdentity, userAcl, BasePermission.READ)
+        }
+    }
+
+    /**
+     * Remove all the permissions for a given user
+     *
+     * @param userAccount the user that we want to remove access to
+     */
+    void removePermissionsForUser(UserAccount userAccount) {
+        //to be called when a user is deleted
+        AclSid aclSid = AclSid.findBySid(userAccount.username)
+
+        //iterate through all the acl entries and remove them if they belong to the user
+        AclEntry.findAllBySid(aclSid).each { AclEntry aclEntry ->
+            aclEntry.delete()
+        }
+
+        //remove any object identities the user owned
+        AclObjectIdentity.findAllByOwner(aclSid).each { AclObjectIdentity aclObjectIdentity ->
+            aclObjectIdentity.delete()
+        }
+
+        //remove the sid for the user
+        aclSid.delete()
+    }
+
+    /**
+     * Helper method for acl changes since we have to be admin
+     */
+    @Secured(['ROLE_ADMIN'])
+    protected void loginAsSuperUser() {
+        // have to be authenticated as an admin to create ACLs
+        SCH.context.authentication = new UsernamePasswordAuthenticationToken(
+                'admin', 'wustlCielo@2017',
+                AuthorityUtils.createAuthorityList('ROLE_SUPERUSER'))
+    }
+
+    /**
+     * Helper method to logout programmatically
+     */
+    @Secured(['ROLE_ADMIN', 'ROLE_SUPERUSER'])
+    protected void logout() {
+        SCH.clearContext()
     }
 }

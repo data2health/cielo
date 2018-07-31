@@ -712,9 +712,10 @@ function showNewProjectWizard() {
     var dialog = bootbox.dialog({
         title: ' ',
         className: "new-project-wizard",
-        message: '<div class="text-center"><i class="fa fa-spin fa-spinner"></i> Loading...</div>',
+        message: ' ',
         closeButton: false,
         size: 'large',
+        show: true,
         buttons: {
             previous: {
                 id: 'previous-button',
@@ -919,10 +920,18 @@ function onLastPage() {
     }
 }
 
-function onPageSelection(isMyProjects) {
+function onPageSelection() {
     var offsetVal  = parseInt($('#paging-options').val()) - 1;
     var filterText = $('#projectSearch').val();
-    $.get("/project/filtered/list", {offset: offsetVal, myProjects: isMyProjects, filterTerm: filterText}, function (data) {
+    var filterOnProjects    = $('input[name=projectType]:checked').val();
+    var myProjects;
+
+    if (filterOnProjects === 'all' ) {
+        myProjects = false;
+    } else {
+        myProjects = true;
+    }
+    $.get("/project/filtered/list", {offset: offsetVal, myProjects: myProjects, filterTerm: filterText}, function (data) {
         replaceProjectTableContent(data);
     });
 }

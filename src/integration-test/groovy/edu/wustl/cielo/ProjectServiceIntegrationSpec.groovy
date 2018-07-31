@@ -318,7 +318,7 @@ class ProjectServiceIntegrationSpec extends Specification {
         List<Project> projects
 
         when:
-            projects = projectService.retrieveFilteredProjectsFromDB(user,"", 0, 5)
+            projects = projectService.retrieveFilteredProjectsFromDB(user, false, "", 0, 5)
 
         then:
             projects
@@ -326,7 +326,7 @@ class ProjectServiceIntegrationSpec extends Specification {
 
         when:
             projects.clear()
-            projects = projectService.retrieveFilteredProjectsFromDB(user,"Project2", 0, 5)
+            projects = projectService.retrieveFilteredProjectsFromDB(user, false, "Project2", 0, 5)
 
         then:
             projects.size() == 0
@@ -341,13 +341,13 @@ class ProjectServiceIntegrationSpec extends Specification {
         int countedProjectPages
 
         when:
-            countedProjectPages = projectService.countFilteredProjectsPages(user,"", 5)
+            countedProjectPages = projectService.countFilteredProjectsPages(user, false, "", 5)
 
         then:
             countedProjectPages == 1
 
         when:
-            countedProjectPages = projectService.countFilteredProjectsPages(user,"Jupiter", 5)
+            countedProjectPages = projectService.countFilteredProjectsPages(user, false, "Jupiter", 5)
 
         then:
             countedProjectPages == 1 //returns 1 even if no results
@@ -355,7 +355,7 @@ class ProjectServiceIntegrationSpec extends Specification {
         when:
             new Project(projectOwner: user, name: "Second", license: softwareLicense,
                     description: "something").save()
-            countedProjectPages = projectService.countFilteredProjectsPages(user,"", 1)
+            countedProjectPages = projectService.countFilteredProjectsPages(user, false, "", 1)
 
         then:
             countedProjectPages == 2

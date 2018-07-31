@@ -45,9 +45,7 @@ class UrlMappings {
         "/project/likePost"(controller: "project", action: "likeComment")
         "/project/removeLike"(controller: "project", action: "removeCommentLike")
         "/project/getUsers"(controller: "project", action: "getCommentLikeUsers")
-        "/project/myList/"(controller: "project", action: "myProjects")
         "/project/delete/"(controller: "project", action: "deleteProject")
-        "/project/public/list"(controller: "project", action: "publicProjectsList")
         "/project/addTeam"(controller: "project", action: "addTeamToProject")
         "/project/getTeams"(controller: "project", action: "getTeams")
         "/project/newProject"(controller: "project", action: "newProject")
@@ -59,6 +57,14 @@ class UrlMappings {
         "/project/bundles/list"(controller: "project", action: "getBundles")
         "/project/filtered/list"(controller: "project", action: "getFilteredProjects")
         "/project/$id/downloadFile/$hash/$name"(controller: "project", action: "downloadFile")
+        "/project/viewProjects"(controller: "project", action: "projectsList")
+        "/project/accessRequestContent"(controller: "project", action: "getAccessRequestDialogContent")
+        "/project/requestAccess"(controller: "project", action: "requestAccessToProject")
+        "/project/grantAccess"(controller: "project", action: "grantAccessToProject")
+        "/project/denyAccess"(controller: "project", action: "denyAccessToProject")
+        "/project/acknowledgeRequestResult"(controller: "project", action: "acknowledgeAccessRequestResult")
+        "/project/access/revoke"(controller: "project", action: "revokeAccessToProject")
+        "/project/user/access/list"(controller: "project", action: "renderIndividualUserAccess")
 
         //license
         "/license/$id"(controller: "license", action: "getLicenseBody")
@@ -91,9 +97,15 @@ class UrlMappings {
         //data
         "/data/$id"(controller: "data", action: "view")
 
+        //access requests
+        "/messages"(controller: "accessRequest", action: "list")
+        "/messages/rows"(controller: "accessRequest", action: "getTableRows")
+
         //Errors
-        "500"(view:'/error')
-        "404"(view:'/notFound')
+        "500"(controller: "errors", action:"error")
+        "404"(controller: "errors", action: "notFound")
+        "401"(controller: "errors", action: "denied")
+        "403"(controller: "errors", action: "denied")
 
         //Google domain verification
         "/google7a73685f036100a5.html"(view: "/verification")

@@ -1,18 +1,24 @@
 package edu.wustl.cielo
 
 import com.google.cloud.storage.BlobId
+import edu.wustl.cielo.enums.AccessRequestStatusEnum
 import edu.wustl.cielo.enums.ActivityTypeEnum
 import edu.wustl.cielo.enums.FileUploadType
 import grails.gorm.transactions.ReadOnly
 import grails.gorm.transactions.Transactional
 import grails.plugin.cache.Cacheable
+import grails.plugin.springsecurity.acl.AclEntry
+import grails.plugin.springsecurity.acl.AclObjectIdentity
+import grails.plugin.springsecurity.acl.AclSid
 import grails.util.Environment
 import groovy.util.logging.Slf4j
 import grails.web.mapping.LinkGenerator
 import org.apache.commons.lang.RandomStringUtils
+import org.springframework.security.acls.domain.BasePermission
 import org.springframework.validation.ObjectError
 import com.thedeanda.lorem.Lorem
 import com.thedeanda.lorem.LoremIpsum
+import org.springframework.security.access.AccessDeniedException
 import javax.servlet.http.Part
 import groovy.sql.Sql
 
@@ -30,6 +36,9 @@ class ProjectService {
     def cloudService
     def dataSource
     def teamService
+    def userAccountService
+    def customAclService
+    def accessRequestService
 
     /**
      * Main call used in bootstrap to generated project data
@@ -288,7 +297,7 @@ class ProjectService {
      * @param project the project to save
      */
     private void saveProjectAndLog(Project project) {
-        //flush here to avoid problems with subsequent saves
+
         if (project) {
             project.lastChanged = new Date()
             if (!project.save()) {
@@ -442,50 +451,48 @@ class ProjectService {
         Project project = Project.findById(projectId)
 
         if (project) {
-            if (project.name != newProjectName || project.annotations.collect { it.id } != tags ||
-                project.description.toLowerCase() != description.toLowerCase() || project.shared != shared ||
-                    project.license.id != softwareLicenseId) {
-                if (project.name != newProjectName) {
-                    //there are changes
-                    project.name = newProjectName
+            if (project.name != newProjectName) {
+                //there are changes
+                project.name = newProjectName
+            }
+
+            if (project.annotations.collect { it.id }.sort() != tags?.sort()) {
+                List<Long> oldTagIds = project.annotations.collect { it.id }
+                //remove old tags
+                oldTagIds.each {
+                    project.annotations.remove(Annotation.findById(it))
                 }
 
-                if (project.annotations.collect { it.id }.sort() != tags?.sort()) {
-                    List<Long> oldTagIds = project.annotations.collect { it.id }
-                    //remove old tags
-                    oldTagIds.each {
-                        project.annotations.remove(Annotation.findById(it))
-                    }
-
-                    //add new tags
-                    tags.each {
-                        project.annotations.add(Annotation.findById(it))
-                    }
-                }
-
-                if (project.description.toLowerCase() != description.toLowerCase()) {
-                    project.description = description
-                }
-
-                if (softwareLicenseId != project.license.id) {
-                    project.license = SoftwareLicense.findById(softwareLicenseId)
-                }
-
-                if (project.shared != shared)       project.shared = shared
-                project.lastChanged = new Date()
-
-                //now save the project
-                if (!project.save()) {
-                    project.errors.allErrors.each { ObjectError error ->
-                        log.error(error.toString())
-                    }
-                    log.error("Unable to save project with new name and/or tags")
-                    succeeded = false //previous step could have succeeded
-                } else {
-                    succeeded = true
+                //add new tags
+                tags.each {
+                    project.annotations.add(Annotation.findById(it))
                 }
             }
-            else succeeded = true //no changes were necessary but no failure so set to true
+
+            if (project.description.toLowerCase() != description.toLowerCase()) {
+                project.description = description
+            }
+
+            if (softwareLicenseId != project.license.id) {
+                project.license = SoftwareLicense.findById(softwareLicenseId)
+            }
+            if (project.shared != shared)      {
+                project.shared = shared
+                customAclService.patchPermissionsOnSave(project)
+            }
+
+            project.lastChanged = new Date()
+
+            //now save the project
+            if (!project.save()) {
+                project.errors.allErrors.each { ObjectError error ->
+                    log.error(error.toString())
+                }
+                log.error("Unable to save project with new name and/or tags")
+                succeeded = false //previous step could have succeeded
+            } else {
+                succeeded = true
+            }
         }
 
         return succeeded
@@ -641,12 +648,19 @@ class ProjectService {
                     cloudService.deleteFile(blobId)
                 }
 
-                //delete the git repo on both local and remote for the given project
-                if (cloudService.deleteRepo(projectId)) {
-                    project.delete(failOnError: true)
-                    return true
-                } else return false
+                //first things first... delete all acl's
+                AclObjectIdentity objectIdentity = customAclService.getOrCreateObjectIdentity(project.id,
+                        Project.class.name, null)
 
+                customAclService.removeAllAccess(objectIdentity)
+                objectIdentity.delete(flush: true)
+
+                //delete the git repo on both local and remote for the given project
+                cloudService.deleteRepo(projectId)
+
+                //now delete the project
+                project.delete(failOnError: true)
+                return true
             } catch (Exception e) {
                 project.errors.allErrors.each { ObjectError error ->
                     log.error(error.toString())
@@ -725,6 +739,8 @@ class ProjectService {
                 }
                 return false
             }
+
+            addWriteAccessForNewTeamMembers(team, project)
             return true
         }
     }
@@ -751,6 +767,7 @@ class ProjectService {
                     }
                     return false
                 }
+                addWriteAccessForNewTeamMembers(team, project)
                 return true
             }
         }
@@ -925,6 +942,9 @@ class ProjectService {
             return false
         }
 
+        //Add acl stuff
+        customAclService.setupBasePermissionsForProject(project)
+
         //use the project id as part of the name of the file to keep unique
         if (dataUpload) {
             int revision    = 0 //the default
@@ -1002,6 +1022,7 @@ class ProjectService {
                 }
                 return false
             }
+            removeAccessForTeamMembers(team, project)
             return true
         }
         return false
@@ -1111,7 +1132,7 @@ class ProjectService {
      */
     @ReadOnly
     @Cacheable("filtered_projects")
-    List<Project> retrieveFilteredProjectsFromDB(UserAccount user, String filterTerm, int offset, int max) {
+    List<Project> retrieveFilteredProjectsFromDB(UserAccount user, boolean filterOnSharedOnly, String filterTerm, int offset, int max) {
         Sql sql = new Sql(dataSource)
         StringBuffer whereClause = new StringBuffer(' where ')
         List params = []
@@ -1120,22 +1141,22 @@ class ProjectService {
             whereClause << ' project.project_owner_id=?'
             params.add(user.id)
         } else {
-            whereClause << ' project.shared = true  -- for public projects'
+            if (filterOnSharedOnly) whereClause << ' project.shared = true  -- for public projects'
         }
 
         whereClause << """
-                AND (
-                        lower(t.name) like lower(${"'%" + filterTerm + "%'"})
+                ${!whereClause.toString().equals(" where ")? ' AND': ''} (
+                        lower(t.name) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(project.name) like lower(${"'%" + filterTerm + "%'"})
+                        lower(project.name) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(project.description) like ${"'%" + filterTerm + "%'"}
+                        lower(project.description) like ${"'%" + (filterTerm?:'') + "%'"}
                     OR
-                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like lower(${"'%" + filterTerm + "%'"})
+                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(teamMembers.members) like lower(${"'%" + filterTerm + "%'"})
+                        lower(teamMembers.members) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(pa.annotations) like lower(${"'%" + filterTerm + "%'"})
+                        lower(pa.annotations) like lower(${"'%" + (filterTerm?:'') + "%'"})
                 )
         """
 
@@ -1190,7 +1211,7 @@ class ProjectService {
      */
     @ReadOnly
     @Cacheable("filtered_projects_count")
-    int countFilteredProjectsPages(UserAccount user, String filterTerm, int max) {
+    int countFilteredProjectsPages(UserAccount user, boolean filterOnShared, String filterTerm, int max) {
         Sql sql = new Sql(dataSource)
         StringBuffer whereClause = new StringBuffer(' where ')
         List params = []
@@ -1200,22 +1221,22 @@ class ProjectService {
             whereClause << ' project.project_owner_id=?'
             params.add(user.id)
         } else {
-            whereClause << ' project.shared = true  -- for public projects'
+            if (filterOnShared) whereClause << ' project.shared = true  -- for public projects'
         }
 
         whereClause << """
-                AND (
-                        lower(t.name) like lower(${"'%" + filterTerm + "%'"})
+                ${!whereClause.toString().equals(" where ") ? 'AND' : ''} (
+                        lower(t.name) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(project.name) like lower(${"'%" + filterTerm + "%'"})
+                        lower(project.name) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(project.description) like lower(${"'%" + filterTerm + "%'"})
+                        lower(project.description) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like lower(${"'%" + filterTerm + "%'"})
+                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(teamMembers.members) like lower(${"'%" + filterTerm + "%'"})
+                        lower(teamMembers.members) like lower(${"'%" + (filterTerm?:'') + "%'"})
                     OR
-                        lower(pa.annotations) like lower(${"'%" + filterTerm + "%'"})
+                        lower(pa.annotations) like lower(${"'%" + (filterTerm?:'') + "%'"})
                 )
         """
 
@@ -1299,6 +1320,27 @@ class ProjectService {
     }
 
     /**
+     * Retrieve project from db
+     *
+     * @param id the id of the project
+     *
+     * @return either a project or null
+     */
+    Project getProject(Long id) throws AccessDeniedException {
+        Project project
+        List<BasePermission> permissions    = [BasePermission.READ, BasePermission.WRITE, BasePermission.ADMINISTRATION]
+        boolean hasPermission
+
+        hasPermission = customAclService.hasPermission(userAccountService.getLoggedInUser().username, id, permissions)
+
+        if (hasPermission) {
+            project = Project.findById(id)
+        }
+
+        return project
+    }
+
+    /**
      * Check whether the project has the uploaded file already saved
      *
      * @param projectId the id of the project to look at
@@ -1350,5 +1392,262 @@ class ProjectService {
             }
         }
         return revision
+    }
+
+    /**
+     * Grant permission for an entity to a project
+     *
+     * @param accessRequestId the id of the access request
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean grantPermissionToProject(Long accessRequestId) {
+        AccessRequest accessRequest = AccessRequest.findById(accessRequestId)
+        Long projectId      = accessRequest.projectId
+        boolean succeeded
+
+        Project project = Project.findById(projectId)
+        String projectClassName = Project.class.name
+        AclSid aclSid           = AclSid.findBySid(accessRequest.user.username)
+        AclObjectIdentity aclObjectIdentity = customAclService.getOrCreateObjectIdentity(project.id, projectClassName, aclSid)
+        BasePermission basePermission = customAclService.getBasePermissionForMask(accessRequest.mask)
+
+        succeeded = customAclService.grantPermission(aclObjectIdentity, aclSid, basePermission)
+
+        if (succeeded) {
+            accessRequestService.approveAccessRequest(accessRequest)
+        }
+        return succeeded
+    }
+
+    /**
+     * Revoke a particular permission or permissions for a user on a given project
+     *
+     * @param projectId the id of the project to remove permission to
+     * @param userId the id of the user that needs the permission revoked
+     * @param masks a list of masks
+     * @param user the user initiating the change
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean revokeAccessToProject(Long projectId, Long userId, List<Integer> masks, UserAccount user) {
+        boolean success      = false
+        String projectClassName = Project.class.name
+        Project project         = Project.findById(projectId)
+
+        if(project.projectOwner.equals(user)) {
+            //only proceed if the owner is requesting the change
+            UserAccount userAccount = UserAccount.findById(userId)
+            AclSid ownerSid = AclSid.findBySid(project.projectOwner.username)
+            AclSid userSid = AclSid.findBySid(userAccount.username)
+            AclObjectIdentity aclObjectIdentity = customAclService.getOrCreateObjectIdentity(project.id, projectClassName, ownerSid)
+
+            try {
+                masks.each { Integer maskInteger ->
+                    AclEntry.findBySidAndAclObjectIdentityAndMask(userSid, aclObjectIdentity, maskInteger.intValue()).delete()
+                }
+                success = true
+            } catch (Exception e) {
+                log.error(e.message)
+            }
+        }
+        return success
+    }
+
+    /**
+     * Deny the access request
+     *
+     * @param accessRequestId the id of the access request to deny
+     * @param userAccountId the id of the user attempting to deny access
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean denyAccessRequest(Long accessRequestId, Long userAccountId) {
+        return accessRequestService.denyAccess(accessRequestId, userAccountId)
+    }
+
+    /**
+     * Create an access request
+     *
+     * @param projectId the id of the project we are granting access on
+     * @param user the user that needs access
+     * @param bitMask the bitmask for the access needed
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean requestAccessToProject(Long projectId, UserAccount user, int bitMask) {
+        return accessRequestService.createRequest(projectId, user, bitMask)
+    }
+
+    /**
+     * Mark access request as aknowledged
+     *
+     * @param accessRequestId the id of the access request
+     * @param user the user attempting to acknowledge request
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean acknowledgeAccessRequestStatus(Long accessRequestId, UserAccount user) {
+        AccessRequest accessRequest = AccessRequest.findById(accessRequestId)
+
+        if (accessRequest) {
+            if (accessRequest.user.equals(user)) {
+                //now we can mark this acknowledged
+                accessRequest.status = AccessRequestStatusEnum.ACKNOWLEDGED
+
+                if (!accessRequest.save()) {
+                    accessRequest.errors.allErrors.each { ObjectError objectError ->
+                        log.error(objectError.toString())
+                    }
+                    return false
+                }
+            }
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Given a project, return who has access to the project and what level they have
+     *
+     * @param project the private project to look into
+     *
+     * @return a list of objects that contains the user and their access
+     */
+    List<Object> getListOfUsersAccess(Project project) {
+        AclObjectIdentity objectIdentity    = customAclService.getOrCreateObjectIdentity(project.id, Project.class.name, null)
+        List<Object> userAccessObject       = []
+
+        if (!project.shared) {
+            customAclService.getAclEntriesForObjectIdentity(objectIdentity).each { AclEntry aclEntry ->
+                AclSid aclSid = aclEntry.sid
+                UserAccount userAccount = UserAccount.findByUsername(aclSid.sid)
+                if (!project.projectOwner.equals(userAccount)) {
+                    Object existingInstance = userAccessObject.find { it.user.equals(userAccount) }
+                    if (existingInstance) {
+                        userAccessObject.remove(existingInstance)
+                        ArrayList newEntry = existingInstance.access.plus([mask: aclEntry.mask,
+                                name: customAclService.getBasePermissionName(aclEntry.mask)])
+                        existingInstance.access = newEntry
+                        userAccessObject.add(existingInstance)
+                    } else {
+                        userAccessObject.add([user: UserAccount.findByUsername(aclSid.sid), access: [[mask: aclEntry.mask,
+                                                                                                     name: customAclService.getBasePermissionName(aclEntry.mask)]]])
+                    }
+                }
+            }
+        }
+        return userAccessObject
+    }
+
+    /**
+     * Get list of permissions a user has for a given project
+     *
+     * @param project the id of the project to check
+     * @param userAccount the id of the user we are interested in
+     *
+     * @return list of custom object containing the user object and the permissions they have for the project or null list
+     */
+    Map getListOfUserAccess(Long projectId, Long userId) {
+        Project project         = Project.findById(projectId)
+        UserAccount userAccount = UserAccount.findById(userId)
+        AclObjectIdentity objectIdentity = customAclService.getOrCreateObjectIdentity(project.id, Project.class.name, null)
+        Map userAccessObject = [:]
+        AclSid aclSid = AclSid.findBySid(userAccount.username)
+
+        if (!project.shared) {
+            AclEntry.findAllByAclObjectIdentityAndSid(objectIdentity, aclSid).each { AclEntry aclEntry ->
+                Object existingInstance = userAccessObject.find { it.user.equals(userAccount) }
+                if (existingInstance) {
+                    userAccessObject.remove(existingInstance)
+                    ArrayList newEntry = existingInstance.access.plus([mask: aclEntry.mask,
+                                                                       name: customAclService.getBasePermissionName(aclEntry.mask)])
+                    existingInstance.access = newEntry
+                    userAccessObject.put(existingInstance)
+                } else {
+                    userAccessObject.put("user", userAccount)
+                    userAccessObject.put("access", [[mask: aclEntry.mask,
+                                                                       name: customAclService.getBasePermissionName(aclEntry.mask)]])
+                }
+            }
+        }
+        return userAccessObject
+    }
+
+    /**
+     * Given a team and project ensure that all the members of team have write access
+     *
+     * @param team the team which has the members to grant access to
+     * @param projet the project that members need access to
+     */
+    void addWriteAccessForNewTeamMembers(Team team, Project project) {
+
+        if (!project.shared) {
+            AclObjectIdentity objectIdentity    = customAclService.getOrCreateObjectIdentity(project.id, Project.class.name, null)
+            BasePermission writePermission      = BasePermission.WRITE
+
+            team.members.each { UserAccount userAccount ->
+                addPermissionForUserToObject(writePermission, userAccount.username, project.name, objectIdentity)
+            }
+
+            //and for the team admin
+            addPermissionForUserToObject(writePermission, team.administrator.username, project.name, objectIdentity)
+        }
+    }
+
+    /**
+     * Remove access for members of a team to a given project
+     *
+     * @param team the team whose members that need revoking
+     * @param project the project that the users access is to be revoked for
+     */
+    void removeAccessForTeamMembers(Team team, Project project) {
+        if (!project.shared) {
+            AclObjectIdentity objectIdentity    = customAclService.getOrCreateObjectIdentity(project.id, Project.class.name, null)
+            BasePermission writePermission      = BasePermission.WRITE
+
+            team.members.each { UserAccount userAccount ->
+                findAndRemovePermissionFromUserToObject(writePermission, userAccount.username, objectIdentity)
+            }
+
+            //also for the administrator of the team
+            findAndRemovePermissionFromUserToObject(writePermission, team.administrator.username, objectIdentity)
+        }
+    }
+
+    /**
+     * Remove permission from user to an object
+     * @param permission
+     * @param objectIdentity
+     * @param userName
+     */
+    void findAndRemovePermissionFromUserToObject(BasePermission permission, String userName, AclObjectIdentity objectIdentity) {
+        AclSid aclSid       = AclSid.findBySid(userName)
+        AclEntry aclEntry   = AclEntry.findByAclObjectIdentityAndSidAndMask(objectIdentity, aclSid, permission.mask)
+
+        if (aclEntry) {
+            customAclService.removePermission(objectIdentity, aclSid, permission)
+        }
+    }
+
+    /**
+     * Add permission to an object for a given user
+     *
+     * @param permission the permission to add
+     * @param userName the username of the user gaining access
+     * @param objectName the name of the object
+     * @param objectIdentity the identity of the object
+     */
+    void addPermissionForUserToObject(BasePermission permission, String userName, String objectName, AclObjectIdentity objectIdentity) {
+        AclSid aclSid       = AclSid.findBySid(userName)
+        AclEntry aclEntry   = AclEntry.findByAclObjectIdentityAndSidAndMask(objectIdentity, aclSid, permission.mask)
+
+        if (!aclEntry?.id) {
+            boolean addPermissionResult = customAclService.grantPermission(objectIdentity, aclSid, permission)
+
+            if (!addPermissionResult) {
+                log.error("Unable to add permission to ${objectName} for user ${userName}")
+            }
+        }
     }
 }

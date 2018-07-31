@@ -1,10 +1,13 @@
 package edu.wustl.cielo
 
+import edu.wustl.cielo.enums.AccessRequestStatusEnum
+
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import grails.web.mapping.LinkGenerator
+import org.springframework.security.acls.domain.BasePermission
 
 class CieloTagLib {
     static defaultEncodeAs  = [taglib:'html'] //html escapes characters
@@ -13,13 +16,14 @@ class CieloTagLib {
                                userOwnsTeam: [taglib: 'raw'], userCanMakeChangesToProject: [taglib: 'raw'],
                                loggedInUserCanMakeChangesToUser: [taglib: 'raw'], getSoftwareLicenseOptions: [taglib: 'raw'],
                                customTimeZoneSelect: [taglib: 'raw'], //, otherTagName: [taglib:'none']]
-                               doesUserContributeToTeam: [taglib: 'raw'],
-                               getProjectsForTeam: [taglib: 'raw'],
-                               doesUserOwnProject: [taglib: 'raw']]
+                               doesUserContributeToTeam: [taglib: 'raw'], getProjectsForTeam: [taglib: 'raw'],
+                               doesUserOwnProject: [taglib: 'raw'], loggedInUser: [taglib: 'raw'],
+                               accessRequest: [taglib: 'raw'], messagesCount: [taglib: 'raw'], getAccessMaskName: [taglib: 'raw']]
 
     LinkGenerator grailsLinkGenerator
     def springSecurityService
     def projectService
+    def customAclService
 
     /**
      * Use if the output needs not be html encoded. This is true when the text already has html
@@ -218,69 +222,74 @@ class CieloTagLib {
     }
 
     def dateDiff = { attrs ->
-        String returnVal
-        LocalDateTime from  = timezoneDate(new Date(attrs.date.getTime()))
-        LocalDateTime today = LocalDateTime.now()
 
-        //number of years first
-        long years = from.until(today, ChronoUnit.YEARS)
-
-        if (years) {
-            if (years > 1L) {
-                returnVal = "${years} years ago"
-            } else {
-                returnVal = "${years} year ago"
-            }
+        if (!attrs.date) {
+            out << "<span class='date-time date-diff' data-date='unknown' data-diff='N/A'>N/A</span>"
         } else {
-            //now months
-            long months = from.until(today, ChronoUnit.MONTHS)
+            String returnVal
+            LocalDateTime from  = timezoneDate(new Date(attrs.date.getTime()))
+            LocalDateTime today = LocalDateTime.now()
 
-            if (months) {
-                if (months > 1L) {
-                    returnVal = "${months} months ago"
+            //number of years first
+            long years = from.until(today, ChronoUnit.YEARS)
+
+            if (years) {
+                if (years > 1L) {
+                    returnVal = "${years} years ago"
                 } else {
-                    returnVal = "${months} month ago"
+                    returnVal = "${years} year ago"
                 }
             } else {
-                long weeks = from.until(today, ChronoUnit.WEEKS)
+                //now months
+                long months = from.until(today, ChronoUnit.MONTHS)
 
-                if (weeks) {
-                    if (weeks > 1L) {
-                        returnVal = "${weeks} weeks ago"
+                if (months) {
+                    if (months > 1L) {
+                        returnVal = "${months} months ago"
                     } else {
-                        returnVal = "${weeks} week ago"
+                        returnVal = "${months} month ago"
                     }
-
                 } else {
-                    long days = from.until(today, ChronoUnit.DAYS)
+                    long weeks = from.until(today, ChronoUnit.WEEKS)
 
-                    if (!(days < 0L)) {
-                        if (days > 1L) {
-                            returnVal = "${days} days ago"
+                    if (weeks) {
+                        if (weeks > 1L) {
+                            returnVal = "${weeks} weeks ago"
                         } else {
-                            def daysDiff = today.date.day - from.date.day
-
-                            if   (daysDiff == 1L) returnVal = "yesterday"
-                            else  returnVal = "today"
+                            returnVal = "${weeks} week ago"
                         }
+
                     } else {
-                        //must be either hours or something smaller than that
-                        def hoursDiff = from.until(today, ChronoUnit.HOURS)
+                        long days = from.until(today, ChronoUnit.DAYS)
 
-                        if (hoursDiff) {
-                            returnVal = "${hoursDiff} hours ago"
+                        if (!(days < 0L)) {
+                            if (days > 1L) {
+                                returnVal = "${days} days ago"
+                            } else {
+                                def daysDiff = today.date.day - from.date.day
+
+                                if   (daysDiff == 1L) returnVal = "yesterday"
+                                else  returnVal = "today"
+                            }
                         } else {
-                            def minutesDiff = from.until(today, ChronoUnit.MINUTES)
+                            //must be either hours or something smaller than that
+                            def hoursDiff = from.until(today, ChronoUnit.HOURS)
 
-                            if (minutesDiff) returnVal = "${minutesDiff} minutes ago"
-                            else returnVal = "seconds ago"
+                            if (hoursDiff) {
+                                returnVal = "${hoursDiff} hours ago"
+                            } else {
+                                def minutesDiff = from.until(today, ChronoUnit.MINUTES)
+
+                                if (minutesDiff) returnVal = "${minutesDiff} minutes ago"
+                                else returnVal = "seconds ago"
+                            }
                         }
                     }
                 }
             }
-        }
 
-        out << "<span class='date-time date-diff' data-date='${g.formatDateWithTimezone(date: attrs.date)}' data-diff='${returnVal}'>${returnVal}</span>"
+            out << "<span class='date-time date-diff' data-date='${g.formatDateWithTimezone(date: attrs.date)}' data-diff='${returnVal}'>${returnVal}</span>"
+        }
     }
 
     /**
@@ -388,6 +397,18 @@ class CieloTagLib {
     }
 
     /**
+     * Return the logged in User
+     */
+    def loggedInUser = { attrs, body ->
+        UserAccount user
+        if (springSecurityService.isLoggedIn()) {
+            def principal    = springSecurityService?.principal
+            user = UserAccount.get(principal?.id)
+        }
+        this.pageScope."$attrs.var" = user
+    }
+
+    /**
      * Generate the HTML dropdown for software licenses
      */
     def getSoftwareLicenseOptions = { attrs, body ->
@@ -457,16 +478,54 @@ class CieloTagLib {
         List<Project> projectNames = []
 
         projectService.getListOfProjectsTeamContributesTo(attr.team).each {
-            if (Boolean.valueOf(g.doesUserOwnProject(project: it).toString()) ||
-                    Boolean.valueOf(g.doesUserOwnOrContributeToTeam(team: attr.team).toString()) ||
-                    it.shared) {
                 String link = g.createLink(controller: "project", action: "view", params: [id: it.id])
                 projectNames.add( "<a class='btn btn-link' href='" + link + "' style='padding: 0; margin:0'>" + it.name + "</a>")
-            } else { projectNames.add("******")}
         }
 
         if (projectNames.size() == 0) out << "<em>None yet</em>"
         else out << projectNames.join(', ')
+    }
+
+    /**
+     * Get access request for a given project based on the user that is logged in
+     */
+    def accessRequest = { attrs, body ->
+        Project project = attrs.project
+        if ( project ) {
+            AccessRequest accessRequest
+            if (springSecurityService.isLoggedIn()) {
+                def principal    = springSecurityService?.principal
+                UserAccount user = UserAccount.get(principal?.id)
+                accessRequest = AccessRequest.findByProjectIdAndUser(project.id, user)
+            }
+            this.pageScope."$attrs.var" = accessRequest
+        }
+    }
+
+    /**
+     * Get the count of messafes for a given user
+     */
+    def messagesCount = { attrs, body ->
+
+        if (springSecurityService.isLoggedIn()) {
+            def principal    = springSecurityService?.principal
+            UserAccount user = UserAccount.get(principal?.id)
+
+            if (user) {
+                this.pageScope."$attrs.var" =  AccessRequest.countByProjectOwnerIdAndStatus(user.id, AccessRequestStatusEnum.PENDING)
+            }
+        } else this.pageScope."$attrs.var" = 0
+    }
+
+    /**
+     * Given a value of a mask (int) get the name of the mask
+     */
+    def getAccessMaskName = { attrs, body ->
+        if (attrs.mask) {
+            out << customAclService.getBasePermissionName(attrs.mask)
+        } else {
+            out << "Unknown"
+        }
     }
 
     /**
