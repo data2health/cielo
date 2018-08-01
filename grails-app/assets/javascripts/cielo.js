@@ -393,6 +393,111 @@ function showTermsOfUseNoAcknowledge() {
 
 }
 
+function showSynapseTest() {
+    var alertWindow = bootbox.dialog({
+        title: 'Synapse Test',
+        className: 'scrollable-bootbox-alert',
+        message: generateSynapseDataForm(),
+        closeButton: true,
+        size: "large",
+        buttons: {
+            ok: {
+                className: 'btn-secondary',
+                label: 'OK',
+                callback: function () {
+                    return true;
+                }
+            }
+        }
+    });
+
+
+    alertWindow.init(function() {
+        //grab the text for the license from db
+        var synapseVerUrl   = "http://repo-prod.prod.sagebase.org/repo/v1/version";
+        var teamRequestUrl  = "https://repo-prod.prod.sagebase.org/repo/v1/team/4";
+
+        $.get(synapseVerUrl, function(data) {
+            $('#versionURL').html(synapseVerUrl);
+            $('#versionNumber').html(data.version);
+
+            $.get(teamRequestUrl, function(data) {
+                $('#teamURL').html(teamRequestUrl);
+                $('#teamName').html(data.name);
+                $('#createdOn').html(data.createdOn);
+                $('#modifiedOn').html(data.modifiedOn);
+                $('#eTag').html(data.etag);
+                $('#teamDescription').html(data.description);
+            });
+        });
+    });
+}
+
+function generateSynapseDataForm() {
+    var $form = $("<form></form>");
+    $form.append("<div class=\"container\">\n" +
+        "    <div class=\"row\">\n" +
+        "      <div class=\"col-md-8\">\n" +
+        "        <label>Synapse Server Version (<span id=\"versionURL\"></span>):</label>\n" +
+        "      </div>\n" +
+        "      <div class=\"col-md-4\">\n" +
+        "          <span id=\"versionNumber\" style=\"font-style: italic; font-weight:800;\"></span>\n" +
+        "      </div>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"row\">\n" +
+        "      <p class=\"lead\">Data retrieved for Team #2 (<span id=\"teamURL\"></span>):</p>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"row\">\n" +
+        "      <div class=\"col-md-8\">\n" +
+        "        <label>Name:</label>\n" +
+        "      </div>\n" +
+        "      <div class=\"col-md-4\">\n" +
+        "        <span id=\"teamName\"></span>\n" +
+        "      </div>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"row\">\n" +
+        "      <div class=\"col-md-8\">\n" +
+        "        <label>Created On:</label>\n" +
+        "      </div>\n" +
+        "      <div class=\"col-md-4\">\n" +
+        "        <span id=\"createdOn\"></span>\n" +
+        "      </div>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"row\">\n" +
+        "      <div class=\"col-md-8\">\n" +
+        "        <label>Modified On:</label>\n" +
+        "      </div>\n" +
+        "      <div class=\"col-md-4\">\n" +
+        "        <span id=\"modifiedOn\"></span>\n" +
+        "      </div>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"row\">\n" +
+        "      <div class=\"col-md-8\">\n" +
+        "        <label>E-Tag:</label>\n" +
+        "      </div>\n" +
+        "      <div class=\"col-md-4\">\n" +
+        "        <span id=\"eTag\"></span>\n" +
+        "      </div>\n" +
+        "    </div>\n" +
+        "\n" +
+        "<div class=\"row\">\n" +
+        "  <div class=\"col-md-8\">\n" +
+        "    <label>Team Description:</label>\n" +
+        "  </div>\n" +
+        "  <div class=\"col-md-4\">\n" +
+        "    <span id=\"teamDescription\"></span>\n" +
+        "  </div>\n" +
+        "</div>" +
+        "</div>");
+
+    return $form;
+}
+
 function showSoftwareLicense(licenseId, licenseLabel) {
     var alertWindow = bootbox.alert({
         title: licenseLabel,
