@@ -38,6 +38,6 @@ class AccessRequestController {
         }
 
         def newRowsHTML = accessRequestService.renderTableRows([requests :accessRequestList])
-        render([html: newRowsHTML, pagesCount: count] as JSON)
+        render([html: newRowsHTML, pagesCount: count, currentPage: (offset + 1)] as JSON)
     }
 }

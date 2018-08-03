@@ -581,24 +581,31 @@ class ActivityService {
      * @param activityTypeEnum the activity type
      */
     private static void invalidateNecessaryCaches(ActivityTypeEnum activityTypeEnum) {
-        if (activityTypeEnum == ActivityTypeEnum.ACTIVITY_NEW_PROJECT ||
-            activityTypeEnum == ActivityTypeEnum.ACTIVITY_DELETE_PROJECT) {
-            grailsCacheManager.getCache("most_viewed_projects").clear()
-            grailsCacheManager.getCache("filtered_projects_count").clear()
-            grailsCacheManager.getCache("filtered_projects").clear()
-        } else if (activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_VIEWS) {
-            grailsCacheManager.getCache("most_viewed_projects").clear()
-        } else if (activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_NAME ||
-                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_DESCRIPTION ||
-                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_ANNOTATIONS ||
-                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_SHARED ||
-                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS ||
-                   activityTypeEnum == ActivityTypeEnum.ACTIVITY_NEW_TEAM) {
-            grailsCacheManager.getCache("filtered_projects_count").clear()
-            grailsCacheManager.getCache("filtered_projects").clear()
-            grailsCacheManager.getCache("filtered_teams").clear()
-            grailsCacheManager.getCache("filtered_teams_count").clear()
-            grailsCacheManager.getCache("filtered_teams_project_ids").clear()
+
+        switch (activityTypeEnum) {
+            case ActivityTypeEnum.ACTIVITY_NEW_PROJECT:
+            case ActivityTypeEnum.ACTIVITY_DELETE_PROJECT:
+                grailsCacheManager.getCache("most_viewed_projects").clear()
+                grailsCacheManager.getCache("filtered_projects_pages_count").clear()
+                grailsCacheManager.getCache("filtered_projects_count").clear()
+                grailsCacheManager.getCache("filtered_projects").clear()
+                break
+            case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_VIEWS:
+                grailsCacheManager.getCache("most_viewed_projects").clear()
+                break
+            case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_NAME:
+            case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_DESCRIPTION:
+            case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_ANNOTATIONS:
+            case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_SHARED:
+            case ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_TEAMS:
+            case ActivityTypeEnum.ACTIVITY_NEW_TEAM:
+                grailsCacheManager.getCache("filtered_projects_pages_count").clear()
+                grailsCacheManager.getCache("filtered_projects_count").clear()
+                grailsCacheManager.getCache("filtered_projects").clear()
+                grailsCacheManager.getCache("filtered_teams").clear()
+                grailsCacheManager.getCache("filtered_teams_count").clear()
+                grailsCacheManager.getCache("filtered_teams_project_ids").clear()
+                break
         }
     }
 }

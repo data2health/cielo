@@ -32,13 +32,7 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-4">
-                &nbsp;
-            </div>
-        </div>
-
-        <div class="row">
+        <div class="row searchDivBackground">
             <div class="col-lg-4">
                 <div class="input-group input-group-sm mb-0" style="max-height: 2em;">
                     <div class="input-group-prepend">
@@ -51,6 +45,7 @@
                     </span>
                 </div>
             </div>
+            <div class="col-lg-8">&nbsp;</div>
         </div>
 
         <g:render template="projectsTable" model="[isUserProjects: isUserProjects,
