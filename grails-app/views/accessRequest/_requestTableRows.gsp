@@ -30,12 +30,12 @@
         <td style="text-align: right;">
             <g:if test="${request.status == AccessRequestStatusEnum.PENDING}">
                 <div class="accessControlButtonContainer">
-                    <div id="approve_${request.id}" class="accessControlButton" onclick="approveRequest(${request.id});">
+                    <div id="approve_${request.id}" class="accessControlButton" onclick="initiateApproval(${request.id});">
                         <i class="far fa-check-circle"></i>
                         &nbsp;Approve
                     </div>
                     &nbsp;
-                    <div id="deny_${request.id}" class="accessControlButton-red" onclick="denyRequest(${request.id});">
+                    <div id="deny_${request.id}" class="accessControlButton-red" onclick="initiateDenial(${request.id});">
                         <i class="fas fa-ban"></i>
                         &nbsp;Deny
                     </div>

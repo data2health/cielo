@@ -6,9 +6,9 @@
 <section class="mbr-fullscreen d-block d-lg-none" style="min-height: 0; max-height: 2vh;">&nbsp;</section>
 
 <section class="mbr-fullscreen" style="min-height: 100vh;">
+    <g:if test="${messages.size() > 0}">
     <div class="messages-background-div">
         <div class="container-fluid" style="">
-        <g:if test="${messages.size() > 0}">
             <div class="row justify-content-md-center projectFilterDiv">
                 <div class="col-md-12 lead">
                     <g:message code="project.access.control.header.message"/>
@@ -21,11 +21,13 @@
             </div>
         </g:if>
         <g:else>
-            <div class="jumbotron" style="text-align: center;background-color: #6c757d; color: white;">
-                <span class="lead">No messages to show</span>
-            </div>
+        <div style="min-width: 100vw;">
+            <div class="container-fluid" style="">
+                <div class="jumbotron" style="text-align: center;background-color: #6c757d; color: white;">
+                    <span class="lead">No messages to show</span>
+                </div>
         </g:else>
-    </div>
+        </div>
     </div>
 </section>
 
@@ -57,14 +59,14 @@
         });
     }
 
-    function approveRequest(requestId) {
+    function initiateApproval(requestId) {
         if ($('#approve_' + requestId).attr("class").indexOf("-disabled") === -1) {
             disableButtons(requestId);
             approveRequest(requestId);
         }
     }
 
-    function denyRequest(requestId) {
+    function initiateDenial(requestId) {
         if ($('#deny_' + requestId).attr("class").indexOf("-disabled") === -1) {
             disableButtons(requestId);
             denyRequest(requestId);
@@ -102,8 +104,9 @@
     }
 
     function refreshRequestsTable () {
+        var pageOffset = parseInt($('#paging-options').val()) - 1;
         //get the rows from the server again
-        $.get("${createLink(controller: "accessRequest", action: "getTableRows")}", function(data) {
+        $.get("${createLink(controller: "accessRequest", action: "getTableRows")}", {offset: pageOffset}, function(data) {
             replaceTableRows(data);
             updateBadge();
         });
@@ -112,7 +115,18 @@
     function replaceTableRows(data) {
         //remove all rows
         $('#requestsTableBody tr').remove();
-        $('#requestsTableBody').html(data);
+        $('#requestsTableBody').html(data.html);
+
+        //now check to see if we need to change pages
+        if ($('#requestsTableBody tr').length === 0) {
+            if (parseInt($('#paging-options').val()) === 1) {
+                location.reload();
+            } else {
+                var previousPage = parseInt($('#paging-options').val()) - 1;
+                $('#paging-options').val(previousPage);
+                $('#paging-options').change();
+            }
+        }
     }
 
     function updateBadge() {
