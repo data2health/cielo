@@ -414,21 +414,28 @@ function showSynapseTest() {
 
     alertWindow.init(function() {
         //grab the text for the license from db
-        var synapseVerUrl   = "http://repo-prod.prod.sagebase.org/repo/v1/version";
+        var synapseVerUrl   = "https://repo-prod.prod.sagebase.org/repo/v1/version";
         var teamRequestUrl  = "https://repo-prod.prod.sagebase.org/repo/v1/team/4";
 
-        $.get(synapseVerUrl, function(data) {
-            $('#versionURL').html(synapseVerUrl);
-            $('#versionNumber').html(data.version);
+        $.ajax({
+            type: "GET",
+            url: synapseVerUrl,
+            contentType: false,
+            processData: false,
+            crossDomain: true,
+            success : function (data) {
+                $('#versionURL').html(synapseVerUrl);
+                $('#versionNumber').html(data.version);
 
-            $.get(teamRequestUrl, function(data) {
-                $('#teamURL').html(teamRequestUrl);
-                $('#teamName').html(data.name);
-                $('#createdOn').html(data.createdOn);
-                $('#modifiedOn').html(data.modifiedOn);
-                $('#eTag').html(data.etag);
-                $('#teamDescription').html(data.description);
-            });
+                $.get(teamRequestUrl, function(data) {
+                    $('#teamURL').html(teamRequestUrl);
+                    $('#teamName').html(data.name);
+                    $('#createdOn').html(data.createdOn);
+                    $('#modifiedOn').html(data.modifiedOn);
+                    $('#eTag').html(data.etag);
+                    $('#teamDescription').html(data.description);
+                });
+            }
         });
     });
 }
@@ -441,12 +448,13 @@ function generateSynapseDataForm() {
         "        <label>Synapse Server Version (<span id=\"versionURL\"></span>):</label>\n" +
         "      </div>\n" +
         "      <div class=\"col-md-4\">\n" +
-        "          <span id=\"versionNumber\" style=\"font-style: italic; font-weight:800;\"></span>\n" +
+        "          <span id=\"versionNumber\" style=\"font-style: italic; font-weight:800;\">" +
+        "<div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div></span>\n" +
         "      </div>\n" +
         "    </div>\n" +
         "\n" +
         "    <div class=\"row\">\n" +
-        "      <p class=\"lead\">Data retrieved for Team #2 (<span id=\"teamURL\"></span>):</p>\n" +
+        "      <p class=\"lead\">Data retrieved for Team (<span id=\"teamURL\"></span>):</p>\n" +
         "    </div>\n" +
         "\n" +
         "    <div class=\"row\">\n" +
@@ -454,7 +462,7 @@ function generateSynapseDataForm() {
         "        <label>Name:</label>\n" +
         "      </div>\n" +
         "      <div class=\"col-md-4\">\n" +
-        "        <span id=\"teamName\"></span>\n" +
+        "        <span id=\"teamName\"><div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div></span>\n" +
         "      </div>\n" +
         "    </div>\n" +
         "\n" +
@@ -463,7 +471,7 @@ function generateSynapseDataForm() {
         "        <label>Created On:</label>\n" +
         "      </div>\n" +
         "      <div class=\"col-md-4\">\n" +
-        "        <span id=\"createdOn\"></span>\n" +
+        "        <span id=\"createdOn\"><div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div></span>\n" +
         "      </div>\n" +
         "    </div>\n" +
         "\n" +
@@ -472,7 +480,7 @@ function generateSynapseDataForm() {
         "        <label>Modified On:</label>\n" +
         "      </div>\n" +
         "      <div class=\"col-md-4\">\n" +
-        "        <span id=\"modifiedOn\"></span>\n" +
+        "        <span id=\"modifiedOn\"><div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div></span>\n" +
         "      </div>\n" +
         "    </div>\n" +
         "\n" +
@@ -481,7 +489,7 @@ function generateSynapseDataForm() {
         "        <label>E-Tag:</label>\n" +
         "      </div>\n" +
         "      <div class=\"col-md-4\">\n" +
-        "        <span id=\"eTag\"></span>\n" +
+        "        <span id=\"eTag\"><div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div></span>\n" +
         "      </div>\n" +
         "    </div>\n" +
         "\n" +
@@ -490,7 +498,7 @@ function generateSynapseDataForm() {
         "    <label>Team Description:</label>\n" +
         "  </div>\n" +
         "  <div class=\"col-md-4\">\n" +
-        "    <span id=\"teamDescription\"></span>\n" +
+        "    <span id=\"teamDescription\"><div class=\"text-center\"><i class=\"fa fa-spin fa-spinner\"></i></div></span>\n" +
         "  </div>\n" +
         "</div>" +
         "</div>");

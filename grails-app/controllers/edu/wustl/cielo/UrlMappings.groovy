@@ -101,6 +101,10 @@ class UrlMappings {
         "/messages"(controller: "accessRequest", action: "list")
         "/messages/rows"(controller: "accessRequest", action: "getTableRows")
 
+        //rest controller
+        "/rest/v1/version"(controller: "rest", action: "appVersion", method: "GET")
+        "/rest/v1/projects"(controller: "rest", action: "getListOfProjects", method: "GET")
+
         //Errors
         "500"(controller: "errors", action:"error")
         "404"(controller: "errors", action: "notFound")

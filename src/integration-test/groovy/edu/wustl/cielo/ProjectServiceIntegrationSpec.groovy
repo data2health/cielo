@@ -1,6 +1,7 @@
 package edu.wustl.cielo
 
 import edu.wustl.cielo.enums.ProjectStatusEnum
+import org.grails.plugin.cache.GrailsCacheManager
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Autowired
 import grails.testing.mixin.integration.Integration
@@ -13,6 +14,9 @@ class ProjectServiceIntegrationSpec extends Specification {
 
     @Autowired
     ProjectService projectService
+
+    @Autowired
+    GrailsCacheManager grailsCacheManager
 
     TeamService teamService
 
@@ -428,5 +432,41 @@ class ProjectServiceIntegrationSpec extends Specification {
 
         then:
             results
+    }
+
+    void "test countFilteredProjects"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        int countedProjects
+
+        when:
+            countedProjects = projectService.countFilteredProjects(false, "")
+
+        then:
+            countedProjects == 1
+
+        when:
+            countedProjects = projectService.countFilteredProjects(true, "")
+
+        then:
+            countedProjects == 0
+
+        when:
+            new Project(projectOwner: user, name: "Second", license: softwareLicense,
+                    description: "something").save()
+            grailsCacheManager.getCache("filtered_projects_count").clear()
+            countedProjects = projectService.countFilteredProjects(true, "")
+
+        then:
+            countedProjects == 0
+
+        when:
+            countedProjects = projectService.countFilteredProjects(false, "" )
+
+        then:
+            countedProjects == 2
     }
 }

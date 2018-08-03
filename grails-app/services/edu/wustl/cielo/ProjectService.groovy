@@ -1201,6 +1201,71 @@ class ProjectService {
     }
 
     /**
+     * Get the total count of projects for a given searh term
+     *
+     * @param filterOnShared whether we filter on public projects
+     * @param filterTerm the search term or null/empty string
+     *
+     * @return the number of projects found
+     */
+    @ReadOnly
+    @Cacheable("filtered_projects_count")
+    int countFilteredProjects(boolean filterOnShared, String filterTerm) {
+        Sql sql = new Sql(dataSource)
+        StringBuffer whereClause = new StringBuffer(' where ')
+        List params = []
+
+       if (filterOnShared) whereClause << ' project.shared = true  -- for public projects'
+
+        whereClause << """
+                ${!whereClause.toString().equals(" where ")? ' AND': ''} (
+                        lower(t.name) like lower(${"'%" + (filterTerm?:'') + "%'"})
+                    OR
+                        lower(project.name) like lower(${"'%" + (filterTerm?:'') + "%'"})
+                    OR
+                        lower(project.description) like ${"'%" + (filterTerm?:'') + "%'"}
+                    OR
+                        lower(admin_pub_profile.first_name || ' ' || admin_pub_profile.last_name) like lower(${"'%" + (filterTerm?:'') + "%'"})
+                    OR
+                        lower(teamMembers.members) like lower(${"'%" + (filterTerm?:'') + "%'"})
+                    OR
+                        lower(pa.annotations) like lower(${"'%" + (filterTerm?:'') + "%'"})
+                )
+        """
+
+        String query = """
+                SELECT 
+                    count(project.id) as cnt
+                FROM project
+                    LEFT JOIN project_team AS pt ON pt.project_teams_id=id
+                    LEFT JOIN team AS t ON t.id=pt.team_id
+                    LEFT JOIN team_user_account AS tuac ON tuac.team_members_id=t.id
+                    LEFT JOIN user_account AS uac ON uac.id=t.administrator_id 
+                    LEFT JOIN profile AS admin_pub_profile ON admin_pub_profile.user_id=project.project_owner_id
+                    LEFT JOIN (
+                        SELECT
+                            team.id AS t_id,
+                            string_agg(profile.first_name || ' ' || profile.last_name, ', ') AS members
+                        FROM team     
+                            LEFT JOIN team_user_account AS tuac ON tuac.team_members_id=team.id
+                            LEFT JOIN profile ON profile.user_id=tuac.user_account_id
+                        GROUP BY team.id
+                        ORDER BY team.id
+                    ) AS teamMembers ON teamMembers.t_id=pt.team_id
+                    LEFT JOIN (
+                        SELECT
+                            string_agg(annotation.label, ', ') AS annotations,
+                            project_annotation.project_annotations_id AS id
+                        FROM project_annotation
+                        LEFT JOIN annotation ON annotation.id=project_annotation.annotation_id
+                        GROUP BY project_annotation.project_annotations_id
+                    ) AS pa ON pa.id=project.id
+                ${whereClause.toString()}
+                """
+
+        return sql.rows(query, params)[0].cnt
+    }
+    /**
      * Retrieve the total count of projects with given filter
      *
      * @param user the user if searching myprojects, null otherwise
@@ -1210,7 +1275,7 @@ class ProjectService {
      * @return the number of total projects that match search criteria
      */
     @ReadOnly
-    @Cacheable("filtered_projects_count")
+    @Cacheable("filtered_projects_pages_count")
     int countFilteredProjectsPages(UserAccount user, boolean filterOnShared, String filterTerm, int max) {
         Sql sql = new Sql(dataSource)
         StringBuffer whereClause = new StringBuffer(' where ')
@@ -1272,7 +1337,7 @@ class ProjectService {
 
         numberOfCountedItems = sql.rows(query, params).size()
 
-        if (numberOfCountedItems == 0 || numberOfCountedItems <= max) return 1
+        if (numberOfCountedItems == 0 || numberOfCountedItems <= max || max <= 0) return 1
         else return Math.ceil(numberOfCountedItems / max).toInteger().intValue()
     }
 
