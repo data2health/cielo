@@ -10,6 +10,8 @@ import grails.plugin.springsecurity.acl.AclObjectIdentity
 import grails.plugin.springsecurity.acl.AclEntry
 import grails.testing.services.ServiceUnitTest
 import grails.web.mapping.LinkGenerator
+import org.grails.plugin.cache.GrailsCacheManager
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.security.acls.model.AclCache
 import spock.lang.Specification
@@ -17,6 +19,9 @@ import grails.testing.gorm.DomainUnitTest
 import grails.plugin.springsecurity.SpringSecurityService
 
 class ProjectServiceSpec extends Specification implements ServiceUnitTest<ProjectService>, DomainUnitTest<Project> {
+
+    @Autowired
+    GrailsCacheManager grailsCacheManager
 
     def webRoot
     def assetsRoot
@@ -1033,5 +1038,29 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
 
         then:
             revision == 1
+    }
+
+    void "test changeProjectVisibility"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+        Project project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
+                description: "some description").save()
+        AclSid aclSid       = new AclSid()
+        aclSid.principal    = false
+        aclSid.sid          = user.username
+        aclSid.save(flush: true)
+
+        given:
+            !project.shared
+
+        when:
+            activityService = new ActivityService()
+            activityService.grailsCacheManager = grailsCacheManager
+            service.activityService = activityService
+            service.changeProjectVisibility(project.id, true)
+
+        then:
+            project.shared
     }
 }

@@ -55,6 +55,7 @@ class HomeControllerSpec extends Specification implements ControllerUnitTest<Hom
     void "test home"(){
 
         controller.activityService = activityService
+        controller.userAccountService = userAccountService
         controller.teamService = teamService
 
         when: "not logged in"
@@ -76,6 +77,20 @@ class HomeControllerSpec extends Specification implements ControllerUnitTest<Hom
         then:
             !response.redirectedUrl
             response.status == 200
+            response.reset()
+
+        when:
+            userAccountService = new UserAccountService()
+            userAccountService.metaClass.isUserApiUserOnly = { UserAccount userAccount ->
+                true
+            }
+            controller.userAccountService = userAccountService
+            controller.home()
+
+        then:
+            response.redirectedUrl
+            response.status == 302
+
     }
 
     void "test sidebarLeft"() {

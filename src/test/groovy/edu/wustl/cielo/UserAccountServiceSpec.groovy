@@ -287,4 +287,28 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
             user.profile.institution.id
             user.profile.institution.fullName == "University of Kentucky"
     }
+
+    void "test isUserApiUserOnly"() {
+        UserAccount userAccount = new UserAccount(username: "someuser", password: "somePassword").save()
+
+        UserRole userRole = new UserRole(authority: UserRolesEnum.ROLE_API.toString()).save()
+        UserAccountUserRole userAccountUserRole    = new UserAccountUserRole()
+        userAccountUserRole.userRole               = userRole
+        userAccountUserRole.userAccount            = userAccount
+        userAccountUserRole.save()
+
+        when:
+            boolean isApiUser = service.isUserApiUserOnly(userAccount)
+
+        then:
+            isApiUser
+
+        when:
+            userAccountUserRole.userRole = new UserRole(authority: UserRolesEnum.ROLE_USER.toString()).save()
+            userAccountUserRole.save()
+            isApiUser = service.isUserApiUserOnly(userAccount)
+
+        then:
+            !isApiUser
+    }
 }
