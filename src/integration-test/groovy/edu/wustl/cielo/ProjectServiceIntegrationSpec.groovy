@@ -1,6 +1,7 @@
 package edu.wustl.cielo
 
 import edu.wustl.cielo.enums.ProjectStatusEnum
+import grails.plugin.springsecurity.acl.AclSid
 import org.grails.plugin.cache.GrailsCacheManager
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -468,5 +469,29 @@ class ProjectServiceIntegrationSpec extends Specification {
 
         then:
             countedProjects == 2
+    }
+
+    void "test createNewProject"() {
+        UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+        AclSid aclSid       = new AclSid()
+        aclSid.principal    = false
+        aclSid.sid          = user.username
+        aclSid.save(flush: true)
+
+        SoftwareLicense softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
+                url: "http://www.rerlicense.com").save()
+
+        when:
+            List<Project> projects = Project.all
+
+        then:
+            projects.size() == 0
+
+        when:
+            Long projectId = -1L
+            projectId = projectService.createNewProject("My Project", "My description", softwareLicense.id, "", user.username)
+
+        then:
+            projectId != -1L
     }
 }

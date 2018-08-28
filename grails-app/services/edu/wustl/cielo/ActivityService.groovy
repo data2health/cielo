@@ -294,7 +294,12 @@ class ActivityService {
         UserAccount user
 
         if (springSecurityService.isLoggedIn()) {
-            user = UserAccount.get(springSecurityService?.principal?.id)
+            try {
+                user = UserAccount.get(springSecurityService?.principal?.id)
+            } catch (MissingPropertyException mpe) {
+                //rest login uses user's username as principal so no id
+                user = UserAccount.findByUsername(springSecurityService?.principal)
+            }
         } else {
             user = UserAccount.findByUsername("admin")
         }

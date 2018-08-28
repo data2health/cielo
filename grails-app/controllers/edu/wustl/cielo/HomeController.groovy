@@ -16,6 +16,12 @@ class HomeController {
         Object principal = springSecurityService.principal
         UserAccount user = principal ? UserAccount.get(principal.id) : null
 
+        //Need to logout the user is its only api because, they do not need UI access
+        //This behaviour may need to change in the future
+        if (userAccountService.isUserApiUserOnly(user)) {
+            redirect uri:'/logout'
+        }
+
         if (!user) {
             log.error("User is not logged in. Redirecting to login page.")
             redirect controller: 'login', action: 'auth'

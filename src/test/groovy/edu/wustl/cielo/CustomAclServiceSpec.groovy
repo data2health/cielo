@@ -1,5 +1,6 @@
 package edu.wustl.cielo
 
+import edu.wustl.cielo.enums.UserRolesEnum
 import grails.plugin.springsecurity.acl.AclEntry
 import grails.plugin.springsecurity.acl.AclService
 import grails.plugin.springsecurity.acl.AclSid
@@ -233,6 +234,18 @@ class CustomAclServiceSpec extends Specification implements ServiceUnitTest<Cust
     void "test patchPermissionsOnSave"() {
         UserAccount userAccount = new UserAccount(username: "someuser", password: "somePassword").save()
         UserAccount userAccount2 = new UserAccount(username: "someuser2", password: "somePassword").save()
+
+        UserRole userRole = new UserRole(authority: UserRolesEnum.ROLE_USER.toString()).save()
+        UserAccountUserRole userAccountUserRole    = new UserAccountUserRole()
+        userAccountUserRole.userRole               = userRole
+        userAccountUserRole.userAccount            = userAccount
+        userAccountUserRole.save()
+
+        UserAccountUserRole userAccountUserRole2    = new UserAccountUserRole()
+        userAccountUserRole2.userRole               = userRole
+        userAccountUserRole2.userAccount            = userAccount2
+        userAccountUserRole2.save()
+
         service.bootstrapAcls()
         SoftwareLicense softwareLicense = new SoftwareLicense(creator: userAccount, body: "Some text\nhere.", label: "RER License 1.0",
                 url: "http://www.rerlicense.com").save()

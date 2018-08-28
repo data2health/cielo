@@ -1715,4 +1715,70 @@ class ProjectService {
             }
         }
     }
+
+    /**
+     * Create a project with basic information
+     *
+     * @param name the name of the project
+     * @param desc the description of the project
+     * @param licenseId the if of the project
+     * @param licenseLabel the name of the license
+     * @param username the username of the user creating the project
+     *
+     * @return the project id or -1L
+     */
+    Long createNewProject(String name, String desc, Long licenseId, String licenseLabel, String username) {
+        SoftwareLicense softwareLicense
+        UserAccount user = UserAccount.findByUsername(username)
+        Sql sql = new Sql(dataSource)
+
+        if (licenseId != -1L) softwareLicense = SoftwareLicense.findById(licenseId)
+        else softwareLicense = SoftwareLicense.findByLabel(licenseLabel)
+
+        if (user && softwareLicense) {
+            List params = []
+            String query = """
+                  INSERT INTO project(version, date_created, last_updated, license_id, name, views, status, project_owner_id, description, shared,
+                  last_changed)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """
+
+            params.addAll([0, new Date().toTimestamp(), new Date().toTimestamp(), softwareLicense.id, name, 0, "IN_PROGRESS", user.id, desc, true, new Date().toTimestamp()])
+            sql.executeInsert(query, params)
+        }
+
+        Project project = Project.findByNameAndDescriptionAndProjectOwner(name, desc, user)
+        if (project) {
+            customAclService.setupBasePermissionsForProject(project)
+            activityService.invalidateNecessaryCaches(ActivityTypeEnum.ACTIVITY_NEW_PROJECT)
+        }
+
+        return project?.id ?: -1L
+    }
+
+    /**
+     * Change the visibility of the project
+     *
+     * @param projectId the id of the project to change
+     * @param shared whether project is to be shared or not
+     *
+     * @return true if successful, false otherwise
+     */
+    boolean changeProjectVisibility(Long projectId, boolean shared) {
+        Project project = Project.findById(projectId)
+        project.shared = shared
+        project.lastChanged = new Date()
+
+        if (!project.save()) {
+            project.errors.allErrors.each { ObjectError objectError ->
+                log.error(objectError.toString())
+            }
+            return false
+        }
+        customAclService.patchPermissionsOnSave(project)
+        if (Environment.current != Environment.TEST) {
+            activityService.invalidateNecessaryCaches(ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_SHARED)
+        }
+        return true
+    }
 }

@@ -7,4 +7,5 @@ enum UserRolesEnum {
     ROLE_SUPERUSER,
     ROLE_ADMIN,
     ROLE_USER,
+    ROLE_API
 }

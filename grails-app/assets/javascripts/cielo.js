@@ -6,27 +6,29 @@ window.addEventListener('load', function (event) {
     $('[data-toggle="tooltip"]').tooltip();
 }, false);
 
-$('.panel-collapse ').on('hide.bs.collapse', function(event) {
-    var chevronUp = $('#' + event.target.id).prev().find('i');
-
-    chevronUp.removeClass("fa-chevron-up");
-    chevronUp.addClass("fa-chevron-down");
-});
-
-$('.panel-collapse').on('show.bs.collapse', function() {
-    var chevronDown;
-
-    if (event.target.id.endsWith('_i')) {
-        chevronDown = $('#' + event.target.id);
-    } else {
-        //its not the icon element, likely the parent
-        chevronDown = $('#' + event.target.id).find('i');
-    }
-    chevronDown.removeClass("fa-chevron-down");
-    chevronDown.addClass("fa-chevron-up");
-});
 
 $( function() {
+
+    $('.panel-collapse ').on('hide.bs.collapse', function(event) {
+        var chevronUp = $('#' + event.target.id).prev().find('i');
+
+        chevronUp.removeClass("fa-chevron-up");
+        chevronUp.addClass("fa-chevron-down");
+    });
+
+    $('.panel-collapse').on('show.bs.collapse', function(event) {
+        var chevronDown;
+
+        if (event.target.id.endsWith('_i')) {
+            console.log(event);
+            chevronDown = $('#' + event.target.id);
+        } else {
+            //its not the icon element, likely the parent
+            chevronDown = $('#' + event.target.id).find('i');
+        }
+        chevronDown.removeClass("fa-chevron-down");
+        chevronDown.addClass("fa-chevron-up");
+    });
 
     //hook onto global ajax events
     $(document).bind("ajaxSend", function() {

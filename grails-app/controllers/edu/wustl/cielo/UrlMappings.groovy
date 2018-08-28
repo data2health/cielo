@@ -104,6 +104,10 @@ class UrlMappings {
         //rest controller
         "/rest/v1/version"(controller: "rest", action: "appVersion", method: "GET")
         "/rest/v1/projects"(controller: "rest", action: "getListOfProjects", method: "GET")
+        "/rest/v1/project/new"(controller: "rest", action: "createProject", method: "POST")
+        "/rest/v1/project/update/visibility"(controller: "rest", action: "changeProjectVisibility", method: "POST")
+        "/rest/v1/login"(controller: "rest", action: "restLogin", method: "POST")
+        "/rest/v1/licenses/list"(controller: "rest", action: "listLicenses", method: "GET")
 
         //Errors
         "500"(controller: "errors", action:"error")
