@@ -291,8 +291,13 @@ class CustomAclService {
         } else {
             //the project shared property was switched to private
             UserAccount.all.each { UserAccount userAccount ->
-                AclSid userAcl = AclSid.findBySid(userAccount.username)
-                removePermission(aclObjectIdentity, userAcl, BasePermission.READ)
+                UserAccountUserRole userAccountUserRole = UserAccountUserRole.findByUserAccount(userAccount)
+                if (!userAccountUserRole.userRole.authority.equals("ROLE_ADMIN") ||
+                        !userAccountUserRole.userRole.authority.equals("ROLE_SUPERUSER"))
+                {
+                    AclSid userAcl = AclSid.findBySid(userAccount.username)
+                    removePermission(aclObjectIdentity, userAcl, BasePermission.READ)
+                }
             }
         }
     }
@@ -309,11 +314,12 @@ class CustomAclService {
     static int getNextAvailableAceOrder(AclObjectIdentity aclObjectIdentity) {
         int nextAceOrder = -1
         int objectCount = AclEntry.countByAclObjectIdentity(aclObjectIdentity)
+        List<Integer> listOfAceOrders = AclEntry.findAllByAclObjectIdentity(aclObjectIdentity).sort { a,b -> a.aceOrder <=> b.aceOrder  }.collect { it.aceOrder }
 
-        AclEntry.findAllByAclObjectIdentity(aclObjectIdentity).sort { a,b -> a.aceOrder <=> b.aceOrder  }.eachWithIndex { AclEntry obj, int index ->
-            if (index != obj.aceOrder) {
-                nextAceOrder =  index
-                return true
+        for (int index = 0; index < listOfAceOrders.size(); index++) {
+            if (index != listOfAceOrders[index].intValue()) {
+                nextAceOrder = index
+                index = listOfAceOrders.size() + 1
             }
         }
 

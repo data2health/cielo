@@ -32,12 +32,20 @@ grails.plugin.springsecurity.filterChain.chainMap = [
 	[pattern: '/**',             filters: 'JOINED_FILTERS']
 ]
 
+
+//migration settings
+grails.plugin.databasemigration.updateOnStart 			= true
+grails.plugin.databasemigration.updateOnStartFileName 	= 'changelog.groovy'
+grails.plugin.databasemigration.autoMigrateScripts 		= ['RunApp']
+grails.plugin.databasemigration.updateOnStartContexts 	= ['development', 'production']
+
 environments {
 	development {
 		annotations="/WEB-INF/startup/shorter_mshd2014.txt"
 	}
 	test {
 		annotations="/WEB-INF/startup/shorter_mshd2014.txt"
+		grails.plugin.databasemigration.updateOnStart = false
 	}
 	production {
 		annotations="/WEB-INF/startup/shorter_mshd2014.txt"
@@ -52,8 +60,3 @@ mailjet.publicKey="6d9a8bd2361ca922b3ee2ff263655f9c"
 mailjet.secretKey="e7e5a40f55babdfd6540d2ab2e438e5b"
 mailjet.from = "CIELO"
 mailjet.fromAddress = "cd2h.cielo@wustl.edu"
-
-//migration settings
-grails.plugin.databasemigration.updateOnStart 			= true
-grails.plugin.databasemigration.updateOnStartFileName 	= 'changelog.groovy'
-grails.plugin.databasemigration.autoMigrateScripts 		= ['RunApp', 'DebugApp']

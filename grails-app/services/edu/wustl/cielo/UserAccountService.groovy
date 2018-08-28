@@ -687,4 +687,21 @@ class UserAccountService {
     protected void logout() {
         SCH.clearContext()
     }
+
+    /**
+     * Is the user passed in only have ROLE_API
+     *
+     * @param userAccount the user to check
+     *
+     * @return true if user only has ROLE_API, false otherwise
+     */
+    boolean isUserApiUserOnly(UserAccount userAccount) {
+        UserRole apiUserRole = UserRole.findByAuthority("ROLE_API")
+        List<UserAccountUserRole> userAccountUserRoles = UserAccountUserRole.findAllByUserAccount(userAccount)
+
+        if (userAccountUserRoles.size() == 1) {
+            return userAccountUserRoles[0].userRole == apiUserRole
+        }
+        return false
+    }
 }
