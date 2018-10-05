@@ -86,6 +86,8 @@ on an ongoing basis, with input from our community of users.</p>
     </li>
 </ul>
 
+<h4>CIELO Annotations</h4>
+<p>Annotations in the CIELO platform are provided by the NCI Thesaurus&trade;. Please click <a href="https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/NCI_THESAURUS_license.txt">here</a> to review the NCI Thesaurus&trade; license.</p>
 
 <h4>Account Terms</h4>
 <ul>

@@ -6,7 +6,6 @@ window.addEventListener('load', function (event) {
     $('[data-toggle="tooltip"]').tooltip();
 }, false);
 
-
 $( function() {
 
     $('.panel-collapse ').on('hide.bs.collapse', function(event) {
@@ -69,21 +68,6 @@ $( function() {
 
     //autoload count initialization
     sessionStorage.setItem("autoloadCount", 1);
-
-    //custom data attributes will show on mouseenter and mouseleave
-    $('.date-time').click(
-        function() {
-            var dataDiff = $(this).attr('data-diff');
-            var currentHtml = $(this).html();
-
-            if (currentHtml === dataDiff){
-                $(this).html($(this).attr('data-date'));
-            } else {
-                $(this).html($(this).attr('data-diff'));
-            }
-        }
-    );
-
 
     $('.jarallax').jarallax({
         type: 'scale',
@@ -211,7 +195,35 @@ $( function() {
         }
     });
 
-    $('.multiple-select').select2();
+    $('#annotations-select').select2({
+        minimumInputLength: 3,
+        ajax: {
+            delay: 250,
+            url: '/annotations/list',
+            data: function (params) {
+                var query = {
+                    search: params.term,
+                    page: (params.page - 1) || 0
+                };
+                if (params.term === "") {
+                    return false;
+                } else {
+                    return query;
+                }
+            },
+            dataType: 'json',
+            processResults: function (data) {
+                // Tranforms the top-level key of the response object from 'items' to 'results'
+                return {
+                    results: data.items,
+                    pagination: {
+                        more: data.pagination.more
+                    }
+                };
+            },
+            cache: true
+        }
+    });
 
     $('#addActivity').click(function () {
         bootbox.dialog({
@@ -312,8 +324,25 @@ $( function() {
         } else {
             $('#teamSearchClear').css('display', 'none');
         }
-    })
+    });
+
+    //custom data attributes will show on click
+    $('.date-time').on('click', toggleDate);
 });
+
+
+function toggleDate() {
+    var dateSpan    = event.target;
+    var dataDiff    = $(dateSpan).attr('data-diff');
+    var currentHtml = $(dateSpan).html();
+    var date        = $(dateSpan).attr('data-date');
+
+    if (currentHtml === dataDiff){
+        $(dateSpan).html(date);
+    } else {
+        $(dateSpan).html(dataDiff);
+    }
+}
 
 function getAttributes(element) {
     var output = "";
@@ -363,7 +392,7 @@ function showTermsOfUse() {
     alertWindow.init(function() {
         //grab the text for the license from db
         $.get("/license/termsOfUse", function (data) {
-            alertWindow.find('.bootbox-body').html(data);
+            alertWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert").html(data);
         });
     });
 }
@@ -389,7 +418,7 @@ function showTermsOfUseNoAcknowledge() {
     alertWindow.init(function() {
         //grab the text for the license from db
         $.get("/license/termsOfUse", function (data) {
-            alertWindow.find('.bootbox-body').html(data);
+            alertWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert").html(data);
         });
     });
 
@@ -642,18 +671,7 @@ function getOlderActivity(offset, max) {
         $(this).insertBefore($("#olderContent")).hide().show('fast', function() {
             window.doneLoading = true;
             $('[data-toggle="tooltip"]').tooltip('update');
-            $('.date-time').click(
-                function() {
-                    var dataDiff = $(this).attr('data-diff');
-                    var currentHtml = $(this).html();
-
-                    if (currentHtml === dataDiff){
-                        $(this).html($(this).attr('data-date'));
-                    } else {
-                        $(this).html($(this).attr('data-diff'));
-                    }
-                }
-            );
+            $('.date-time').off('click', toggleDate).on('click', toggleDate);
         });
 
         //check whether we need to show the load more button or not

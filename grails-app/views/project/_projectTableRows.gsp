@@ -78,7 +78,11 @@
         </td>
         <td>
             <g:if test="${project.annotations.size() > 0}">
-                ${project.annotations.label.join(', ')}
+                <g:each in="${project.annotations}" var="annotation">
+                    <span class="annotations-pill">
+                        ${annotation.term}
+                    </span>&nbsp;
+                </g:each>
             </g:if>
             <g:else>
                 <em>No annotations</em>

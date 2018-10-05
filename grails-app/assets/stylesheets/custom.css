@@ -300,8 +300,16 @@ ul.list-group.list-group-flush {
 }
 
 #activity {
-    padding: 0;
+    padding: 2px 6px 2px 2px;
     margin: 0;
+}
+
+.annotations-pill {
+    background-color: #f19f09;
+    color: white;
+    padding: 0.25em 1em;
+    border-radius: 1em;
+    border: 1.5px solid #818992;
 }
 
 .card-footer.team-users {

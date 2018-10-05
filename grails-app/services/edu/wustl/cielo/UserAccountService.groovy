@@ -236,7 +236,7 @@ class UserAccountService {
             log.info("Creating ${numberOfUsers} users...")
             log.info("****************************\n")
 
-            def annotations = Annotation.list()
+            def annotations = Annotation.list(max: 20)
             def institutions = Institution.list()
 
             numberOfUsers.times { index ->
@@ -282,12 +282,14 @@ class UserAccountService {
                         picture: profilePic
                 )
 
-                numAnnotations.times {
-                    Annotation annotationToAdd = annotations?.get(new Random().nextInt(annotations.size()))
-                    while (profile.annotations?.contains(annotationToAdd)) {
-                        annotationToAdd = annotations?.get(new Random().nextInt(annotations.size()))
+                if (annotations.size() > 0) {
+                    numAnnotations.times {
+                        Annotation annotationToAdd = annotations?.get(new Random().nextInt(annotations.size()))
+                        while (profile.annotations?.contains(annotationToAdd) && annotations.size() > 1) {
+                            annotationToAdd = annotations?.get(new Random().nextInt(annotations.size()))
+                        }
+                        profile.addToAnnotations(annotationToAdd)
                     }
-                    profile.addToAnnotations(annotationToAdd)
                 }
 
                 if (!profile.save()) {

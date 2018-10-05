@@ -26,45 +26,45 @@ appender('STDOUT', ConsoleAppender) {
 
 
 //standard
-logger('org.hibernate.internal.SessionImpl', level, ['STDOUT'])
-
-//Custom logging entries
-//Domain Objects
-logger('edu.wustl.cielo.Activity', level, ['STDOUT'])
-logger('edu.wustl.cielo.Annotation', level, ['STDOUT'])
-logger('edu.wustl.cielo.Code', level, ['STDOUT'])
-logger('edu.wustl.cielo.Comment', level, ['STDOUT'])
-logger('edu.wustl.cielo.Data', level, ['STDOUT'])
-logger('edu.wustl.cielo.Institution', level, ['STDOUT'])
-logger('edu.wustl.cielo.Profile', level, ['STDOUT'])
-logger('edu.wustl.cielo.ProfilePic', level, ['STDOUT'])
-logger('edu.wustl.cielo.Project', level, ['STDOUT'])
-logger('edu.wustl.cielo.Publication', level, ['STDOUT'])
-logger('edu.wustl.cielo.RegistrationCode', level, ['STDOUT'])
-logger('edu.wustl.cielo.SoftwareLicense', level, ['STDOUT'])
-logger('edu.wustl.cielo.Team', level, ['STDOUT'])
-logger('edu.wustl.cielo.UserAccount', level, ['STDOUT'])
-logger('edu.wustl.cielo.UserAccountUserRole', level, ['STDOUT'])
-logger('edu.wustl.cielo.UserRole', level, ['STDOUT'])
-logger('edu.wustl.cielo.meta.MetaData', level, ['STDOUT'])
-
-//Services
-logger('edu.wustl.cielo.AnnotationService', level, ['STDOUT'])
-logger('edu.wustl.cielo.InstitutionService', level, ['STDOUT'])
-logger('edu.wustl.cielo.ProjectService', level, ['STDOUT'])
-logger('edu.wustl.cielo.SoftwareLicenseService', level, ['STDOUT'])
-logger('edu.wustl.cielo.TeamService', level, ['STDOUT'])
-logger('edu.wustl.cielo.UserAccountService', level, ['STDOUT'])
-
-//Controllers
-logger('edu.wustl.cielo.HomeController', level, ['STDOUT'])
-
-//Plugins
-logger('grails.plugins.quartz', level, ['STDOUT'])
-logger('grails.plugins.mail', level, ['STDOUT'])
-
-//Jobs
-logger('edu.wustl.cielo.EmailSenderJob', level, ['STDOUT'])
+//logger('org.hibernate.internal.SessionImpl', level, ['STDOUT'])
+//
+////Custom logging entries
+////Domain Objects
+//logger('edu.wustl.cielo.Activity', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Annotation', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Code', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Comment', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Data', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Institution', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Profile', level, ['STDOUT'])
+//logger('edu.wustl.cielo.ProfilePic', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Project', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Publication', level, ['STDOUT'])
+//logger('edu.wustl.cielo.RegistrationCode', level, ['STDOUT'])
+//logger('edu.wustl.cielo.SoftwareLicense', level, ['STDOUT'])
+//logger('edu.wustl.cielo.Team', level, ['STDOUT'])
+//logger('edu.wustl.cielo.UserAccount', level, ['STDOUT'])
+//logger('edu.wustl.cielo.UserAccountUserRole', level, ['STDOUT'])
+//logger('edu.wustl.cielo.UserRole', level, ['STDOUT'])
+//logger('edu.wustl.cielo.meta.MetaData', level, ['STDOUT'])
+//
+////Services
+//logger('edu.wustl.cielo.AnnotationService', level, ['STDOUT'])
+//logger('edu.wustl.cielo.InstitutionService', level, ['STDOUT'])
+//logger('edu.wustl.cielo.ProjectService', level, ['STDOUT'])
+//logger('edu.wustl.cielo.SoftwareLicenseService', level, ['STDOUT'])
+//logger('edu.wustl.cielo.TeamService', level, ['STDOUT'])
+//logger('edu.wustl.cielo.UserAccountService', level, ['STDOUT'])
+//
+////Controllers
+//logger('edu.wustl.cielo.HomeController', level, ['STDOUT'])
+//
+////Plugins
+//logger('grails.plugins.quartz', level, ['STDOUT'])
+//logger('grails.plugins.mail', level, ['STDOUT'])
+//
+////Jobs
+//logger('edu.wustl.cielo.EmailSenderJob', level, ['STDOUT'])
 
 //    appender("FILE", FileAppender) {
 //        file = "stacktrace.log"

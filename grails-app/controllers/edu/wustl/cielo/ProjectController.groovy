@@ -55,7 +55,7 @@ class ProjectController {
             projectService.incrementViewsCounter(project)
 
             return [userProfile: user.profile,
-                    annotations: Annotation.list(),
+                    annotations: null,
                     project: project,
                     usersAccess: projectService.getListOfUsersAccess(project),
                     showTeams: showTeams,
@@ -274,7 +274,7 @@ class ProjectController {
         Object principal        = springSecurityService.principal
         UserAccount user        = principal ? UserAccount.get(principal.id) : null
 
-       render(template: "newProjectWizard", model: [annotations: Annotation.list(),
+       render(template: "newProjectWizard", model: [annotations: null,
                                                     licences: SoftwareLicense.list(),
                                                     users: UserAccount.list() - user,
                                                     teams: Team.list()])

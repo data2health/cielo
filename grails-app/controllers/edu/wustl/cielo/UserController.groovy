@@ -23,7 +23,7 @@ class UserController {
                 projects: userAccountService.getProjectsUserOwns(user),
                 projectsUserContributesTo: projectService.getProjectsUserContributesTo(user),
                 institutes: Institution.list(),
-                annotations: Annotation.list(),
+                annotations:  user?.profile?.annotations.collect { [name: it.term, id: it.id.toString()] } as JSON,
                 loggedInUser: loggedInUser]
     }
 
@@ -41,7 +41,21 @@ class UserController {
         if (user) {
             bindData(user, params, [exclude: ['password']])
             if (user.id) {
-                if (user.profile) bindData(user.profile, params)
+                bindData(user.profile, params)
+
+                if (params."annotations-select") {
+                    List<Annotation> annotations = []
+                    if (params."annotations-select".indexOf(',') != -1) {
+                        (params."annotations-select".tokenize(',')).each { String annotationId ->
+                            annotations.add(Annotation.findById(Long.valueOf(annotationId)))
+                        }
+                    } else {
+                        annotations.add(Annotation.findById(Long.valueOf(params."annotations-select")))
+                    }
+
+                    user.profile.annotations.addAll(annotations)
+                }
+
                 if (params.profilePic) {
                     if (!user.profile.picture) user.profile.picture = new ProfilePic()
                     user.profile.picture.fileContents  = params.profilePic.bytes

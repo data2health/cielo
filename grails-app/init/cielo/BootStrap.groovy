@@ -5,6 +5,7 @@ import edu.wustl.cielo.SoftwareLicense
 import edu.wustl.cielo.UserAccount
 import edu.wustl.cielo.EmailSenderJob
 import grails.plugin.springsecurity.acl.AclSid
+import grails.util.Environment
 import groovy.util.logging.Slf4j
 
 @Slf4j
@@ -35,8 +36,10 @@ class BootStrap {
         //add user role to admin if not exists
         userAccountService.bootstrapAddSuperUserRoleToUser(admin)
 
-        //always add annotations
-        if (Annotation.count() == 0) annotationService.initializeAnnotations(new File(webRoot + grailsApplication.config.annotations))
+        //always add annotations except for integration tests
+        if (Annotation.count() == 0 && Environment.current != Environment.TEST) {
+            annotationService.initializeAnnotations([new File(webRoot + grailsApplication.config.annotations)])
+        }
 
         //always bootstrap licenses
         if (SoftwareLicense.count() == 0) softwareLicenseService.bootstrapLicenses(new File(webRoot + grailsApplication.config.software.licenses.path))

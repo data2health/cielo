@@ -33,23 +33,21 @@
                     <div id="project-annotations" style="margin-top: -20px; margin-bottom: 30px;display: flex;">
                         <i class="fas fa-tags" style="transform: translateY(4px) translateX(4px) rotate(90deg);color: gold;padding-right: 1em;"></i>
                         <div id="annotations-text">
-                            <span id="annotation-labels">
+                            <div id="annotation-labels">
                                 <g:set var="counter" value="${1}"/>
                                 <g:set var="annotationsCount" value="${project?.annotations?.size()}"/>
                                 <g:each in="${project?.annotations}" var="annotation">
+                                    <span id="${annotation.id}">${annotation.term}</span>
                                     <g:if test="${counter != annotationsCount}">
-                                        ${annotation.label},
+                                        ,
                                     </g:if>
-                                    <g:else>
-                                        ${annotation.label}
-                                    </g:else>
                                     <g:set var="counter" value="${counter+1}"/>
                                 </g:each>
-                            </span>
+                            </div>
                             <span id="annotations-select-span" style="display: none;padding-left: 1em;">
-                                <select class="multiple-select" name="annotations-select" multiple="multiple">
+                                <select id="annotations-select" class="multiple-select" name="annotations-select" multiple="multiple">
                                     <g:each in="${annotations}" var="annotation">
-                                        <option value="${annotation.id}">${annotation.label}</option>
+                                        <option value="${annotation.id}">${annotation.term}</option>
                                     </g:each>
                                 </select>
                             </span>
@@ -346,22 +344,13 @@
     }
 
     function editProject() {
-        var annotations = $('#annotation-labels').text().replace(/^\s+|\s+$/, '').split(",");
-        var options = new Array(annotations.length);
+        var annotations = $('#annotation-labels span');
         var projectLicense = $('#softwareLicenseButton').html().trim();
 
-        //setup multi-select for the annotations for the project
-        for (index in annotations) {
-            //exact match the annotation using filter
-            var textId = $('.multiple-select option').filter(function () {
-                return $(this).text() === annotations[index].trim();
-            }).attr("value");
-            options[index] = textId;
-        }
-
-        //project-description-input description-label
-
-        $('.multiple-select').val(options).trigger("change");
+        $.each(annotations, function(key, value) {
+            var newOption = new Option($(value).text().trim(), $(value).prop('id'), true, true);
+            $('.multiple-select').append(newOption).trigger('change');
+        });
 
         //hide/show where appropriate
         $('#annotation-labels').hide();
@@ -438,15 +427,15 @@
                 $('#project-name-label').text(newProjectName);
 
                 var projectTagObjects = $('.multiple-select').select2('data');
+
                 for (index in projectTagObjects) {
-                    if (index === "0") {
-                        tagsLabel += projectTagObjects[index].text;
-                    } else {
-                        tagsLabel += ", " + projectTagObjects[index].text;
+                    tagsLabel += '<span id="' + projectTagObjects[index].id + '">' + projectTagObjects[index].text + '</span>';
+                    if (Number.parseInt(index) !== (projectTagObjects.length - 1)) {
+                        tagsLabel += ", "
                     }
                 }
 
-                $('#annotation-labels').text(tagsLabel);
+                $('#annotation-labels').html( $.parseHTML( tagsLabel ) );
                 $('#project-description-text').text($('.project-description-textarea').val());
 
                 //license change
@@ -691,7 +680,6 @@
                         var revokableMasks = new Array();
 
                         $('#accessForm').find('input:not(:checked)').each( function () {
-                           // console.log($(this).val());
                             revokableMasks.push($(this).val());
                         });
 
@@ -716,7 +704,6 @@
            if (result.success) {
 
                $.post("${createLink(controller: "project", action: "renderIndividualUserAccess")}", {projectId: projectId, userId: userId}, function (data) {
-                   console.log(data);
                    $('#userAccessDiv_' + userId).replaceWith(data);
                });
            }
