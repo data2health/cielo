@@ -35,6 +35,8 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
     AclService aclService
     AclCache aclCache
     CustomAclService customAclService
+    AnnotationService annotationService
+    UtilService utilService
 
     def setup() {
         mockDomains(UserRole, Institution, Profile, Annotation, SoftwareLicense, RegistrationCode, UserAccountUserRole,
@@ -61,6 +63,18 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
         userAccountService.assetResourceLocator = [findAssetForURI: { String URI ->
             new ByteArrayResource(new File(assetsRoot + "/images/${URI}").bytes)
         }]
+
+        utilService = new UtilService()
+        utilService.metaClass.getDateDiff = { Date fromDate, Date toDate = null ->
+            "today"
+        }
+        annotationService = new AnnotationService()
+
+        annotationService.metaClass.saveNewAnnotation = { List<String> names, String code ->
+            ; //nothing to be done
+        }
+
+        annotationService.utilService = utilService
 
         messageSource.addMessage('ACTIVITY_NEW_USER', Locale.getDefault(), "hello")
         messageSource.addMessage('ACTIVITY_NEW_PROJECT', Locale.getDefault(), "hello")
@@ -129,8 +143,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
             //first setup institutions
             InstitutionService institutionService = new InstitutionService()
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
-            AnnotationService annotationService = new AnnotationService()
-            annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+            annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
             userAccountService.bootstrapUserRoles()
             userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
             userAccountService.setupMockAppUsers(2, 1)
@@ -185,7 +198,7 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
 
         when: "calling with valid project"
             user = new UserAccount(username: "admin", password: "somePassword").save()
-            annotation = new Annotation(label: "ID").save()
+            annotation = new Annotation(term: "ID", code: "C10001").save()
             softwareLicense = new SoftwareLicense(creator: user, body: "Some text\nhere.", label: "RER License 1.0",
                     url: "http://www.rerlicense.com").save()
             project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,

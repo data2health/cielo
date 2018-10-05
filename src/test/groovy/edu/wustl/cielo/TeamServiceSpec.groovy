@@ -11,12 +11,25 @@ class TeamServiceSpec extends Specification implements ServiceUnitTest<TeamServi
     def assetsRoot
     def assetResourceLocator
     UserAccountService userAccountService
+    UtilService utilService
+    AnnotationService annotationService
 
     void setup() {
         mockDomains(Institution, Profile, UserRole, UserAccountUserRole, RegistrationCode)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
         assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
 
+        utilService = new UtilService()
+        utilService.metaClass.getDateDiff = { Date fromDate, Date toDate = null ->
+            "today"
+        }
+        annotationService = new AnnotationService()
+
+        annotationService.metaClass.saveNewAnnotation = { List<String> names, String code ->
+            ; //nothing to be done
+        }
+
+        annotationService.utilService = utilService
         userAccountService = new UserAccountService()
         userAccountService.assetResourceLocator = assetResourceLocator
         userAccountService.assetResourceLocator = [findAssetForURI: { String URI ->
@@ -43,8 +56,12 @@ class TeamServiceSpec extends Specification implements ServiceUnitTest<TeamServi
         when: "adding users first, then adding teams and members"
             InstitutionService institutionService = new InstitutionService()
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
-            AnnotationService annotationService = new AnnotationService()
-            annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+
+            annotationService.metaClass.saveNewAnnotation = { List<String> names, String code ->
+                ; //nothing to be done
+            }
+
+            annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
             userAccountService.bootstrapUserRoles()
             userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
             userAccountService.setupMockAppUsers(4, 0)
@@ -61,8 +78,7 @@ class TeamServiceSpec extends Specification implements ServiceUnitTest<TeamServi
     void "test getTeamMembers"() {
         InstitutionService institutionService = new InstitutionService()
         institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
-        AnnotationService annotationService = new AnnotationService()
-        annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+        annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
         userAccountService.bootstrapUserRoles()
         userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())
         userAccountService.setupMockAppUsers(4, 0)
