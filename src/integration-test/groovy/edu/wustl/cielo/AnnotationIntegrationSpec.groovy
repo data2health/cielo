@@ -26,25 +26,37 @@ class AnnotationIntegrationSpec extends Specification {
         def annotation
 
         when:"save with null label"
-            annotation = new Annotation(label: null)
+            annotation = new Annotation(term: null)
 
         then:
             !annotation.save()
 
         when: "annotation has blank label"
-            annotation = new Annotation(label: "")
+            annotation = new Annotation(term: "")
 
         then:
             !annotation.save()
 
         when: "annotation label length is 1"
-            annotation = new Annotation(label: "A")
+            annotation = new Annotation(term: "A")
 
         then:
             !annotation.save()
 
         when: "save with proper label"
-            annotation = new Annotation(label: "ID")
+            annotation = new Annotation(term: "ID", code: null)
+
+        then:
+            !annotation.save()
+
+        when: "save with proper label"
+            annotation = new Annotation(term: "ID", code: "")
+
+        then:
+            !annotation.save()
+
+        when: "save with proper label"
+            annotation = new Annotation(term: "ID", code: "C10001")
 
         then:
             annotation.save()

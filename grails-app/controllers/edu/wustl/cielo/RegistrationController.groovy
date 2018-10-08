@@ -23,7 +23,7 @@ class RegistrationController {
     @Secured('permitAll')
     def register() {
         return [institutes: institutionService.getAvailableInstitutions(),
-                annotations: Annotation.list(),
+                annotations: null,
                 usernames: userAccountService.getUsernames().join(", ")]
     }
 

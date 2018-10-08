@@ -11,11 +11,27 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
 
     def webRoot
     def assetsRoot
+    UtilService utilService
+    AnnotationService annotationService
 
     def setup() {
         mockDomains(Institution, Profile, UserRole, UserAccountUserRole, RegistrationCode)
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
         assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+
+        utilService = new UtilService()
+        utilService.metaClass.getDateDiff = { Date fromDate, Date toDate = null ->
+            "today"
+        }
+        annotationService = new AnnotationService()
+
+        annotationService.metaClass.saveNewAnnotation = { List<String> names, String code ->
+            names.each { name ->
+                new Annotation(term: name, code: code).save()
+            }
+        }
+
+        annotationService.utilService = utilService
 
         service.assetResourceLocator = [findAssetForURI: { String URI ->
             new ByteArrayResource(new File(assetsRoot + "/images/${URI}").bytes)
@@ -156,8 +172,7 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
         when: "setting up mock users"
         InstitutionService institutionService = new InstitutionService()
         institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
-        AnnotationService annotationService = new AnnotationService()
-        annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+        annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
         service.bootstrapUserRoles()
         service.bootstrapAddSuperUserRoleToUser(service.bootstrapCreateOrGetAdminAccount())
         service.setupMockAppUsers(2, 0)
@@ -184,8 +199,7 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
         when: "setting up mock users"
         InstitutionService institutionService = new InstitutionService()
         institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
-        AnnotationService annotationService = new AnnotationService()
-        annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+        annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
         service.bootstrapUserRoles()
         service.bootstrapAddSuperUserRoleToUser(service.bootstrapCreateOrGetAdminAccount())
         service.setupMockAppUsers(2, 0)

@@ -41,14 +41,14 @@ grails.plugin.databasemigration.updateOnStartContexts 	= ['development', 'produc
 
 environments {
 	development {
-		annotations="/WEB-INF/startup/shorter_mshd2014.txt"
+		annotations="/WEB-INF/startup/NCI_Thesaurus_terms.txt"
 	}
 	test {
-		annotations="/WEB-INF/startup/shorter_mshd2014.txt"
+		annotations="/WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt"
 		grails.plugin.databasemigration.updateOnStart = false
 	}
 	production {
-		annotations="/WEB-INF/startup/shorter_mshd2014.txt"
+		annotations="/WEB-INF/startup/NCI_Thesaurus_terms.txt"
 	}
 }
 

@@ -54,7 +54,7 @@ class TeamServiceIntegrationSpec extends Specification implements DomainUnitTest
             InstitutionService institutionService = new InstitutionService()
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
             AnnotationService annotationService = new AnnotationService()
-            annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+            annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
             UserAccountService userAccountService = new UserAccountService()
             userAccountService.bootstrapUserRoles()
             userAccountService.bootstrapAddSuperUserRoleToUser(userAccountService.bootstrapCreateOrGetAdminAccount())

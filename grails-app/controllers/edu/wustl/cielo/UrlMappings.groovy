@@ -109,6 +109,9 @@ class UrlMappings {
         "/rest/v1/login"(controller: "rest", action: "restLogin", method: "POST")
         "/rest/v1/licenses/list"(controller: "rest", action: "listLicenses", method: "GET")
 
+        //annotations
+        "/annotations/list"(controller: "annotation", action: "list")
+
         //Errors
         "500"(controller: "errors", action:"error")
         "404"(controller: "errors", action: "notFound")

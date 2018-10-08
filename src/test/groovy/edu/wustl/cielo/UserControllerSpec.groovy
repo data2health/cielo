@@ -57,6 +57,14 @@ class UserControllerSpec extends Specification implements ControllerUnitTest<Use
 
         when: "user id is provided"
             UserAccount user = new UserAccount(username: "someuser", password: "somePassword").save()
+            Profile profile  = new Profile()
+            profile.user = user
+            profile.emailAddress = "ricardo.rodriguez@wustl.edu"
+            profile.institution  = new Institution(fullName: "WAshington University in St. Louis", shortName: "WashU").save()
+            profile.firstName    = "Some"
+            profile.lastName     = "User"
+            profile.save()
+
             assert user.timezoneId != "EST"
             params.userId =  user.id
             params.timezoneId = "EST"

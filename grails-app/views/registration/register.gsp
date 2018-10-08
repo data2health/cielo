@@ -154,9 +154,9 @@
 
                                 <div class="col-sm-8 ui-widget">
                                     <span id="annotations" class="">
-                                        <select class="multiple-select form-control" name="annotations-select" multiple="multiple">
+                                        <select id="annotations-select" class="multiple-select form-control" name="annotations-select" multiple="multiple">
                                             <g:each in="${annotations}" var="annotation">
-                                                <option value="${annotation.id}">${annotation.label}</option>
+                                                <option value="${annotation.id}">${annotation.term}</option>
                                             </g:each>
                                         </select>
                                     </span>

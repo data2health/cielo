@@ -3,11 +3,7 @@ package edu.wustl.cielo
 import edu.wustl.cielo.enums.AccessRequestStatusEnum
 
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import grails.web.mapping.LinkGenerator
-import org.springframework.security.acls.domain.BasePermission
 
 class CieloTagLib {
     static defaultEncodeAs  = [taglib:'html'] //html escapes characters
@@ -24,6 +20,7 @@ class CieloTagLib {
     def springSecurityService
     def projectService
     def customAclService
+    def utilService
 
     /**
      * Use if the output needs not be html encoded. This is true when the text already has html
@@ -226,68 +223,8 @@ class CieloTagLib {
         if (!attrs.date) {
             out << "<span class='date-time date-diff' data-date='unknown' data-diff='N/A'>N/A</span>"
         } else {
-            String returnVal
-            LocalDateTime from  = timezoneDate(new Date(attrs.date.getTime()))
-            LocalDateTime today = LocalDateTime.now()
 
-            //number of years first
-            long years = from.until(today, ChronoUnit.YEARS)
-
-            if (years) {
-                if (years > 1L) {
-                    returnVal = "${years} years ago"
-                } else {
-                    returnVal = "${years} year ago"
-                }
-            } else {
-                //now months
-                long months = from.until(today, ChronoUnit.MONTHS)
-
-                if (months) {
-                    if (months > 1L) {
-                        returnVal = "${months} months ago"
-                    } else {
-                        returnVal = "${months} month ago"
-                    }
-                } else {
-                    long weeks = from.until(today, ChronoUnit.WEEKS)
-
-                    if (weeks) {
-                        if (weeks > 1L) {
-                            returnVal = "${weeks} weeks ago"
-                        } else {
-                            returnVal = "${weeks} week ago"
-                        }
-
-                    } else {
-                        long days = from.until(today, ChronoUnit.DAYS)
-
-                        if (!(days < 0L)) {
-                            if (days > 1L) {
-                                returnVal = "${days} days ago"
-                            } else {
-                                def daysDiff = today.date.day - from.date.day
-
-                                if   (daysDiff == 1L) returnVal = "yesterday"
-                                else  returnVal = "today"
-                            }
-                        } else {
-                            //must be either hours or something smaller than that
-                            def hoursDiff = from.until(today, ChronoUnit.HOURS)
-
-                            if (hoursDiff) {
-                                returnVal = "${hoursDiff} hours ago"
-                            } else {
-                                def minutesDiff = from.until(today, ChronoUnit.MINUTES)
-
-                                if (minutesDiff) returnVal = "${minutesDiff} minutes ago"
-                                else returnVal = "seconds ago"
-                            }
-                        }
-                    }
-                }
-            }
-
+            String returnVal = utilService.getDateDiff(attrs.date)
             out << "<span class='date-time date-diff' data-date='${g.formatDateWithTimezone(date: attrs.date)}' data-diff='${returnVal}'>${returnVal}</span>"
         }
     }
@@ -565,26 +502,5 @@ class CieloTagLib {
                 break
         }
         return size
-    }
-
-    /**
-     * Convert date to the users timezone, no formatting
-     *
-     * @param date the date to convert
-     *
-     * @return a new date that represents the original in the users timezone
-     */
-    private LocalDateTime timezoneDate(Date date) {
-        def principal    = springSecurityService?.principal
-        UserAccount user = UserAccount.get(principal?.id)
-        TimeZone tz
-
-        if (!user) {
-            tz = TimeZone.getDefault()
-        } else tz = TimeZone.getTimeZone(user.timezoneId)
-
-        ZoneId zoneId = tz.toZoneId()
-
-        return LocalDateTime.ofInstant(date.toInstant(), zoneId)
     }
 }

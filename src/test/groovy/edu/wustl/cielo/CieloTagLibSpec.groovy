@@ -179,41 +179,6 @@ class CieloTagLibSpec extends Specification implements TagLibUnitTest<CieloTagLi
         result.contains("/assets/default_profile.png")
     }
 
-    void "test dateDiff"() {
-        Date date = new Date()
-        def result
-
-        when:
-            result = tagLib.dateDiff([date: date])
-
-        then:
-            result.contains("today")
-
-        when:
-            result = tagLib.dateDiff([date: date - 1])
-
-        then:
-            result.contains("yesterday")
-
-        when:
-            result = tagLib.dateDiff([date: date - 7])
-
-        then:
-            result.contains("1 week ago")
-
-        when:
-            result = tagLib.dateDiff([date: date - 31])
-
-        then:
-            result.contains("1 month ago")
-
-        when:
-            result = tagLib.dateDiff([date: date - 730])
-
-        then:
-            result.contains("2 years ago")
-    }
-
     void "test getSoftwareLicenseOptions"() {
         UserAccount user
 

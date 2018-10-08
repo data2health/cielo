@@ -11,6 +11,38 @@
 
 <script type="application/javascript">
 
+    $( function() {
+        $('#annotations').select2({
+            minimumInputLength: 3,
+            ajax: {
+                delay: 250,
+                url: '/annotations/list',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: (params.page - 1) || 0
+                    };
+                    if (params.term === "") {
+                        return false;
+                    } else {
+                        return query;
+                    }
+                },
+                dataType: 'json',
+                processResults: function (data) {
+                    // Tranforms the top-level key of the response object from 'items' to 'results'
+                    return {
+                        results: data.items,
+                        pagination: {
+                            more: data.pagination.more
+                        }
+                    };
+                },
+                cache: true
+            }
+        });
+    });
+
     function setCharacterCount() {
         var charCount    = $('#description').prop('value').length;
         var totalAllowed = 255;

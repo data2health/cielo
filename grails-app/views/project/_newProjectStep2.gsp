@@ -10,7 +10,7 @@
             <span id="annotationsSpan" class="">
                 <select id="annotations" style="width: 80%" class="multiple-select multi-annotations form-control" name="annotations" multiple="multiple">
                         <g:each in="${annotations}" var="annotation">
-                                <option value="${annotation.id}">${annotation.label}</option>
+                                <option value="${annotation.id}">${annotation.term}</option>
                             </g:each>
                     </select>
             </span>

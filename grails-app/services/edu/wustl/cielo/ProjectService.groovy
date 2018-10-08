@@ -50,7 +50,7 @@ class ProjectService {
         if (Project.list().size() == 0) {
             List<UserAccount> users = UserAccount.list()
             List<SoftwareLicense> softwareLicenses = SoftwareLicense.list()
-            List<Annotation> annotations = Annotation.list()
+            List<Annotation> annotations = Annotation.list(max: 20)
 
             users?.each { UserAccount user ->
                 log.info('************************************************************')
@@ -153,15 +153,18 @@ class ProjectService {
 
         if (project) {
             log.info("\t\tCreating ${Constants.ANNOTATIONS_PER_PROJECT} annotations for ${project.name}...\n")
-            Constants.ANNOTATIONS_PER_PROJECT.times {
-                Annotation annotation = (annotations?.get(new Random().nextInt(annotations?.size())))
-                project.addToAnnotations(annotation)
-                ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_ANNOTATIONS
-                Object[] params = [user.username, (grailsLinkGenerator.serverBaseURL?:"")
-                        + "/project/${project.id}", project.name]
-                activityService.saveActivityForEvent(activityTypeEnum,
-                        messageSource.getMessage(activityTypeEnum.toString() + "_BODY_TEXT",
-                                params, Locale.getDefault()))
+
+            if (annotations.size() > 0) {
+                Constants.ANNOTATIONS_PER_PROJECT.times {
+                        Annotation annotation = (annotations?.get(new Random().nextInt(annotations?.size())))
+                        project.addToAnnotations(annotation)
+                        ActivityTypeEnum activityTypeEnum = ActivityTypeEnum.ACTIVITY_UPDATE_PROJECT_ANNOTATIONS
+                        Object[] params = [user.username, (grailsLinkGenerator.serverBaseURL?:"")
+                                + "/project/${project.id}", project.name]
+                        activityService.saveActivityForEvent(activityTypeEnum,
+                                messageSource.getMessage(activityTypeEnum.toString() + "_BODY_TEXT",
+                                        params, Locale.getDefault()))
+                    }
             }
             saveProjectAndLog(project)
         }
@@ -1182,7 +1185,7 @@ class ProjectService {
                     ) AS teamMembers ON teamMembers.t_id=pt.team_id
                     LEFT JOIN (
                         SELECT
-                            string_agg(annotation.label, ', ') AS annotations,
+                            string_agg(annotation.term, ', ') AS annotations,
                             project_annotation.project_annotations_id AS id
                         FROM project_annotation
                         LEFT JOIN annotation ON annotation.id=project_annotation.annotation_id
@@ -1254,7 +1257,7 @@ class ProjectService {
                     ) AS teamMembers ON teamMembers.t_id=pt.team_id
                     LEFT JOIN (
                         SELECT
-                            string_agg(annotation.label, ', ') AS annotations,
+                            string_agg(annotation.term, ', ') AS annotations,
                             project_annotation.project_annotations_id AS id
                         FROM project_annotation
                         LEFT JOIN annotation ON annotation.id=project_annotation.annotation_id
@@ -1326,7 +1329,7 @@ class ProjectService {
                     ) AS teamMembers ON teamMembers.t_id=pt.team_id
                     LEFT JOIN (
                         SELECT
-                            string_agg(annotation.label, ', ') AS annotations,
+                            string_agg(annotation.term, ', ') AS annotations,
                             project_annotation.project_annotations_id AS id
                         FROM project_annotation
                         LEFT JOIN annotation ON annotation.id=project_annotation.annotation_id

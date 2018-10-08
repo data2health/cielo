@@ -168,17 +168,14 @@
                                 </div>
                             </div>
 
-                            <div class="form-group row">
+                            <div class="form-group row" style="align-items: baseline;">
                                 <label for="annotations" class="col-sm-2 form-control-label">
                                     Research Interests
                                 </label>
 
                                 <div class="form-group col-sm-8" style="display: inherit;">
-                                    <span id="annotations" class="">
-                                        <select id="annotationsSelect" style="width: 80%" class="multiple-select form-control" name="annotations" multiple="multiple" disabled="disabled">
-                                            <g:each in="${annotations}" var="annotation">
-                                                <option value="${annotation.id}">${annotation.label}</option>
-                                            </g:each>
+                                    <span id="annotations" style="min-width: 100%">
+                                        <select id="annotations-select" style="width: 80%" class="multiple-select form-control" name="annotations" multiple="multiple" disabled="disabled">
                                         </select>
                                     </span>
                                 </div>
@@ -206,19 +203,13 @@
         $('#timezoneId').prop('disabled', 'disabled');
         $('#timezoneId').val('${user.timezoneId}');
 
-        var annotations = "${user.profile.annotations.collect { it.label }.join(',')}".replace(/^\s+|\s+$/, '').split(",");
-        var options = new Array(annotations.length);
+        var annotationStr   = "${annotations}";
+        var annotations     = JSON.parse( $.parseHTML( annotationStr )[0].textContent );
 
-        //setup multi-select for the annotations for the project
-        for (index in annotations) {
-            //exact match the annotation using filter
-            var textId = $('.multiple-select option').filter(function () {
-                return $(this).text() === annotations[index].trim();
-            }).attr("value");
-            options[index] = textId;
-        }
-
-        $('.multiple-select').val(options).trigger("change");
+        $.each(annotations, function(index, obj) {
+            var newOption = new Option(obj.name, obj.id, true, true);
+            $('.multiple-select').append(newOption).trigger('change');
+        });
 
         //check the image the user has for profile, if different than default save in case they want to edit and then
         //hit cancel so we can properly reset it
@@ -242,7 +233,7 @@
         $('#cancel_button').find("span").css("cursor", "default");
         $('#save_button').find("span").css("cursor", "default");
 
-        $('#userUpdateForm').find(':input, #changePass, #annotationsSelect').each( function (index) {
+        $('#userUpdateForm').find(':input, #changePass, #annotations-select').each( function (index) {
             var id = $(this).attr('id');
             if (id !== undefined)
                 if (id.indexOf('password') === -1 && id.indexOf('username') === -1) {
@@ -264,7 +255,7 @@
         $('#cancel_button').find("span").css("cursor", "not-allowed");
         $('#save_button').find("span").css("cursor", "not-allowed");
 
-        $('#userUpdateForm').find(':input, #changePass, #annotationsSelect').each( function (index) {
+        $('#userUpdateForm').find(':input, #changePass, #annotations-select').each( function (index) {
             if ($(this).attr('id') !== undefined)
                 if ($(this).attr('id').indexOf('password') === -1) {
                     $(this).prop('disabled', 'disabled');

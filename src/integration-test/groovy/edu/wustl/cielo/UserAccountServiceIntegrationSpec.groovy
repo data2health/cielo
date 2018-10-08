@@ -20,9 +20,25 @@ class UserAccountServiceIntegrationSpec extends Specification {
 
     def webRoot
     def assetResourceLocator
+    UtilService utilService
+    AnnotationService annotationService
 
     def setup() {
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+
+        utilService = new UtilService()
+        utilService.metaClass.getDateDiff = { Date fromDate, Date toDate = null ->
+            "today"
+        }
+        annotationService = new AnnotationService()
+
+        annotationService.metaClass.saveNewAnnotation = { List<String> names, String code ->
+            names.each { String name ->
+                new Annotation(term: name, code: code).save()
+            }
+        }
+
+        annotationService.utilService = utilService
         userAccountService.assetResourceLocator = assetResourceLocator
     }
 
@@ -187,9 +203,8 @@ class UserAccountServiceIntegrationSpec extends Specification {
         when: "setting up mock users"
             InstitutionService institutionService = new InstitutionService()
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
-            AnnotationService annotationService = new AnnotationService()
             if (Annotation.count() == 0) {
-                annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+                annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
             }
             if (UserAccountUserRole.count() == 0) {
                 userAccountService.bootstrapUserRoles()
@@ -232,9 +247,8 @@ class UserAccountServiceIntegrationSpec extends Specification {
         when: "setting up mock users"
             InstitutionService institutionService = new InstitutionService()
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
-            AnnotationService annotationService = new AnnotationService()
             if (Annotation.count() <= 2) {
-                annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+                annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
             }
             if (UserAccountUserRole.count() == 0) {
                 userAccountService.bootstrapUserRoles()

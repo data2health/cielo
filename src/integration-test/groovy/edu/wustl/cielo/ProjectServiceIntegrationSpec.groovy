@@ -26,10 +26,28 @@ class ProjectServiceIntegrationSpec extends Specification {
 
     def webRoot
     def assetResourceLocator
+    UtilService utilService
+    AnnotationService annotationService
 
     def setup() {
         teamService = new TeamService()
         webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+
+        utilService = new UtilService()
+        utilService.metaClass.getDateDiff = { Date fromDate, Date toDate = null ->
+            "today"
+        }
+
+        annotationService = new AnnotationService()
+
+        annotationService.metaClass.saveNewAnnotation = { List<String> names, String code ->
+            names.each { String name ->
+                new Annotation(term: name, code: code).save()
+            }
+        }
+
+        annotationService.utilService = utilService
+
         cleanup()
     }
 
@@ -79,8 +97,7 @@ class ProjectServiceIntegrationSpec extends Specification {
             InstitutionService institutionService = new InstitutionService()
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
             if (Annotation.count() == 0) {
-                AnnotationService annotationService = new AnnotationService()
-                annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+                annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
             }
             UserAccountService userAccountService = new UserAccountService()
             userAccountService.assetResourceLocator = assetResourceLocator
@@ -146,7 +163,7 @@ class ProjectServiceIntegrationSpec extends Specification {
                     url: "http://www.rerlicense.com").save(flush: true)
             project = new Project(projectOwner: user, name: "Project1", license: softwareLicense,
                     description: "some description").save(flush: true)
-            new Annotation(label: "some label").save(flush: true)
+            annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
             projectService.bootstrapAnnotationsForProject(project, Annotation.list())
             sessionFactory.getCurrentSession().flush()
 
@@ -285,9 +302,8 @@ class ProjectServiceIntegrationSpec extends Specification {
             //first setup institutions
             InstitutionService institutionService = new InstitutionService()
             institutionService.setupMockInstitutions(new File(webRoot + "WEB-INF/startup/intsitutions.json"))
-            AnnotationService annotationService = new AnnotationService()
             if (Annotation.count() == 0) {
-                annotationService.initializeAnnotations(new File(webRoot + "WEB-INF/startup/shorter_mshd2014.txt"))
+                annotationService.initializeAnnotations([new File(webRoot + "WEB-INF/startup/NCI_Thesaurus_terms_shorter.txt")])
             }
             UserAccountService userAccountService = new UserAccountService()
             userAccountService.assetResourceLocator = assetResourceLocator
