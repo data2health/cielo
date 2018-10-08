@@ -44,6 +44,7 @@ class UserController {
                 bindData(user.profile, params)
 
                 if (params."annotations-select") {
+                    user.profile.annotations.clear()
                     List<Annotation> annotations = []
                     if (params."annotations-select".indexOf(',') != -1) {
                         (params."annotations-select".tokenize(',')).each { String annotationId ->
