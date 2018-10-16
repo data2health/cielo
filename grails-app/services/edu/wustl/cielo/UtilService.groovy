@@ -19,7 +19,7 @@ class UtilService {
     String getDateDiff(Date fromDate, Date toDate = null) {
         String dateDiffString
         LocalDateTime from  = timezoneDate(fromDate)
-        LocalDateTime today = toDate ? timezoneDate(toDate) : LocalDateTime.now()
+        LocalDateTime today = toDate ? timezoneDate(toDate) : timezoneDate(new Date())
 
         //number of years first
         long years = from.until(today, ChronoUnit.YEARS)
