@@ -8,6 +8,6 @@
             screen.
             <br>&nbsp;<br>
         </div><br>
-        <g:render template="newUploadScreen" model="[type: 'data', projectId: 'unsaved', requireDescription: false]"/>
+        <g:render template="newUploadScreen" model="[type: 'data', projectId: 'unsaved', requireDescription: false, allowNone: true]"/>
     </div>
 </div>

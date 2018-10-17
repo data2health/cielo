@@ -6,16 +6,16 @@ window.addEventListener('load', function (event) {
     $('[data-toggle="tooltip"]').tooltip();
 }, false);
 
-$( function() {
+$(function () {
 
-    $('.panel-collapse ').on('hide.bs.collapse', function(event) {
+    $('.panel-collapse ').on('hide.bs.collapse', function (event) {
         var chevronUp = $('#' + event.target.id).prev().find('i');
 
         chevronUp.removeClass("fa-chevron-up");
         chevronUp.addClass("fa-chevron-down");
     });
 
-    $('.panel-collapse').on('show.bs.collapse', function(event) {
+    $('.panel-collapse').on('show.bs.collapse', function (event) {
         var chevronDown;
 
         if (event.target.id.endsWith('_i')) {
@@ -30,9 +30,9 @@ $( function() {
     });
 
     //hook onto global ajax events
-    $(document).bind("ajaxSend", function() {
+    $(document).bind("ajaxSend", function () {
         showWaitDialog();
-    }).bind("ajaxComplete", function(event, xhr, ajaxOptions) {
+    }).bind("ajaxComplete", function (event, xhr, ajaxOptions) {
         hideWaitDialog();
 
         //reset the tooltips which by now could potentially be dead
@@ -51,7 +51,7 @@ $( function() {
                     ok: {
                         label: "OK",
                         className: 'btn-primary',
-                        callback: function() {
+                        callback: function () {
                             window.location.reload();
                         }
                     }
@@ -101,7 +101,7 @@ $( function() {
             //activity div
             $("#activity").addClass("col-md-6");
 
-            $(".sidebar-announcements").css("left","");
+            $(".sidebar-announcements").css("left", "");
             //show all children
             $("#sidebar-options").children().show();
         } else {
@@ -124,11 +124,11 @@ $( function() {
     });
 
     //remove was-validated so that we're back to square one
-    $('#resetButton').on('click', function() {
+    $('#resetButton').on('click', function () {
         $('#registerForm').removeClass("was-validated");
     });
 
-    $('#registerForm').on('submit', function(event) {
+    $('#registerForm').on('submit', function (event) {
         var failure = false;
 
         if (this.checkValidity() === false) {
@@ -186,7 +186,7 @@ $( function() {
         if ($('#agreement').prop('checked') === false) {
             $('#agreement').addClass('is-invalid');
             $('#agreementInvalidFeedBack').html("You must read and agree to Terms of Use");
-            failure =  true;
+            failure = true;
         }
 
         if (failure === true) {
@@ -229,16 +229,16 @@ $( function() {
         bootbox.dialog({
             title: 'Create a Post',
             message: "<div class=\"form-group row\">\n" +
-            "         <div class=\"col-sm-12\">\n" +
-            "             <input id=\"title\" name=\"title\" class=\"form-control\" placeholder=\"Enter post title\"\n" +
-            "                    required=\"\" aria-required=\"true\">\n" +
-            "             <div id=\"titleInvalidFeedBack\" class=\"col-md-10 invalid-feedback\"></div>\n" +
-            "         </div></div>" +
-            "<div class=\"form-group row\">\n" +
-            "<div class=\"col-sm-12\">\n" +
-            "    <textarea id=\"postMessage\" name=\"postMessage\" class=\"form-control\" rows=\"4\" placeholder=\"Enter message here\"></textarea>\n" +
-            "    <div id=\"postMessageInvalidFeedBack\" class=\"col-md-10 invalid-feedback\"></div>\n" +
-            "</div></div>",
+                "         <div class=\"col-sm-12\">\n" +
+                "             <input id=\"title\" name=\"title\" class=\"form-control\" placeholder=\"Enter post title\"\n" +
+                "                    required=\"\" aria-required=\"true\">\n" +
+                "             <div id=\"titleInvalidFeedBack\" class=\"col-md-10 invalid-feedback\"></div>\n" +
+                "         </div></div>" +
+                "<div class=\"form-group row\">\n" +
+                "<div class=\"col-sm-12\">\n" +
+                "    <textarea id=\"postMessage\" name=\"postMessage\" class=\"form-control\" rows=\"4\" placeholder=\"Enter message here\"></textarea>\n" +
+                "    <div id=\"postMessageInvalidFeedBack\" class=\"col-md-10 invalid-feedback\"></div>\n" +
+                "</div></div>",
             buttons: {
                 cancel: {
                     label: "Cancel",
@@ -247,8 +247,8 @@ $( function() {
                 ok: {
                     label: "Save",
                     className: 'btn-primary',
-                    callback: function() {
-                        var title   = $('#title').val();
+                    callback: function () {
+                        var title = $('#title').val();
                         var message = $('#postMessage').val();
 
                         $('#titleInvalidFeedBack').text("");
@@ -264,11 +264,11 @@ $( function() {
                             }
                             return false;
                         } else {
-                            $.post("/activity/post", {title: title, message: message}, function(data) {
+                            $.post("/activity/post", {title: title, message: message}, function (data) {
                                 if (data.success) {
                                     $.get("/activity/getActivities", function (data) {
                                         $('.activity-feed #activity').html(data);
-                                        $('<div id="olderContent"></div>').insertAfter( $('#nextPage') );
+                                        $('<div id="olderContent"></div>').insertAfter($('#nextPage'));
                                     });
                                 }
                             });
@@ -279,8 +279,8 @@ $( function() {
         });
     });
 
-    $('#projectSearch').keypress( function(event) {
-        if ( event.which == 13 ) {
+    $('#projectSearch').keypress(function (event) {
+        if (event.which == 13) {
             event.preventDefault();
 
             var filterText = $('#projectSearch').val();
@@ -299,15 +299,15 @@ $( function() {
     });
 
     $('#projectSearch').on('keyup', function (event) {
-        if ($('#projectSearch').val().length !== 0){
+        if ($('#projectSearch').val().length !== 0) {
             $('#projectSearchClear').css('display', 'block');
         } else {
             $('#projectSearchClear').css('display', 'none');
         }
     });
 
-    $('#searchInput').keypress( function(event) {
-        if ( event.which == 13 ) {
+    $('#searchInput').keypress(function (event) {
+        if (event.which == 13) {
             event.preventDefault();
 
             var filterText = $('#searchInput').val();
@@ -319,7 +319,7 @@ $( function() {
     });
 
     $('#searchInput').on('keyup', function (event) {
-        if ($('#searchInput').val().length !== 0){
+        if ($('#searchInput').val().length !== 0) {
             $('#teamSearchClear').css('display', 'block');
         } else {
             $('#teamSearchClear').css('display', 'none');
@@ -332,12 +332,12 @@ $( function() {
 
 
 function toggleDate() {
-    var dateSpan    = event.target;
-    var dataDiff    = $(dateSpan).attr('data-diff');
+    var dateSpan = event.target;
+    var dataDiff = $(dateSpan).attr('data-diff');
     var currentHtml = $(dateSpan).html();
-    var date        = $(dateSpan).attr('data-date');
+    var date = $(dateSpan).attr('data-date');
 
-    if (currentHtml === dataDiff){
+    if (currentHtml === dataDiff) {
         $(dateSpan).html(date);
     } else {
         $(dateSpan).html(dataDiff);
@@ -373,7 +373,7 @@ function showTermsOfUse() {
                 label: 'I agree with the Terms of Use',
                 callback: function () {
                     $('#register').prop('disabled', false);
-                   return true;
+                    return true;
                 }
             },
             cancel: {
@@ -389,7 +389,7 @@ function showTermsOfUse() {
         }
     });
 
-    alertWindow.init(function() {
+    alertWindow.init(function () {
         //grab the text for the license from db
         $.get("/license/termsOfUse", function (data) {
             alertWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert").html(data);
@@ -415,7 +415,7 @@ function showTermsOfUseNoAcknowledge() {
         }
     });
 
-    alertWindow.init(function() {
+    alertWindow.init(function () {
         //grab the text for the license from db
         $.get("/license/termsOfUse", function (data) {
             alertWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert").html(data);
@@ -443,10 +443,10 @@ function showSynapseTest() {
     });
 
 
-    alertWindow.init(function() {
+    alertWindow.init(function () {
         //grab the text for the license from db
-        var synapseVerUrl   = "https://repo-prod.prod.sagebase.org/repo/v1/version";
-        var teamRequestUrl  = "https://repo-prod.prod.sagebase.org/repo/v1/team/4";
+        var synapseVerUrl = "https://repo-prod.prod.sagebase.org/repo/v1/version";
+        var teamRequestUrl = "https://repo-prod.prod.sagebase.org/repo/v1/team/4";
 
         $.ajax({
             type: "GET",
@@ -454,11 +454,11 @@ function showSynapseTest() {
             contentType: false,
             processData: false,
             crossDomain: true,
-            success : function (data) {
+            success: function (data) {
                 $('#versionURL').html(synapseVerUrl);
                 $('#versionNumber').html(data.version);
 
-                $.get(teamRequestUrl, function(data) {
+                $.get(teamRequestUrl, function (data) {
                     $('#teamURL').html(teamRequestUrl);
                     $('#teamName').html(data.name);
                     $('#createdOn').html(data.createdOn);
@@ -550,7 +550,7 @@ function showSoftwareLicense(licenseId, licenseLabel) {
 
     //grab the text for the license from db
     $.get("/license/getLicenseBody/" + licenseId, function (data) {
-        alertWindow.find('.bootbox-body').html('<pre>'+ data.licenseText +'</pre>');
+        alertWindow.find('.bootbox-body').html('<pre>' + data.licenseText + '</pre>');
     });
 }
 
@@ -592,16 +592,16 @@ function handleInfiniteScroll(event) {
     if ((isInViewport(document.querySelector('#contact-us-form')) && isInViewport(document.querySelector('#olderContent'))) &&
         document.querySelector('#no-more-activity') === null && !$('#loadOlderActivity').is(":visible")) {
 
-        setTimeout(function(){
+        setTimeout(function () {
             $("#loading-activity-indicator").show();
 
-            setTimeout(function(){
+            setTimeout(function () {
                 //if still visible; allows for auto-cancel if you scroll back up before timer goes off
                 //if the manual button load
                 if ((isInViewport(document.querySelector('#contact-us-form')) && isInViewport(document.querySelector('#olderContent'))) &&
                     document.querySelector('#no-more-activity') === null && !$('#loadOlderActivity').is(":visible")) {
-                    var offset  = Number($('#offset').html());
-                    var max     = Number($('#max').html());
+                    var offset = Number($('#offset').html());
+                    var max = Number($('#max').html());
 
                     if (!(isNaN(offset) && isNaN(max)) && window.doneLoading === true) {
                         window.doneLoading = false;
@@ -650,7 +650,7 @@ function getCommentsForActivity(activityId) {
 
     $.post("/activity/getComments/" + activityId, {commentCount: newCommentsCount}, function (data) {
         $("#feed_footer_activity_" + activityId).addClass("with-comments");
-        $("#comments_activity_"+ activityId ).html(data);
+        $("#comments_activity_" + activityId).html(data);
     });
 }
 
@@ -659,7 +659,7 @@ function getOlderComments(activityId) {
 
     $.post("/activity/getComments/" + activityId, {commentCount: newCommentsCount}, function (data) {
         $("#feed_footer_activity_" + activityId).addClass("with-comments");
-        $("#comments_activity_"+ activityId ).html(data);
+        $("#comments_activity_" + activityId).html(data);
         $('[data-toggle="tooltip"]').tooltip('update');
     });
 }
@@ -667,8 +667,8 @@ function getOlderComments(activityId) {
 function getOlderActivity(offset, max) {
 
     $("#nextPage").remove();
-    $("<div></div>").load("/activity/getActivities?offset="+offset+"&max="+max, function () {
-        $(this).insertBefore($("#olderContent")).hide().show('fast', function() {
+    $("<div></div>").load("/activity/getActivities?offset=" + offset + "&max=" + max, function () {
+        $(this).insertBefore($("#olderContent")).hide().show('fast', function () {
             window.doneLoading = true;
             $('[data-toggle="tooltip"]').tooltip('update');
             $('.date-time').off('click', toggleDate).on('click', toggleDate);
@@ -717,7 +717,7 @@ function removeActivityLike(activityId, id) {
 }
 
 function reloadActivity(activityId) {
-    $.post("/activity/getActivity/",{id: activityId}, function (data) {
+    $.post("/activity/getActivity/", {id: activityId}, function (data) {
         $("#activity_post_" + activityId).html(data);
     });
 }
@@ -729,9 +729,9 @@ function sharePost(activityId, id) {
 
 function validateProfilePic(input) {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
-        if(input) {
+        if (input) {
             var selectedFile = input.files[0];
-            if(selectedFile) {
+            if (selectedFile) {
                 var fileType = selectedFile.type;
                 var control = $("#profilePic");
 
@@ -758,7 +758,7 @@ function validateProfilePic(input) {
                 }
 
                 var reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     $("#currentProfilePic").find("img").attr("src", e.target.result);
                 };
 
@@ -794,8 +794,9 @@ function showAllUsersModal(id, url) {
     usersWindow.find('.bootbox-body').addClass("scrollable-bootbox-alert");
 
     if (url) {
-        $.get(url, {id: id},  function (data) {
-                    usersWindow.find('.bootbox-body').html(data);});
+        $.get(url, {id: id}, function (data) {
+            usersWindow.find('.bootbox-body').html(data);
+        });
     } else {
         usersWindow.find('.bootbox-body').html("<div class=\"jumbotron-fluid\">" + url + " not supported</div>");
     }
@@ -854,7 +855,7 @@ function showNewProjectWizard() {
                 id: 'previous-button',
                 label: "<i class='far fa-arrow-alt-circle-left'></i>",
                 className: 'btn-link wizard-button previous',
-                callback: function() {
+                callback: function () {
                     var stepId = $('.current-step').attr('id');
                     handlePrevious();
                     return false;
@@ -864,7 +865,7 @@ function showNewProjectWizard() {
                 id: 'next-button',
                 label: "<i class='far fa-arrow-alt-circle-right'></i>",
                 className: 'btn-link wizard-button next',
-                callback: function(){
+                callback: function () {
                     handleNext();
                     return false;
                 }
@@ -876,11 +877,11 @@ function showNewProjectWizard() {
             ok: {
                 label: "Continue",
                 className: 'btn-primary continue-btn',
-                callback: function(){
-                    var idOfCurrentStep     = $($('#screens').find('.screen.current-step')).attr('id');
-                    var indexOfCurrentStep  = window.stepIds.indexOf(idOfCurrentStep);
-                    var indexOfNextStep     = indexOfCurrentStep + 1;
-                    var idOfNextStep        = window.stepIds[indexOfNextStep];
+                callback: function () {
+                    var idOfCurrentStep = $($('#screens').find('.screen.current-step')).attr('id');
+                    var indexOfCurrentStep = window.stepIds.indexOf(idOfCurrentStep);
+                    var indexOfNextStep = indexOfCurrentStep + 1;
+                    var idOfNextStep = window.stepIds[indexOfNextStep];
 
                     //hide the form body and get next one to show
                     transitionStep(idOfCurrentStep, idOfNextStep, indexOfNextStep);
@@ -900,14 +901,14 @@ function showNewProjectWizard() {
             finish: {
                 label: "Save Project",
                 className: 'finish-btn btn-primary',
-                callback: function() {
+                callback: function () {
                     handleSave();
                 }
             }
         }
     });
 
-    dialog.init(function(){
+    dialog.init(function () {
         $('.wizard-button.previous').css('display', 'none');
         $('.wizard-button.next').css('display', 'none');
         $('.finish-btn').css('display', 'none');
@@ -928,7 +929,7 @@ function initStepIds() {
     var wizardWindows = $('#screens').find('.screen');
     window.stepIds = new Array(wizardWindows.length);
 
-    wizardWindows.each( function(index) {
+    wizardWindows.each(function (index) {
         window.stepIds[index] = $(wizardWindows[index]).attr('id');
     });
 }
@@ -937,10 +938,10 @@ function grabFormData(formParentSelector) {
     var formData = new FormData();
 
     //get all the data from all the forms from the wizard for the types in the find clause
-    $(formParentSelector).each ( function() {
-        $(this).find("textarea, input:not('.form-check-input'), select").each ( function() {
-            if($(this).attr('id') !== undefined && $(this).attr('disabled') === undefined) {
-                if ($(this).prop('value') !== null && $(this).prop('value').length > 0 ) {
+    $(formParentSelector).each(function () {
+        $(this).find("textarea, input:not('.form-check-input'), select").each(function () {
+            if ($(this).attr('id') !== undefined && $(this).attr('disabled') === undefined) {
+                if ($(this).prop('value') !== null && $(this).prop('value').length > 0) {
                     formData.append($(this).attr('id'), $(this).prop('value'));
                 }
             }
@@ -948,9 +949,9 @@ function grabFormData(formParentSelector) {
     });
 
     //For file inputs: data and code are optional
-    $('input:file').each( function () {
-        var elementId    = $(this).attr('id');
-        var file         = document.getElementById(elementId).files[0];
+    $('input:file').each(function () {
+        var elementId = $(this).attr('id');
+        var file = document.getElementById(elementId).files[0];
         if (typeof file !== 'undefined' && elementId !== 'undefined' &&
             $(this).attr('disabled') === undefined && typeof file !== "string") {
             if (formData.has(elementId)) {
@@ -981,7 +982,7 @@ function replaceProjectTableContent(data) {
         $('#paging-options option').remove();
 
         for (var index = 1; index <= data.pagesCount; index++) {
-            $('#paging-options').append('<option value="' + index +'">' + index + '</option>');
+            $('#paging-options').append('<option value="' + index + '">' + index + '</option>');
         }
 
         $('#ofPages').text('of ' + data.pagesCount);
@@ -1006,7 +1007,7 @@ function replaceTeamTableContent(data) {
         $('#paging-options option').remove();
 
         for (var index = 1; index <= data.pagesCount; index++) {
-            $('#paging-options').append('<option value="' + index +'">' + index + '</option>');
+            $('#paging-options').append('<option value="' + index + '">' + index + '</option>');
         }
 
         $('#ofPages').text('of ' + data.pagesCount);
@@ -1025,7 +1026,7 @@ function replaceTeamTableContent(data) {
 function onNextPage() {
     if ($('#right-table-toolbar i').first().attr('class').indexOf('fa-disabled') === -1) {
         var offsetVal = $('#paging-options').val();
-        $('#paging-options').val((parseInt(offsetVal) + 1 ));
+        $('#paging-options').val((parseInt(offsetVal) + 1));
         $('#paging-options').trigger("change");
     }
 }
@@ -1033,7 +1034,7 @@ function onNextPage() {
 function onPreviousPage() {
     if ($('#left-table-toolbar i').first().attr('class').indexOf('fa-disabled') === -1) {
         var offsetVal = $('#paging-options').val();
-        $('#paging-options').val((parseInt(offsetVal) - 1 ));
+        $('#paging-options').val((parseInt(offsetVal) - 1));
         $('#paging-options').trigger("change");
     }
 }
@@ -1054,17 +1055,21 @@ function onLastPage() {
 }
 
 function onPageSelection() {
-    var offsetVal  = parseInt($('#paging-options').val()) - 1;
+    var offsetVal = parseInt($('#paging-options').val()) - 1;
     var filterText = $('#projectSearch').val();
-    var filterOnProjects    = $('input[name=projectType]:checked').val();
+    var filterOnProjects = $('input[name=projectType]:checked').val();
     var myProjects;
 
-    if (filterOnProjects === 'all' ) {
+    if (filterOnProjects === 'all') {
         myProjects = false;
     } else {
         myProjects = true;
     }
-    $.get("/project/filtered/list", {offset: offsetVal, myProjects: myProjects, filterTerm: filterText}, function (data) {
+    $.get("/project/filtered/list", {
+        offset: offsetVal,
+        myProjects: myProjects,
+        filterTerm: filterText
+    }, function (data) {
         replaceProjectTableContent(data);
     });
 }
@@ -1074,31 +1079,31 @@ function updateToolbarButtons() {
     var numberOfPages = parseInt($('#ofPages').text().trim().split('of ')[1]);
 
     if (offset <= 0 || offset === 1) {
-        $('#left-table-toolbar').find('i').each( function() {
+        $('#left-table-toolbar').find('i').each(function () {
             $(this).addClass('fa-disabled');
         });
 
-        $('#right-table-toolbar').find('i').each( function() {
+        $('#right-table-toolbar').find('i').each(function () {
             $(this).removeClass('fa-disabled');
         });
     } else {
-        $('#left-table-toolbar').find('i').each( function() {
+        $('#left-table-toolbar').find('i').each(function () {
             $(this).removeClass('fa-disabled');
         });
     }
 
     if (offset === numberOfPages) {
-        $('#right-table-toolbar').find('i').each( function() {
+        $('#right-table-toolbar').find('i').each(function () {
             $(this).addClass('fa-disabled');
         });
 
         if (offset !== 1) {
-            $('#left-table-toolbar').find('i').each( function() {
+            $('#left-table-toolbar').find('i').each(function () {
                 $(this).removeClass('fa-disabled');
             });
         }
     } else {
-        $('#right-table-toolbar').find('i').each( function() {
+        $('#right-table-toolbar').find('i').each(function () {
             $(this).removeClass('fa-disabled');
         });
     }
@@ -1129,24 +1134,30 @@ function clearTeamSearch() {
 function isBundleFormValid(formElement) {
     var isValid = false;
     var name = $(formElement).prop('id').substring(0, 4);
-    var isFileUpload = $('#' + name + 'UploadFile').prop('checked') == true;
+    var isFileUpload = $('#' + name + 'UploadFile').prop('checked') === true;
+    var isNoUpload = $('#' + name + 'UploadNone').prop('checked') === true;
     var hasFile = $('#' + name + 'File').val() > '';
     var hasUrl = $('#' + name + 'UrlInput').val() > '';
     var hasFileName = $('#' + name + 'ExternalFileName').val() > '';
     var hasDescription = $('#' + name + 'UploadDescription').val() > '';
 
-    if(isFileUpload)
-        isValid = hasFile && hasDescription;
-    else
-        isValid = hasUrl && hasFileName && hasDescription;
+    if (isNoUpload) {
+        isValid = true;
+        toggleRequiredLabel(name + 'UploadDescription', true);
+        toggleRequiredLabel(name + 'ExternalFileName', true);
+    } else {
+        if (isFileUpload)
+            isValid = hasFile && hasDescription;
+        else
+            isValid = hasUrl && hasFileName && hasDescription;
 
-    toggleRequiredLabel(name + 'UploadDescription', hasDescription);
-    toggleRequiredLabel(name + 'ExternalFileName', hasFileName || isFileUpload);
-
+        toggleRequiredLabel(name + 'UploadDescription', hasDescription);
+        toggleRequiredLabel(name + 'ExternalFileName', hasFileName || isFileUpload);
+    }
     return isValid;
 }
 
-function toggleRequiredLabel(id, isValid){
+function toggleRequiredLabel(id, isValid) {
     if (isValid) {
         if (document.getElementById("required_name_" + id) !== null) {
             $("#required_name_" + id).remove();
