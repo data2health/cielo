@@ -616,6 +616,10 @@
                         formData.append("projectId", projectId);
                         formData.append("type", type);
 
+                        var isValid = isBundleFormValid($('#' + type + 'Form'));
+                        if(!isValid)
+                            return false;
+
                         $.ajax({
                             type: "POST",
                             url: "${createLink(controller: "project", action: "addBundleToProject")}",

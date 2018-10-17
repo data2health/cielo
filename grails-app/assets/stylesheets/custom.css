@@ -770,7 +770,7 @@ ul.list-group.list-group-flush {
     top: 0;
 }
 
-.wizard-button:hover {
+.wizard-button:hover, .wizard-button:focus {
     text-decoration: none;
 }
 
@@ -785,6 +785,7 @@ ul.list-group.list-group-flush {
     right: 1em;
     top: 0.1em;
 }
+
 
 .modal-title.offset-title {
     margin-left: 5em;

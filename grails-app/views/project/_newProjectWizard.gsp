@@ -11,7 +11,7 @@
 
 <script type="application/javascript">
 
-    $( function() {
+    $(function () {
         $('#annotations').select2({
             minimumInputLength: 3,
             ajax: {
@@ -44,7 +44,7 @@
     });
 
     function setCharacterCount() {
-        var charCount    = $('#description').prop('value').length;
+        var charCount = $('#description').prop('value').length;
         var totalAllowed = 255;
 
         $('#charCount').text(charCount + "/" + totalAllowed);
@@ -53,10 +53,10 @@
     function handleNext() {
 
         if (isFormValid()) {
-            var idOfCurrentStep     = $($('#screens').find('.screen.current-step')).attr('id');
-            var indexOfCurrentStep  = window.stepIds.indexOf(idOfCurrentStep);
-            var indexOfNextStep     = indexOfCurrentStep + 1;
-            var idOfNextStep        = window.stepIds[indexOfNextStep];
+            var idOfCurrentStep = $($('#screens').find('.screen.current-step')).attr('id');
+            var indexOfCurrentStep = window.stepIds.indexOf(idOfCurrentStep);
+            var indexOfNextStep = indexOfCurrentStep + 1;
+            var idOfNextStep = window.stepIds[indexOfNextStep];
 
             transitionStep(idOfCurrentStep, idOfNextStep, indexOfNextStep);
         }
@@ -65,17 +65,16 @@
     function isFormValid() {
         var proceedToNextScreen = true;
 
-        $('.screen.current-step .form-group input, textarea').each ( function() {
-            if ($(this).attr('required') === "required") {
-                if ($(this).prop('value').length === 0) {
-                    proceedToNextScreen = false;
-                    if(document.getElementById("required_name_" + $(this).attr('id')) === null) {
-                        $('<em id="required_name_' + $(this).attr('id') + '" style="color: red">Required</em>').insertBefore($(this));
-                    }
-                } else {
-                    if(document.getElementById("required_name_" + $(this).attr('id')) !== null) {
-                        $("#required_name_" + $(this).attr('id')).remove();
-                    }
+        $('.screen.current-step .form-group input, textarea').each(function () {
+            if ($(this).prop('id') == 'dataUploadDescription' || $(this).prop('id') == 'codeUploadDescription') {
+                proceedToNextScreen = isBundleFormValid($(this).closest('form'));
+
+            } else {
+                if ($(this).attr('required') === "required") {
+                    if ($(this).prop('value').length === 0)
+                        proceedToNextScreen = false;
+
+                    toggleRequiredLabel($(this).attr('id'), proceedToNextScreen);
                 }
             }
         });
@@ -84,10 +83,10 @@
     }
 
     function handlePrevious() {
-        var idOfCurrentStep     = $($('#screens').find('.screen.current-step')).attr('id');
-        var indexOfCurrentStep  = window.stepIds.indexOf(idOfCurrentStep);
-        var indexOfNextStep     = indexOfCurrentStep - 1;
-        var idOfNextStep        = window.stepIds[indexOfNextStep];
+        var idOfCurrentStep = $($('#screens').find('.screen.current-step')).attr('id');
+        var indexOfCurrentStep = window.stepIds.indexOf(idOfCurrentStep);
+        var indexOfNextStep = indexOfCurrentStep - 1;
+        var idOfNextStep = window.stepIds[indexOfNextStep];
 
         transitionStep(idOfCurrentStep, idOfNextStep, indexOfNextStep);
     }
@@ -132,10 +131,10 @@
         var formData = new FormData();
 
         //get all the data from all the forms from the wizard for the types in the find clause
-        $('.new-project-wizard .screen .form-group').each ( function() {
-            $(this).find('textarea, input, select').each ( function() {
-                if($(this).attr('id') !== undefined && $(this).attr('disabled') === undefined) {
-                    if ($(this).prop('value') !== null && $(this).prop('value').length > 0 ) {
+        $('.new-project-wizard .screen .form-group').each(function () {
+            $(this).find('textarea, input, select').each(function () {
+                if ($(this).attr('id') !== undefined && $(this).attr('disabled') === undefined) {
+                    if ($(this).prop('value') !== null && $(this).prop('value').length > 0) {
 
                         var controlId = $(this).attr('id');
 
@@ -150,10 +149,10 @@
         });
 
         //for multiselect
-        $('.multiple-select').each( function () {
-            var controlId       = $(this).attr('id');
-            var selections      = $(this).select2('data');
-            var selectedIds     = [];
+        $('.multiple-select').each(function () {
+            var controlId = $(this).attr('id');
+            var selections = $(this).select2('data');
+            var selectedIds = [];
 
             for (index in selections) {
                 if (selectedIds.indexOf(selections[index].id) === -1) {
@@ -165,13 +164,13 @@
             } else {
                 formData.append(controlId, selectedIds);
             }
-        } );
+        });
 
 
         //For file inputs: data and code are optional
-        $('input:file').each( function () {
-            var elementId    = $(this).attr('id');
-            var file         = document.getElementById(elementId).files[0];
+        $('input:file').each(function () {
+            var elementId = $(this).attr('id');
+            var file = document.getElementById(elementId).files[0];
             if (typeof file !== 'undefined' && elementId !== undefined &&
                 $(this).attr('disabled') === undefined && typeof file !== "string") {
                 if (formData.has(elementId)) {
@@ -188,14 +187,14 @@
             data: formData,
             contentType: false,
             processData: false,
-            success : function () {
+            success: function () {
                 if (window.location.href.indexOf('/project/viewProjects') !== -1) {
                     var offsetVal = parseInt($('#paging-options').val()) - 1;
                     var filterText = $('#projectSearch').val();
-                    var filterOnProjects    = $('input[name=projectType]:checked').val();
+                    var filterOnProjects = $('input[name=projectType]:checked').val();
                     var myProjects;
 
-                    if (filterOnProjects === 'all' ) {
+                    if (filterOnProjects === 'all') {
                         myProjects = false;
                     } else {
                         myProjects = true;
@@ -203,8 +202,8 @@
 
                     $.get("${createLink(controller: "project", action: "getFilteredProjects")}",
                         {offset: offsetVal, myProjects: myProjects, filterTerm: filterText}, function (data) {
-                        replaceProjectTableContent(data);
-                    });
+                            replaceProjectTableContent(data);
+                        });
                 }
             }
         });

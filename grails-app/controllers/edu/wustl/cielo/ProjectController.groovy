@@ -340,7 +340,7 @@ class ProjectController {
 
     @Secured('isAuthenticated()')
     def renderNewUploadScreen() {
-        render(template: "newUploadScreen", model: [projectId: params.projectId, type: params.type, requireDescription: true])
+        render(template: "newUploadScreen", model: [projectId: params.projectId, type: params.type, requireDescription: true, allowNone: false])
     }
 
     @Secured('isAuthenticated()')
