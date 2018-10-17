@@ -1125,3 +1125,35 @@ function clearTeamSearch() {
     e.keyCode = 13;
     $('#searchInput').trigger(e)
 }
+
+function isBundleFormValid(formElement) {
+    var isValid = false;
+    var name = $(formElement).prop('id').substring(0, 4);
+    var isFileUpload = $('#' + name + 'UploadFile').prop('checked') == true;
+    var hasFile = $('#' + name + 'File').val() > '';
+    var hasUrl = $('#' + name + 'UrlInput').val() > '';
+    var hasFileName = $('#' + name + 'ExternalFileName').val() > '';
+    var hasDescription = $('#' + name + 'UploadDescription').val() > '';
+
+    if(isFileUpload)
+        isValid = hasFile && hasDescription;
+    else
+        isValid = hasUrl && hasFileName && hasDescription;
+
+    toggleRequiredLabel(name + 'UploadDescription', hasDescription);
+    toggleRequiredLabel(name + 'ExternalFileName', hasFileName || isFileUpload);
+
+    return isValid;
+}
+
+function toggleRequiredLabel(id, isValid){
+    if (isValid) {
+        if (document.getElementById("required_name_" + id) !== null) {
+            $("#required_name_" + id).remove();
+        }
+    } else {
+        if (document.getElementById("required_name_" + id) === null) {
+            $('<em id="required_name_' + id + '" style="color: red">Required</em>').insertBefore($('#' + id));
+        }
+    }
+}

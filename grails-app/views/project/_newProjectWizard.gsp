@@ -67,63 +67,19 @@
 
         $('.screen.current-step .form-group input, textarea').each(function () {
             if ($(this).prop('id') == 'dataUploadDescription' || $(this).prop('id') == 'codeUploadDescription') {
-
-                proceedToNextScreen = isBundleValid.bind(this, $(this).prop('id').substring(0, 4))();
+                proceedToNextScreen = isBundleFormValid($(this).closest('form'));
 
             } else {
                 if ($(this).attr('required') === "required") {
-                    if ($(this).prop('value').length === 0) {
+                    if ($(this).prop('value').length === 0)
                         proceedToNextScreen = false;
-                        if (document.getElementById("required_name_" + $(this).attr('id')) === null) {
-                            $('<em id="required_name_' + $(this).attr('id') + '" style="color: red">Required</em>').insertBefore($(this));
-                        }
-                    } else {
-                        if (document.getElementById("required_name_" + $(this).attr('id')) !== null) {
-                            $("#required_name_" + $(this).attr('id')).remove();
-                        }
-                    }
 
+                    toggleRequiredLabel($(this).attr('id'), proceedToNextScreen);
                 }
             }
         });
 
         return proceedToNextScreen;
-    }
-
-    function isBundleValid(name) {
-        console.log("validating bundle: ", name);
-        var isValid = false;
-
-        var isFileUpload = $('#' + name + 'UploadFile').prop('checked') == true;
-        var hasFile = $('#' + name + 'File').val() > '';
-        var hasUrl = $('#' + name + 'UrlInput').val() > '';
-
-        if ((isFileUpload && hasFile) || (!isFileUpload && hasUrl)) {
-
-            console.log("description required", $(this).prop('id'), isFileUpload, hasFile, hasUrl);
-            isValid = $(this).val() > '';
-
-        } else {
-            console.log("not required", $(this).prop('id'), $('dataUploadFile').checked, $('dataUploadLink').checked);
-            isValid = true;
-        }
-
-        toggleRequiredLabel.bind(this, isValid)();
-
-        return isValid;
-    }
-
-
-    function toggleRequiredLabel(isValid){
-        if (isValid) {
-            if (document.getElementById("required_name_" + $(this).attr('id')) !== null) {
-                $("#required_name_" + $(this).attr('id')).remove();
-            }
-        } else {
-            if (document.getElementById("required_name_" + $(this).attr('id')) === null) {
-                $('<em id="required_name_' + $(this).attr('id') + '" style="color: red">Required</em>').insertBefore($(this));
-            }
-        }
     }
 
     function handlePrevious() {
