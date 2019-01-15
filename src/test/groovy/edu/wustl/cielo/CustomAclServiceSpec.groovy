@@ -20,7 +20,7 @@ class CustomAclServiceSpec extends Specification implements ServiceUnitTest<Cust
     AclService aclService
     AclCache aclCache
     UserAccountService userAccountService
-    final static String assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+    final static String assetsRoot = new File(".").canonicalPath +  "/grails-app/assets"
 
     def setup() {
         mockDomains(UserAccount, UserAccountUserRole, UserRole, SoftwareLicense, Project, AclClass, AclObjectIdentity,

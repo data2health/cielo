@@ -15,8 +15,8 @@ class SoftwareLicenseServiceSpec extends Specification implements ServiceUnitTes
 
     void setup() {
         mockDomains(Institution, Profile, UserRole, RegistrationCode, UserAccountUserRole)
-        webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
-        assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+        webRoot =  new File(".").canonicalPath +  "/src/main/webapp/"
+        assetsRoot =  new File(".").canonicalPath +  "/grails-app/assets"
 
         userAccountService = new UserAccountService()
         userAccountService.assetResourceLocator = [findAssetForURI: { String URI ->

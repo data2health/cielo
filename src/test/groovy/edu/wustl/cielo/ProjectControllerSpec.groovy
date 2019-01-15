@@ -25,7 +25,8 @@ class ProjectControllerSpec extends Specification implements ControllerUnitTest<
     AclCache aclCache
     CustomAclService customAclService
     UserAccountService userAccountService
-    final static String assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+    final static String assetsRoot = new File(".").canonicalPath +  "/grails-app/assets"
+
 
     void setup() {
         projectService = new ProjectService()

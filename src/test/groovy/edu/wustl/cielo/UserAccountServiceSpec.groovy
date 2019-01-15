@@ -16,8 +16,8 @@ class UserAccountServiceSpec extends Specification implements ServiceUnitTest<Us
 
     def setup() {
         mockDomains(Institution, Profile, UserRole, UserAccountUserRole, RegistrationCode)
-        webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
-        assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+        webRoot = new File(".").canonicalPath +  "/src/main/webapp/"
+        assetsRoot = new File(".").canonicalPath +  "/grails-app/assets"
 
         utilService = new UtilService()
         utilService.metaClass.getDateDiff = { Date fromDate, Date toDate = null ->

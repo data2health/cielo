@@ -25,7 +25,7 @@ class AnnotationServiceSpec extends Specification implements ServiceUnitTest<Ann
             "today"
         }
         service.utilService = utilService
-        webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+        webRoot =  new File(".").canonicalPath + "/src/main/webapp/"
     }
 
     void "test initializeAnnotations"() {
@@ -94,12 +94,12 @@ class AnnotationServiceSpec extends Specification implements ServiceUnitTest<Ann
     }
 
     void "test retrieveFilteredAnnotationsFromDB"() {
-        List<Object> annotations = []
+        List<Annotation> annotations = []
 
         service.metaClass.retrieveFilteredAnnotationsFromDB = { String filter, int offset ->
             if (!filter || offset != 0) []
             else {
-                annotations.findAll { Annotation annotation -> annotation?.term?.toString().contains(filter) }
+                annotations.findAll { annotation -> annotation?.term?.toString().contains(filter) }
             }
         }
 
@@ -111,7 +111,7 @@ class AnnotationServiceSpec extends Specification implements ServiceUnitTest<Ann
 
         when:
             Annotation annotation = new Annotation(term: "Something", code: "C100023").save()
-            annotations.add([name: annotation.term, id: annotation.id])
+            annotations.add([term: annotation.term, id: annotation.id])
             results = service.retrieveFilteredAnnotationsFromDB("", 0)
 
         then:
