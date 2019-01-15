@@ -11,7 +11,7 @@ class InstitutionServiceSpec extends Specification implements ServiceUnitTest<In
 
     void setup() {
         mockDomain Annotation
-        webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
+        webRoot = new File(".").canonicalPath +  "/src/main/webapp/"
     }
 
     void "test setup mock institutions"() {

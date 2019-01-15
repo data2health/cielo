@@ -41,8 +41,8 @@ class ProjectServiceSpec extends Specification implements ServiceUnitTest<Projec
     def setup() {
         mockDomains(UserRole, Institution, Profile, Annotation, SoftwareLicense, RegistrationCode, UserAccountUserRole,
                 AclClass, AclSid, AclObjectIdentity, AclEntry)
-        webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/src/main/webapp/"
-        assetsRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets"
+        webRoot = new File(".").canonicalPath +  "/src/main/webapp/"
+        assetsRoot = new File(".").canonicalPath +  "/grails-app/assets"
         grailsLinkGenerator = Mock()
         activityService = Mock()
         springSecurityService = Mock()

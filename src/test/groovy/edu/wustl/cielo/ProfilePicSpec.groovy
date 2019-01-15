@@ -10,7 +10,7 @@ class ProfilePicSpec extends Specification implements DomainUnitTest<ProfilePic>
 
     def setup() {
         mockDomain(Profile)
-        webRoot = "/Users/rickyrodriguez/Documents/IdeaProjects/cielo/grails-app/assets/images/"
+        webRoot =  new File(".").canonicalPath +  "/grails-app/assets/images/"
     }
 
     void "test saving"() {
