@@ -85,20 +85,22 @@ class UserAccountService {
      * Setup user roles if they do not exist
      */
     void bootstrapUserRoles() {
-        if (UserRole.count() == 0) {
+        if (UserRole.count() == 0 || (UserRole.count() == 1 && UserRole.all.collect{ it.authority }.contains("ROLE_API"))) {
             log.info("****************************")
             log.info("Creating user roles...")
             log.info("****************************\n")
             UserRolesEnum.values().each { roleName ->
-                UserRole newRole = new UserRole(authority: roleName.name())
-                if (!newRole.save()) {
-                    newRole.errors.getAllErrors().each { ObjectError err ->
-                        log.error(err.toString())
+                if (!UserRole.findByAuthority(roleName)) {
+                    UserRole newRole = new UserRole(authority: roleName.name())
+                    if (!newRole.save()) {
+                        newRole.errors.getAllErrors().each { ObjectError err ->
+                            log.error(err.toString())
+                        }
+                        log.error("Unable to save roles. Exiting.")
+                        System.exit(-1)
                     }
-                    log.error("Unable to save roles. Exiting.")
-                    System.exit(-1)
+                    log.info("\tCreated ${roleName.name()}")
                 }
-                log.info("\tCreated ${roleName.name()}")
             }
             log.info("\n")
         }

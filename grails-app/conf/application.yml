@@ -117,6 +117,13 @@ grails:
 
 ---
 
+#email settings
+mailjet:
+    publicKey: '${MAILJET_PUBLIC_KEY}'
+    secretKey: '${MAILJET_SECRET_KEY}'
+    from: "CIELO"
+    fromAddress: "cd2h.cielo@wustl.edu"
+
 hibernate:
     cache:
         queries: false

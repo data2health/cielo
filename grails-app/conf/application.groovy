@@ -54,9 +54,3 @@ environments {
 
 software.licenses.path="/WEB-INF/startup/licenses.json"
 institutions="/WEB-INF/startup/intsitutions.json"
-
-//email settings
-mailjet.publicKey="6d9a8bd2361ca922b3ee2ff263655f9c"
-mailjet.secretKey="e7e5a40f55babdfd6540d2ab2e438e5b"
-mailjet.from = "CIELO"
-mailjet.fromAddress = "cd2h.cielo@wustl.edu"
